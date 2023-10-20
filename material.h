@@ -16,7 +16,7 @@ class material
 {
 public : 
 	virtual ~material() = default;
-	virtual bool scatter(const ray& r, const hitRecord& rec, const SampledWaveLengths& sample, XYZ& attenuation, ray& scattered) const = 0;
+	virtual bool scatter(const ray& r, const hitRecord& rec, const SampledWaveLengths& sample, SampledSpectrum& attenuation, ray& scattered) const = 0;
     virtual vec3 emitted(double u, double v, const vec3& p) const { return vec3(0.0); }
     virtual double scatterPDF(const ray& r, const hitRecord& rec, const ray& scattered) const { return 0; }
 };
@@ -25,7 +25,7 @@ class lambertian : public material {
 public:
     lambertian(const vec3& a) : albedo(make_shared<solidColor>(a)) {}
     lambertian(shared_ptr<texture> _albedo) : albedo(_albedo) {}
-    bool scatter(const ray& r, const hitRecord& rec, const SampledWaveLengths& sample, XYZ& attenuation, ray& scattered) const override;
+    bool scatter(const ray& r, const hitRecord& rec, const SampledWaveLengths& sample, SampledSpectrum& attenuation, ray& scattered) const override;
     double scatterPDF(const ray& r, const hitRecord& rec, const ray& scattered) const override;
 
 private:
@@ -35,7 +35,7 @@ private:
 class dielectric : public material {
 public:
     dielectric(double index_of_refraction) : ir(index_of_refraction) {}
-    bool scatter(const ray& r, const hitRecord& rec, const SampledWaveLengths& sample, XYZ& attenuation, ray& scattered) const override;
+    bool scatter(const ray& r, const hitRecord& rec, const SampledWaveLengths& sample, SampledSpectrum& attenuation, ray& scattered) const override;
 
 private:
     double ir;
@@ -50,7 +50,7 @@ private:
 class metal : public material {
 public:
     metal(const vec3& a, double f) : albedo(RGBAlbedoSpectrum(sRGB, RGBColor(a))), fuzz(f < 1 ? f : 1) {}
-    bool scatter(const ray& r, const hitRecord& rec, const SampledWaveLengths& sample, XYZ& attenuation, ray& scattered) const override;
+    bool scatter(const ray& r, const hitRecord& rec, const SampledWaveLengths& sample, SampledSpectrum& attenuation, ray& scattered) const override;
 
 private:
     RGBAlbedoSpectrum albedo;

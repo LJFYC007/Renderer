@@ -1,13 +1,13 @@
 #pragma once
 #include "material.h"
 
-bool lambertian::scatter(const ray& r, const hitRecord& rec, const SampledWaveLengths& sample, XYZ& attenuation, ray& scattered) const
+bool lambertian::scatter(const ray& r, const hitRecord& rec, const SampledWaveLengths& sample, SampledSpectrum& attenuation, ray& scattered) const
 {
 	auto scatter_direction = rec.normal + randUnitVector();
 	if (scatter_direction.near_zero())
 		scatter_direction = rec.normal;
 	scattered = ray(rec.p, scatter_direction);
-	attenuation = (albedo -> value(rec.u, rec.v, rec.p).Sample(sample)).ToXYZ(sample);
+	attenuation = albedo->value(rec.u, rec.v, rec.p).Sample(sample);
 	return true;
 }
 
@@ -17,9 +17,9 @@ double lambertian::scatterPDF(const ray& r, const hitRecord& rec, const ray& sca
 	return cosTheta < 0.0 ? 0.0 : cosTheta / pi;
 }
 
-bool dielectric::scatter(const ray& r, const hitRecord& rec, const SampledWaveLengths& sample, XYZ& attenuation, ray& scattered) const
+bool dielectric::scatter(const ray& r, const hitRecord& rec, const SampledWaveLengths& sample, SampledSpectrum& attenuation, ray& scattered) const
 {
-	attenuation = XYZ(1.0, 1.0, 1.0);
+	attenuation = SampledSpectrum(1.0);
 	double refraction_ratio = rec.frontFace ? (1.0 / ir) : ir;
 
 	vec3 unit_direction = normalize(r.rd);
@@ -37,10 +37,10 @@ bool dielectric::scatter(const ray& r, const hitRecord& rec, const SampledWaveLe
 	return true;
 }
 
-bool metal::scatter(const ray& r, const hitRecord& rec, const SampledWaveLengths& sample, XYZ& attenuation, ray& scattered) const
+bool metal::scatter(const ray& r, const hitRecord& rec, const SampledWaveLengths& sample, SampledSpectrum& attenuation, ray& scattered) const
 {
 	vec3 reflected = reflect(normalize(r.rd), rec.normal);
 	scattered = ray(rec.p, reflected + fuzz * randUnitVector());
-	attenuation = albedo.Sample(sample).ToXYZ(sample);
+	attenuation = albedo.Sample(sample);
 	return (dot(scattered.rd, rec.normal) > 0);
 }

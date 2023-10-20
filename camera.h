@@ -16,8 +16,8 @@ static vec3 ans[3010][2210];
 class camera
 {
 public:
-	const int ImageWidth = 128;
-	const int ImageHeight = 72;
+	const int ImageWidth = 1280;
+	const int ImageHeight = 720;
 	double fov = 20.0;
 	vec3 lookfrom = vec3(13.0, 2.0, 3.0);
 	vec3 lookat = vec3(0.0, 0.0, 0.0);
@@ -38,6 +38,7 @@ public:
 			for (int i = 0; i < ImageWidth; ++i)
 			{
 				XYZ xyz(0.0);
+				SampledSpectrum spec(0.0);
 				for (int oi = 0; oi < sqrtSPP; ++oi)
 					for (int oj = 0; oj < sqrtSPP; ++oj)
 					{
@@ -45,9 +46,10 @@ public:
 						vec3 pixel = pixelCenter + (-0.5 + (1.0 / sqrtSPP) * (oi + randomDouble())) * pixelDeltaU + (-0.5 + (1.0 / sqrtSPP) * (oj + randomDouble())) * pixelDeltaV;
 						vec3 ro = (defocusAngle <= 0.0) ? cameraCenter : cameraCenter + defocusDiskSample(defocusDiskU, defocusDiskV);
 						vec3 rd = pixel - ro;
-						xyz = xyz + renderRay(ray(ro, rd), maxDepth, SampledWaveLengths(randomDouble()), World);
+						SampledWaveLengths sample = (randomDouble());
+						xyz = xyz + (renderRay(ray(ro, rd), maxDepth, sample, World)).ToXYZ(sample);
 					}
-				RGBColor rgb = sRGB.ToRGB(xyz / double(samplePixel));
+				RGBColor rgb = sRGB.ToRGB(xyz / (double)(samplePixel));
 				vec3 col = vec3(rgb.r, rgb.g, rgb.b);
 
 				if (col.a[0] < 0) col.a[0] = 0;
@@ -107,23 +109,23 @@ private:
 		defocusDiskV = v * defocusRadius;
 	}
 
-	XYZ renderRay(ray r, const int depth, const SampledWaveLengths& sample, const primitive& World)
+	SampledSpectrum renderRay(ray r, const int depth, const SampledWaveLengths& sample, const primitive& World)
 	{
-		if (depth <= 0) return XYZ(0);
+		if (depth <= 0) return SampledSpectrum(0.0);
 		r.rd = normalize(r.rd);
 		hitRecord rec;
 
 		if (!World.hit(r, interval(0.001, infinity), rec))
 		{
 			RGBAlbedoSpectrum spec(sRGB, RGBColor(background));
-			return spec.Sample(sample).ToXYZ(sample);
+			return spec.Sample(sample);
 		}
 
 		ray scattered;
-		XYZ attenuation;
+		SampledSpectrum attenuation(0.0);
 		if (rec.mat->scatter(r, rec, sample, attenuation, scattered))
 			return attenuation * renderRay(scattered, depth - 1, sample, World);
-		return XYZ(0);
+		return SampledSpectrum(0.0);
 	}
 
 	vec3 defocusDiskSample(vec3 u, vec3 v)

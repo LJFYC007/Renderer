@@ -23,7 +23,7 @@ int main()
 	World.add(make_shared<sphere>(point3(0, 1, 0), 1.0, material1));
 	auto material2 = make_shared<lambertian>(vec3(0.4, 0.2, 0.1));
 	World.add(make_shared<sphere>(point3(-4, 1, 0), 1.0, material2));
-	auto material3 = make_shared<metal>(vec3(0.4, 0.5, 0.6), 0.0);
+	auto material3 = make_shared<metal>(vec3(0.7, 0.6, 0.5), 0.0);
 	World.add(make_shared<sphere>(point3(4, 1, 0), 1.0, material3));
 
     cam.render(bvhNode(make_shared<primitiveList>(World)));
