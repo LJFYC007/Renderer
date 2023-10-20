@@ -8,6 +8,7 @@ public :
     double r, g, b;
     RGBColor() : r(0), g(0), b(0) {}
     RGBColor(double _r, double _g, double _b) : r(_r), g(_g), b(_b) {}
+    RGBColor(vec3 x) : r(x.x()), g(x.y()), b(x.z()) {}
 };
 
 class RGBSigmoidPolynomial

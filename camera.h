@@ -3,15 +3,19 @@
 #include "sample.h"
 #include "math.h"
 #include "interval.h"
+#include "spectrum.h"
+#include "color.h"
+#include "colorspace.h"
 
 #include <Windows.h>
 #include <omp.h>
 
 static vec3 ans[3010][2210];
 
+
 class camera
 {
-public : 
+public:
 	const int ImageWidth = 128;
 	const int ImageHeight = 72;
 	double fov = 20.0;
@@ -20,9 +24,9 @@ public :
 	vec3 vup = vec3(0.0, 1.0, 0.0);
 	double defocusAngle = 0.6;
 	double focusDist = 10.0;
-	int samplePixel = 4096;
+	int samplePixel = 1024;
 	int maxDepth = 20;
-	vec3 background = vec3(0.0);
+	vec3 background = vec3(0.7, 0.8, 0.8);
 
 	void render(const primitive& World)
 	{
@@ -33,22 +37,27 @@ public :
 			std::clog << "\rScanlines remaining: " << (ImageHeight - j) << ' ' << std::flush;
 			for (int i = 0; i < ImageWidth; ++i)
 			{
-				vec3 col = vec3(0.0);
-				for (int oi = 0; oi < sqrtSPP; ++ oi)
+				XYZ xyz(0.0);
+				for (int oi = 0; oi < sqrtSPP; ++oi)
 					for (int oj = 0; oj < sqrtSPP; ++oj)
 					{
 						vec3 pixelCenter = pixel00Location + i * pixelDeltaU + j * pixelDeltaV;
 						vec3 pixel = pixelCenter + (-0.5 + (1.0 / sqrtSPP) * (oi + randomDouble())) * pixelDeltaU + (-0.5 + (1.0 / sqrtSPP) * (oj + randomDouble())) * pixelDeltaV;
 						vec3 ro = (defocusAngle <= 0.0) ? cameraCenter : cameraCenter + defocusDiskSample(defocusDiskU, defocusDiskV);
 						vec3 rd = pixel - ro;
-						col += renderRay(ray(ro, rd), maxDepth, World);
+						xyz = xyz + renderRay(ray(ro, rd), maxDepth, SampledWaveLengths(randomDouble()), World);
 					}
-				col = col / double(samplePixel);
+				RGBColor rgb = sRGB.ToRGB(xyz / double(samplePixel));
+				vec3 col = vec3(rgb.r, rgb.g, rgb.b);
+
+				if (col.a[0] < 0) col.a[0] = 0;
+				if (col.a[1] < 0) col.a[1] = 0;
+				if (col.a[2] < 0) col.a[2] = 0;
 				col.a[0] = pow(col.a[0], 1.0 / 2.2);
 				col.a[1] = pow(col.a[1], 1.0 / 2.2);
 				col.a[2] = pow(col.a[2], 1.0 / 2.2);
 
-				static const interval intensity(0.000, 0.999);
+				static const interval intensity(0.000, 0.999);				
 				col.a[0] = static_cast<int>(256 * intensity.clamp(col.a[0]));
 				col.a[1] = static_cast<int>(256 * intensity.clamp(col.a[1]));
 				col.a[2] = static_cast<int>(256 * intensity.clamp(col.a[2]));
@@ -57,8 +66,8 @@ public :
 		}
 
 		std::cout << "P3\n" << ImageWidth << ' ' << ImageHeight << "\n255\n";
-		for (int j = ImageHeight - 1; j >= 0; --j) 
-			for ( int i = 0; i < ImageWidth; ++ i )
+		for (int j = ImageHeight - 1; j >= 0; --j)
+			for (int i = 0; i < ImageWidth; ++i)
 				std::cout << ans[i][j].x() << ' ' << ans[i][j].y() << ' ' << ans[i][j].z() << '\n';
 		std::clog << "\rDone.                 \n";
 	}
@@ -98,27 +107,23 @@ private:
 		defocusDiskV = v * defocusRadius;
 	}
 
-	vec3 renderRay(ray r, const int depth, const primitive& World)
+	XYZ renderRay(ray r, const int depth, const SampledWaveLengths& sample, const primitive& World)
 	{
-		if (depth <= 0) return vec3(0);
+		if (depth <= 0) return XYZ(0);
 		r.rd = normalize(r.rd);
 		hitRecord rec;
 
-		if ( !World.hit(r, interval(0, infinity), rec) )
-			return background;
-			/*
-			double a = 0.5 * (r.rd.y() + 1.0);
-			return (1.0 - a) * vec3(1.0, 1.0, 1.0) + a * vec3(0.5, 0.7, 1.0);
-			*/
-		ray scattered;
-		vec3 attenuation;
-		vec3 emissionColor = rec.mat->emitted(rec.u, rec.v, rec.p);
-		if (!rec.mat->scatter(r, rec, attenuation, scattered))
-			return emissionColor;
+		if (!World.hit(r, interval(0.001, infinity), rec))
+		{
+			RGBAlbedoSpectrum spec(sRGB, RGBColor(background));
+			return spec.Sample(sample).ToXYZ(sample);
+		}
 
-		double scatterPDF = rec.mat->scatterPDF(r, rec, scattered);
-		vec3 scatterColor = attenuation * renderRay(scattered, depth - 1, World);
-		return scatterColor + emissionColor;
+		ray scattered;
+		XYZ attenuation;
+		if (rec.mat->scatter(r, rec, sample, attenuation, scattered))
+			return attenuation * renderRay(scattered, depth - 1, sample, World);
+		return XYZ(0);
 	}
 
 	vec3 defocusDiskSample(vec3 u, vec3 v)

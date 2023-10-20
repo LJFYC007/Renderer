@@ -1,13 +1,13 @@
 #pragma once
 #include "material.h"
 
-bool lambertian::scatter(const ray& r, const hitRecord& rec, vec3& attenuation, ray& scattered) const 
+bool lambertian::scatter(const ray& r, const hitRecord& rec, const SampledWaveLengths& sample, XYZ& attenuation, ray& scattered) const
 {
 	auto scatter_direction = rec.normal + randUnitVector();
 	if (scatter_direction.near_zero())
 		scatter_direction = rec.normal;
 	scattered = ray(rec.p, scatter_direction);
-	attenuation = albedo -> value(rec.u, rec.v, rec.p);
+	attenuation = (albedo -> value(rec.u, rec.v, rec.p).Sample(sample)).ToXYZ(sample);
 	return true;
 }
 
@@ -17,17 +17,9 @@ double lambertian::scatterPDF(const ray& r, const hitRecord& rec, const ray& sca
 	return cosTheta < 0.0 ? 0.0 : cosTheta / pi;
 }
 
-bool metal::scatter(const ray& r, const hitRecord& rec, vec3& attenuation, ray& scattered) const
+bool dielectric::scatter(const ray& r, const hitRecord& rec, const SampledWaveLengths& sample, XYZ& attenuation, ray& scattered) const
 {
-	vec3 reflected = reflect(normalize(r.rd), rec.normal);
-	scattered = ray(rec.p, reflected + fuzz * randUnitVector());
-	attenuation = albedo;
-	return (dot(scattered.rd, rec.normal) > 0);
-}
-
-bool dielectric::scatter(const ray& r, const hitRecord& rec, vec3& attenuation, ray& scattered) const
-{
-	attenuation = vec3(1.0, 1.0, 1.0);
+	attenuation = XYZ(1.0, 1.0, 1.0);
 	double refraction_ratio = rec.frontFace ? (1.0 / ir) : ir;
 
 	vec3 unit_direction = normalize(r.rd);
@@ -45,7 +37,10 @@ bool dielectric::scatter(const ray& r, const hitRecord& rec, vec3& attenuation, 
 	return true;
 }
 
-bool diffuseLight::scatter(const ray& r, const hitRecord& rec, vec3& attenuation, ray& scatterd) const
+bool metal::scatter(const ray& r, const hitRecord& rec, const SampledWaveLengths& sample, XYZ& attenuation, ray& scattered) const
 {
-	return false;
+	vec3 reflected = reflect(normalize(r.rd), rec.normal);
+	scattered = ray(rec.p, reflected + fuzz * randUnitVector());
+	attenuation = albedo.Sample(sample).ToXYZ(sample);
+	return (dot(scattered.rd, rec.normal) > 0);
 }

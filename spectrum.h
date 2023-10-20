@@ -418,7 +418,7 @@ class Spectrum
 {
 public : 
 	virtual double operator ()(double lambda) const = 0;
-	virtual double MaxValue() const { return 0; }
+	virtual double MaxValue() const = 0;
 	virtual SampledSpectrum Sample(const SampledWaveLengths& lambda) const = 0;
 };
 
@@ -552,6 +552,8 @@ public:
     XYZ(vec3 _v) : x(_v.x()), y(_v.y()), z(_v.z()) {}
 
     inline vec2 xy() const { return vec2(x / (x + y + z), y / (x + y + z)); }
+	inline XYZ operator +(const XYZ& others) { return XYZ(x + others.x, y + others.y, z + others.z); }
+	inline XYZ operator *(const XYZ& others) { return XYZ(x * others.x, y * others.y, z * others.z); }
     inline XYZ operator /(double value) { return XYZ(x / value, y / value, z / value); }
 
     static XYZ FromxyY(vec2 xy, double Y = 1) {
