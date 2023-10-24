@@ -48,16 +48,7 @@ public :
 	bool hit(const ray& r, interval t, hitRecord& rec) const override
 	{
 		assert(-1);
-        hitRecord x;
-        bool hitAnything = false;
-        for ( const auto& object : objects)
-            if ( object -> hit(r, t, x) == true )
-            {
-                hitAnything = true;
-				t.Max = x.t;
-                rec = x;
-            }
-        return hitAnything;
+		return false;
 	}
 };
 

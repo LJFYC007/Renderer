@@ -24,9 +24,9 @@ public:
 	vec3 vup = vec3(0.0, 1.0, 0.0);
 	double defocusAngle = 0.6;
 	double focusDist = 10.0;
-	int samplePixel = 1024;
+	int samplePixel = 4096;
 	int maxDepth = 20;
-	vec3 background = vec3(0.7, 0.8, 0.8);
+	vec3 background = vec3(0.0);
 
 	void render(const primitive& World)
 	{
@@ -59,7 +59,7 @@ public:
 				col.a[1] = pow(col.a[1], 1.0 / 2.2);
 				col.a[2] = pow(col.a[2], 1.0 / 2.2);
 
-				static const interval intensity(0.000, 0.999);				
+				static const interval intensity(0.000, 0.999);
 				col.a[0] = static_cast<int>(256 * intensity.clamp(col.a[0]));
 				col.a[1] = static_cast<int>(256 * intensity.clamp(col.a[1]));
 				col.a[2] = static_cast<int>(256 * intensity.clamp(col.a[2]));
@@ -115,7 +115,7 @@ private:
 		r.rd = normalize(r.rd);
 		hitRecord rec;
 
-		if (!World.hit(r, interval(0.001, infinity), rec))
+		if (!World.hit(r, interval(0.000001, infinity), rec))
 		{
 			RGBAlbedoSpectrum spec(sRGB, RGBColor(background));
 			return spec.Sample(sample);
@@ -123,9 +123,12 @@ private:
 
 		ray scattered;
 		SampledSpectrum attenuation(0.0);
-		if (rec.mat->scatter(r, rec, sample, attenuation, scattered))
-			return attenuation * renderRay(scattered, depth - 1, sample, World);
-		return SampledSpectrum(0.0);
+		SampledSpectrum emissionColor = rec.mat->emitted(rec.u, rec.v, rec.p, sample);
+		if (!rec.mat->scatter(r, rec, sample, attenuation, scattered))
+			return emissionColor;
+
+		SampledSpectrum scatterColor = attenuation * renderRay(scattered, depth - 1, sample, World);
+		return emissionColor + scatterColor;
 	}
 
 	vec3 defocusDiskSample(vec3 u, vec3 v)

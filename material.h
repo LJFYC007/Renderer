@@ -14,10 +14,10 @@ class hitRecord;
 
 class material
 {
-public : 
-	virtual ~material() = default;
-	virtual bool scatter(const ray& r, const hitRecord& rec, const SampledWaveLengths& sample, SampledSpectrum& attenuation, ray& scattered) const = 0;
-    virtual vec3 emitted(double u, double v, const vec3& p) const { return vec3(0.0); }
+public:
+    virtual ~material() = default;
+    virtual bool scatter(const ray& r, const hitRecord& rec, const SampledWaveLengths& sample, SampledSpectrum& attenuation, ray& scattered) const = 0;
+    virtual SampledSpectrum emitted(double u, double v, const vec3& p, const SampledWaveLengths& sample) const { return SampledSpectrum(0.0); }
     virtual double scatterPDF(const ray& r, const hitRecord& rec, const ray& scattered) const { return 0; }
 };
 
@@ -55,4 +55,22 @@ public:
 private:
     RGBAlbedoSpectrum albedo;
     double fuzz;
+};
+
+class diffuseLight : public material {
+private:
+    shared_ptr<Spectrum> emit;
+public:
+    diffuseLight(shared_ptr<Spectrum> _emit) : emit(_emit) {}
+    diffuseLight(vec3 rgb) : emit(make_shared<RGBIlluminantSpectrum>(sRGB, RGBColor(rgb))) {}
+
+    bool scatter(const ray& r, const hitRecord& rec, const SampledWaveLengths& sample, SampledSpectrum& attenuation, ray& scattered) const override
+    {
+        return false;
+    }
+
+    SampledSpectrum emitted(double u, double v, const vec3& p, const SampledWaveLengths& sample) const override
+    {
+        return emit->Sample(sample);
+    }
 };

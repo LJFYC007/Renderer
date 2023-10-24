@@ -339,66 +339,66 @@ static const double CIE_Illum_D6500[107 * 2] = {
 
 class SampledSpectrum {
 public:
-    SampledSpectrum(double c) {
-        for (int i = 0; i < NSpectrumSamples; ++i)
-            values[i] = c;
-    }
-    SampledSpectrum(const double* _values) {
-        for (int i = 0; i < NSpectrumSamples; ++i)
-            values[i] = _values[i];
-    }
+	SampledSpectrum(double c) {
+		for (int i = 0; i < NSpectrumSamples; ++i)
+			values[i] = c;
+	}
+	SampledSpectrum(const double* _values) {
+		for (int i = 0; i < NSpectrumSamples; ++i)
+			values[i] = _values[i];
+	}
 
-    double operator[](int i) const { return values[i]; }
-    double& operator[](int i) { return values[i]; }
-    explicit operator bool() const {
-        for (int i = 0; i < NSpectrumSamples; ++i)
-            if (values[i] != 0) return true;
-        return false;
-    }
-    double Sum() const {
-        double sum = 0.0;
-        for (int i = 0; i < NSpectrumSamples; ++i)
-            sum += values[i];
-        return sum;
-    }
-    double Average() const { return Sum() / NSpectrumSamples; }
+	double operator[](int i) const { return values[i]; }
+	double& operator[](int i) { return values[i]; }
+	explicit operator bool() const {
+		for (int i = 0; i < NSpectrumSamples; ++i)
+			if (values[i] != 0) return true;
+		return false;
+	}
+	double Sum() const {
+		double sum = 0.0;
+		for (int i = 0; i < NSpectrumSamples; ++i)
+			sum += values[i];
+		return sum;
+	}
+	double Average() const { return Sum() / NSpectrumSamples; }
 
-    SampledSpectrum operator +(const SampledSpectrum& y)
-    {
-        double v[NSpectrumSamples];
-        for (int i = 0; i < NSpectrumSamples; ++i)
-            v[i] = values[i] + y[i];
-        return SampledSpectrum(v);
-    }
+	SampledSpectrum operator +(const SampledSpectrum& y)
+	{
+		double v[NSpectrumSamples];
+		for (int i = 0; i < NSpectrumSamples; ++i)
+			v[i] = values[i] + y[i];
+		return SampledSpectrum(v);
+	}
 
-    SampledSpectrum operator *(const SampledSpectrum& y)
-    {
-        double v[NSpectrumSamples];
-        for (int i = 0; i < NSpectrumSamples; ++i)
-            v[i] = values[i] * y[i];
-        return SampledSpectrum(v);
-    }
+	SampledSpectrum operator *(const SampledSpectrum& y)
+	{
+		double v[NSpectrumSamples];
+		for (int i = 0; i < NSpectrumSamples; ++i)
+			v[i] = values[i] * y[i];
+		return SampledSpectrum(v);
+	}
 
-    SampledSpectrum operator /(const SampledSpectrum& y)
-    {
-        double v[NSpectrumSamples];
-        for (int i = 0; i < NSpectrumSamples; ++i)
-            v[i] = (y[i] == 0 ? 0 : values[i] / y[i]);
-        return SampledSpectrum(v);
-    }
+	SampledSpectrum operator /(const SampledSpectrum& y)
+	{
+		double v[NSpectrumSamples];
+		for (int i = 0; i < NSpectrumSamples; ++i)
+			v[i] = (y[i] == 0 ? 0 : values[i] / y[i]);
+		return SampledSpectrum(v);
+	}
 
-    SampledSpectrum operator /(double y)
-    {
-        double v[NSpectrumSamples];
-        for (int i = 0; i < NSpectrumSamples; ++i)
-            v[i] = values[i] / y;
-        return SampledSpectrum(v);
-    }
+	SampledSpectrum operator /(double y)
+	{
+		double v[NSpectrumSamples];
+		for (int i = 0; i < NSpectrumSamples; ++i)
+			v[i] = values[i] / y;
+		return SampledSpectrum(v);
+	}
 
-    XYZ ToXYZ(const SampledWaveLengths& lambda) const;
-    RGBColor ToRGB(const SampledWaveLengths& lambda, const RGBColorSpace& space) const;
+	XYZ ToXYZ(const SampledWaveLengths& lambda) const;
+	RGBColor ToRGB(const SampledWaveLengths& lambda, const RGBColorSpace& space) const;
 private:
-    double values[NSpectrumSamples];
+	double values[NSpectrumSamples];
 };
 
 class SampledWaveLengths {
@@ -421,7 +421,7 @@ public:
 
 	void Terminate() {
 		for (int i = 1; i < NSpectrumSamples; ++i)
-			if (pdf[i] != 0) return ;
+			if (pdf[i] != 0) return;
 		for (int i = 1; i < NSpectrumSamples; ++i)
 			pdf[i] = 0;
 		pdf[0] /= NSpectrumSamples;
@@ -432,7 +432,7 @@ private:
 
 class Spectrum
 {
-public : 
+public:
 	virtual double operator ()(double lambda) const = 0;
 	virtual double MaxValue() const = 0;
 	virtual SampledSpectrum Sample(const SampledWaveLengths& lambda) const = 0;
@@ -451,13 +451,13 @@ private:
 
 class DenselySampledSpectrum : public Spectrum
 {
-public : 
+public:
 	DenselySampledSpectrum(const Spectrum& spec, int _min = LambdaMin, int _max = LambdaMax) : lambdaMin(_min), lambdaMax(_max) {
 		values.resize(lambdaMax - lambdaMin + 1);
 		for (int i = lambdaMin; i <= lambdaMax; ++i)
 			values[i - lambdaMin] = spec(i);
 	}
-	DenselySampledSpectrum(const double *_values, int _min = LambdaMin, int _max = LambdaMax) : lambdaMin(_min), lambdaMax(_max) {
+	DenselySampledSpectrum(const double* _values, int _min = LambdaMin, int _max = LambdaMax) : lambdaMin(_min), lambdaMax(_max) {
 		values.resize(lambdaMax - lambdaMin + 1);
 		for (int i = lambdaMin; i <= lambdaMax; ++i)
 			values[i - lambdaMin] = _values[i - lambdaMin];
@@ -476,7 +476,7 @@ public :
 
 	double MaxValue() const override { return lambdaMax; }
 
-	SampledSpectrum Sample(const SampledWaveLengths& lambda) const override { 
+	SampledSpectrum Sample(const SampledWaveLengths& lambda) const override {
 		double s[NSpectrumSamples];
 		for (int i = 0; i < NSpectrumSamples; ++i)
 			s[i] = this->operator()(lambda[i]);
@@ -499,14 +499,14 @@ public :
 		return DenselySampledSpectrum(a, lambdaMin, lambdaMax);
 	}
 
-private : 
+private:
 	int lambdaMin, lambdaMax;
 	vector<double> values;
 };
 
 class PiecewiseLinearSpectrum : public Spectrum
 {
-public : 
+public:
 	//PiecewiseLinearSpectrum(vector<double> _lambdas, vector<double> _values);
 	PiecewiseLinearSpectrum(const double* samples, int n, bool normalize);
 
@@ -527,55 +527,74 @@ public :
 		return *std::max_element(values.begin(), values.end());
 	}
 
-	SampledSpectrum Sample(const SampledWaveLengths& lambda) const override { 
+	SampledSpectrum Sample(const SampledWaveLengths& lambda) const override {
 		double s[NSpectrumSamples];
 		for (int i = 0; i < NSpectrumSamples; ++i)
 			s[i] = this->operator()(lambda[i]);
 		return SampledSpectrum(s);
 	}
 
-private : 
+private:
 	vector<double> lambdas, values;
 };
 
 class RGBAlbedoSpectrum : public Spectrum
 {
-public : 
+public:
 	RGBAlbedoSpectrum(const RGBColorSpace& cs, RGBColor rgb);
 	double operator ()(double lambda) const override { return rsp(lambda); }
 	double MaxValue() const override { return rsp.MaxValue(); }
 
-	SampledSpectrum Sample(const SampledWaveLengths& lambda) const override { 
+	SampledSpectrum Sample(const SampledWaveLengths& lambda) const override {
 		double s[NSpectrumSamples];
 		for (int i = 0; i < NSpectrumSamples; ++i)
 			s[i] = this->operator()(lambda[i]);
 		return SampledSpectrum(s);
 	}
 
-private :
+private:
 	RGBSigmoidPolynomial rsp;
 };
 
 const DenselySampledSpectrum SpectraX(CIE_X), SpectraY(CIE_Y), SpectraZ(CIE_Z);
 const PiecewiseLinearSpectrum SpectrasRGB(CIE_Illum_D6500, 107, true);
 
+class RGBIlluminantSpectrum : public Spectrum
+{
+public:
+	RGBIlluminantSpectrum(const RGBColorSpace& cs, RGBColor rgb);
+	double operator ()(double lambda) const override { return scale * rsp(lambda) * SpectrasRGB(lambda); }
+	double MaxValue() const override { return scale * rsp.MaxValue() * SpectrasRGB.MaxValue(); }
+
+	SampledSpectrum Sample(const SampledWaveLengths& lambda) const override {
+		double s[NSpectrumSamples];
+		for (int i = 0; i < NSpectrumSamples; ++i)
+			s[i] = this->operator()(lambda[i]);
+		return SampledSpectrum(s) * SpectrasRGB.Sample(lambda);
+	}
+
+private:
+	double scale;
+	RGBSigmoidPolynomial rsp;
+};
+
 class XYZ
 {
 public:
-    double x, y, z;
-    XYZ() : x(0), y(0), z(0) {}
-    XYZ(double _x, double _y, double _z) : x(_x), y(_y), z(_z) {}
-    XYZ(vec3 _v) : x(_v.x()), y(_v.y()), z(_v.z()) {}
+	double x, y, z;
+	XYZ() : x(0), y(0), z(0) {}
+	XYZ(double _x, double _y, double _z) : x(_x), y(_y), z(_z) {}
+	XYZ(vec3 _v) : x(_v.x()), y(_v.y()), z(_v.z()) {}
 
-    inline vec2 xy() const { return vec2(x / (x + y + z), y / (x + y + z)); }
+	inline vec2 xy() const { return vec2(x / (x + y + z), y / (x + y + z)); }
 	inline XYZ operator +(const XYZ& others) { return XYZ(x + others.x, y + others.y, z + others.z); }
 	inline XYZ operator *(const XYZ& others) { return XYZ(x * others.x, y * others.y, z * others.z); }
-    inline XYZ operator /(double value) { return XYZ(x / value, y / value, z / value); }
+	inline XYZ operator /(double value) { return XYZ(x / value, y / value, z / value); }
 
-    static XYZ FromxyY(vec2 xy, double Y = 1) {
-        if (xy.y() == 0) return XYZ();
-        return XYZ(xy.x() * Y / xy.y(), Y, (1 - xy.x() - xy.y()) * Y / xy.y());
-    }
+	static XYZ FromxyY(vec2 xy, double Y = 1) {
+		if (xy.y() == 0) return XYZ();
+		return XYZ(xy.x() * Y / xy.y(), Y, (1 - xy.x() - xy.y()) * Y / xy.y());
+	}
 };
 
 inline double InnerProduct(const Spectrum& f, const Spectrum& g) {

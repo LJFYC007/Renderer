@@ -4,16 +4,19 @@
 
 class RGBColor
 {
-public : 
+public:
     double r, g, b;
     RGBColor() : r(0), g(0), b(0) {}
     RGBColor(double _r, double _g, double _b) : r(_r), g(_g), b(_b) {}
     RGBColor(vec3 x) : r(x.x()), g(x.y()), b(x.z()) {}
+
+    RGBColor operator /(double x) { return RGBColor(r / x, g / x, b / x); }
 };
 
 class RGBSigmoidPolynomial
 {
 public:
+    RGBSigmoidPolynomial() : c0(0), c1(0), c2(0) {}
     RGBSigmoidPolynomial(double _c0, double _c1, double _c2) : c0(_c0), c1(_c1), c2(_c2) {}
 
     static double s(double x) {
@@ -39,7 +42,7 @@ private:
 
 class RGBToSpectrumTable
 {
-public : 
+public:
     static constexpr int res = 64;
     using CoefficientArray = float[3][res][res][res][3];
 
@@ -47,7 +50,7 @@ public :
 
     RGBSigmoidPolynomial operator ()(RGBColor rgb) const;
 
-private : 
+private:
     const float* zNodes;
     const CoefficientArray* coeffs;
 };

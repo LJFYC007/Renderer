@@ -4,19 +4,19 @@
 
 XYZ SampledSpectrum::ToXYZ(const SampledWaveLengths& lambda) const
 {
-    SampledSpectrum X = SpectraX.Sample(lambda);
-    SampledSpectrum Y = SpectraY.Sample(lambda);
-    SampledSpectrum Z = SpectraZ.Sample(lambda);
-    SampledSpectrum pdf = lambda.PDF();
-    return XYZ(((X * *this) / pdf).Average(),
-        ((Y * *this) / pdf).Average(),
-        ((Z * *this) / pdf).Average()) / CIE_Y_INTEGRAL;
+	SampledSpectrum X = SpectraX.Sample(lambda);
+	SampledSpectrum Y = SpectraY.Sample(lambda);
+	SampledSpectrum Z = SpectraZ.Sample(lambda);
+	SampledSpectrum pdf = lambda.PDF();
+	return XYZ(((X * *this) / pdf).Average(),
+		((Y * *this) / pdf).Average(),
+		((Z * *this) / pdf).Average()) / CIE_Y_INTEGRAL;
 }
 
 RGBColor SampledSpectrum::ToRGB(const SampledWaveLengths& lambda, const RGBColorSpace& space) const
 {
-    XYZ xyz = ToXYZ(lambda);
-    return space.ToRGB(xyz);
+	XYZ xyz = ToXYZ(lambda);
+	return space.ToRGB(xyz);
 }
 
 PiecewiseLinearSpectrum::PiecewiseLinearSpectrum(const double* samples, int n, bool normalize)
@@ -46,3 +46,10 @@ PiecewiseLinearSpectrum::PiecewiseLinearSpectrum(const double* samples, int n, b
 }
 
 RGBAlbedoSpectrum::RGBAlbedoSpectrum(const RGBColorSpace& cs, RGBColor rgb) : rsp(cs.ToRGBCoeffs(rgb)) {}
+
+RGBIlluminantSpectrum::RGBIlluminantSpectrum(const RGBColorSpace& cs, RGBColor rgb)
+{
+	double m = std::max(std::max(rgb.r, rgb.g), rgb.b);
+	scale = 2 * m;
+	rsp = cs.ToRGBCoeffs(scale ? rgb / scale : RGBColor(0.0, 0.0, 0.0));
+}
