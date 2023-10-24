@@ -16,8 +16,8 @@ static vec3 ans[3010][2210];
 class camera
 {
 public:
-	const int ImageWidth = 1280;
-	const int ImageHeight = 720;
+	const int ImageWidth = 2560;
+	const int ImageHeight = 1440;
 	double fov = 20.0;
 	vec3 lookfrom = vec3(13.0, 2.0, 3.0);
 	vec3 lookat = vec3(0.0, 0.0, 0.0);
@@ -115,7 +115,7 @@ private:
 		r.rd = normalize(r.rd);
 		hitRecord rec;
 
-		if (!World.hit(r, interval(0.000001, infinity), rec))
+		if (!World.hit(r, interval(0.001, infinity), rec))
 		{
 			RGBAlbedoSpectrum spec(sRGB, RGBColor(background));
 			return spec.Sample(sample);

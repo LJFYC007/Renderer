@@ -10,17 +10,17 @@ using std::make_shared;
 
 class texture
 {
-public : 
+public:
 	virtual ~texture() = default;
 	virtual RGBAlbedoSpectrum value(double u, double v, const vec3& p) const = 0;
 };
 
 class solidColor : public texture
 {
-private : 
+private:
 	RGBAlbedoSpectrum color;
 
-public : 
+public:
 	solidColor(vec3 _color) : color(sRGB, RGBColor(_color)) {}
 	solidColor(double red, double green, double blue) : color(sRGB, RGBColor(vec3(red, green, blue))) {}
 	RGBAlbedoSpectrum value() const { return color; }
@@ -29,13 +29,13 @@ public :
 
 class checkerBoard : public texture
 {
-private : 
+private:
 	double scale;
 	shared_ptr<texture> even, odd;
-public :
+public:
 	checkerBoard(double _scale, shared_ptr<texture> _even, shared_ptr<texture> _odd) : scale(_scale), even(_even), odd(_odd) {}
 	checkerBoard(double _scale, vec3 _even, vec3 _odd) : scale(_scale), even(make_shared<solidColor>(_even)), odd(make_shared<solidColor>(_odd)) {}
-	
+
 	RGBAlbedoSpectrum value(double u, double v, const vec3& p) const override
 	{
 		int x = static_cast<int>(std::floor(scale * p.x()));

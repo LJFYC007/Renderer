@@ -10,6 +10,7 @@
 #include "material.h"
 #include "texture.h"
 #include "colorspace.h"
+#include "shape.h"
 
 primitiveList World;
 
