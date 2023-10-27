@@ -5,8 +5,22 @@
 
 #include <optional>
 #include <vector>
-
+#include <memory>
+using std::shared_ptr;
+using std::make_shared;
 using std::vector;
+
+class material;
+
+class hitRecord
+{
+public : 
+	point3 p;
+	vec3 normal;
+	double t, u, v;
+	bool frontFace;
+	shared_ptr<material> mat;
+};
 
 class QuadricIntersection
 {
@@ -17,6 +31,7 @@ public:
 
 class Shape
 {
+public : 
 	virtual AABB Bounds() const = 0;
 	virtual std::optional<hitRecord> Intersect(const ray& r, interval t) const = 0;
 	//virtual bool IntersectP(const ray& r, interval t) const = 0;

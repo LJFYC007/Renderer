@@ -154,10 +154,12 @@
     <ClCompile Include="spectrum.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="aabb.h" />
     <ClInclude Include="bvh.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="color.h" />
     <ClInclude Include="colorspace.h" />
+    <ClInclude Include="interaction.h" />
     <ClInclude Include="interval.h" />
     <ClInclude Include="math.h" />
     <ClInclude Include="primitive.h" />

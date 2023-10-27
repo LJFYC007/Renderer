@@ -16,19 +16,19 @@ static vec3 ans[3010][2210];
 class camera
 {
 public:
-	const int ImageWidth = 1920;
-	const int ImageHeight = 1080;
+	const int ImageWidth = 200;
+	const int ImageHeight = 100;
 	double fov = 20.0;
 	vec3 lookfrom = vec3(13.0, 2.0, 3.0);
 	vec3 lookat = vec3(0.0, 0.0, 0.0);
 	vec3 vup = vec3(0.0, 1.0, 0.0);
 	double defocusAngle = 0.6;
 	double focusDist = 10.0;
-	int samplePixel = 4096;
+	int samplePixel = 1024;
 	int maxDepth = 20;
 	vec3 background = vec3(0.0);
 
-	void render(const primitive& World)
+	void render(const bvhNode& World)
 	{
 		initialize();
 #pragma omp parallel for schedule(dynamic) 
@@ -109,13 +109,13 @@ private:
 		defocusDiskV = v * defocusRadius;
 	}
 
-	SampledSpectrum renderRay(ray r, const int depth, const SampledWaveLengths& sample, const primitive& World)
+	SampledSpectrum renderRay(ray r, const int depth, const SampledWaveLengths& sample, const bvhNode& World)
 	{
 		if (depth <= 0) return SampledSpectrum(0.0);
 		r.rd = normalize(r.rd);
-		hitRecord rec;
 
-		if (!World.hit(r, interval(0.001, infinity), rec))
+		std::optional<hitRecord> rec = World.Intersect(r, interval(0.001, infinity));
+		if (!rec)
 		{
 			RGBAlbedoSpectrum spec(sRGB, RGBColor(background));
 			return spec.Sample(sample);
@@ -123,8 +123,8 @@ private:
 
 		ray scattered;
 		SampledSpectrum attenuation(0.0);
-		SampledSpectrum emissionColor = rec.mat->emitted(rec.u, rec.v, rec.p, sample);
-		if (!rec.mat->scatter(r, rec, sample, attenuation, scattered))
+		SampledSpectrum emissionColor = rec->mat->emitted(rec->u, rec->v, rec->p, sample);
+		if (!rec->mat->scatter(r, rec.value(), sample, attenuation, scattered))
 			return emissionColor;
 
 		SampledSpectrum scatterColor = attenuation * renderRay(scattered, depth - 1, sample, World);
