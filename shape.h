@@ -85,46 +85,68 @@ private:
 	shared_ptr<material> mat;
 };
 
-class TriangleMesh
-{
-public:
-	int nTriangles, nVertices;
-	vector<int> vertexIndices;
-	vector<vec3> p, s, n;
-	vector<vec2> uv;
-	vector<int> faceIndices;
-
-	TriangleMesh(vector<int> _vertexIndices, vector<vec3> _p, vector<vec3> _s, vector<vec3> _n, vector<vec2> _uv, vector<int> _faceIndices) :
-		nTriangles(_vertexIndices.size() / 3), nVertices(_p.size()), vertexIndices(_vertexIndices), p(_p), s(_s), n(_n), uv(_uv), faceIndices(_faceIndices) {}
-};
-
 class TriangleIntersection 
 {
 public:
 	double t, u, v;
 };
 
+struct Vertex {
+	vec3 p, n; vec2 uv;
+	Vertex() {}
+	Vertex(vec3 _p, vec3 _n) : p(_p), n(_n) {}
+	Vertex(vec3 _p, vec3 _n, vec2 _uv) : p(_p), n(_n), uv(_uv) {}
+};
+
+class TriangleMesh
+{
+public:
+	int nTriangles, nVertices;
+	vector<int> vertexIndices;
+	vector<Vertex> vertices;
+	shared_ptr<material> mat;
+
+	TriangleMesh(vector<int> _vertexIndices, vector<Vertex> _vertices, shared_ptr<material> _mat) :
+		nTriangles(_vertexIndices.size() / 3), nVertices(_vertices.size()), vertexIndices(_vertexIndices), vertices(_vertices), mat(_mat) {}
+};
+static vector<TriangleMesh> meshes;
+
 class Triangle : public Shape
 {
 public:
-	Triangle(vec3 _p0, vec3 _p1, vec3 _p2, shared_ptr<material> _mat) : p0(_p0), p1(_p1), p2(_p2), mat(_mat) {}
+	Triangle(int _meshIndex, int _triIndex) : meshIndex(_meshIndex), triIndex(_triIndex) {}
+
+	const TriangleMesh* GetMesh() const {
+		return &meshes[meshIndex];
+	}
 
 	AABB Bounds() const override {
-		/*
 		const TriangleMesh* mesh = GetMesh();
 		const int* v = &mesh->vertexIndices[3 * triIndex];
-		vec3 p0 = mesh->p[v[0]], p1 = mesh->p[v[1]], p2 = mesh->p[v[2]];
-		*/
-		return AABB(p0, p1).Union(p2);
+		vec3 p0 = mesh->vertices[v[0]].p;
+		vec3 p1 = mesh->vertices[v[1]].p;
+		vec3 p2 = mesh->vertices[v[2]].p;
+		return AABB(p0, p1,p2);
 	}
 
 	std::optional<hitRecord> Intersect(const ray& r, interval t) const override {
+		const TriangleMesh* mesh = GetMesh();
+		const int* v = &mesh->vertexIndices[3 * triIndex];
+		vec3 p0 = mesh->vertices[v[0]].p;
+		vec3 p1 = mesh->vertices[v[1]].p;
+		vec3 p2 = mesh->vertices[v[2]].p;
+
 		std::optional<TriangleIntersection> ints = BasicIntersect(r, t, p0, p1, p2);
 		if (!ints) return {};
 
 		hitRecord rec;
-		rec.t = ints->t; rec.p = p0 + (p1 - p0) * ints->u + (p2 - p0) * ints->v;
-		rec.mat = mat;
+		rec.t = ints->t;
+		rec.p = p0 + (p1 - p0) * ints->u + (p2 - p0) * ints->v;
+		rec.normal = mesh->vertices[v[0]].n
+			+ (mesh->vertices[v[1]].n - mesh->vertices[v[1]].n) * ints->u
+			+ (mesh->vertices[v[2]].n - mesh->vertices[v[1]].n) * ints->v;
+
+		rec.mat = mesh->mat;
 		return rec;
 	}
 
@@ -145,15 +167,5 @@ public:
 	}
 
 private:
-	vec3 p0, p1, p2;
-	shared_ptr<material> mat;
-
-	/*
 	int meshIndex = -1, triIndex = -1;
-	static vector<const TriangleMesh*>* allMeshes;
-
-	const TriangleMesh* GetMesh() const {
-		return (*allMeshes)[meshIndex];
-	}
-	*/
 };

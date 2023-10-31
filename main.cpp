@@ -9,13 +9,41 @@
 #include "texture.h"
 #include "colorspace.h"
 #include "shape.h"
+#include "model.h"
 
 primitiveList World;
+
+void addBox(vec3 a, vec3 b, vec3 c, vec3 n, shared_ptr<material> mat)
+{
+	vector<Vertex> vertices;
+	vector<int> vertexIndices;
+    vertices.push_back(Vertex(a, n));
+    vertices.push_back(Vertex(a + b, n));
+    vertices.push_back(Vertex(a + c, n));
+    vertices.push_back(Vertex(a + b + c, n));
+    vertexIndices.push_back(0); vertexIndices.push_back(1); vertexIndices.push_back(2);
+    vertexIndices.push_back(1); vertexIndices.push_back(2); vertexIndices.push_back(3);
+    meshes.push_back(TriangleMesh(vertexIndices, vertices, mat));
+}
+
+void box(vec3 a, vec3 b, shared_ptr<material> mat)
+{
+    auto dx = vec3(b[0] - a[0], 0, 0);
+    auto dy = vec3(0, b[1] - a[1], 0);
+    auto dz = vec3(0, 0, b[2] - a[2]);
+    addBox(vec3(a[0], a[1], b[2]), dx, dy, vec3(0, 0, -1), mat);
+    addBox(vec3(b[0], a[1], b[2]), -dz, dy, vec3(1, 0, 0), mat);
+    addBox(vec3(b[0], a[1], a[2]), -dx, dy, vec3(0, 0, 1), mat);
+    addBox(vec3(a[0], a[1], a[2]), dz, dy, vec3(-1, 0, 0), mat);
+    addBox(vec3(a[0], b[1], b[2]), dx, -dz, vec3(0, 1, 0), mat);
+    addBox(vec3(a[0], a[1], a[2]), dx, dz, vec3(0, -1, 0), mat);
+}
 
 int main()
 {
     camera cam;
 
+    /*
     auto difflight = make_shared<diffuseLight>(vec3(4, 4, 4));
     World.add(make_shared<Sphere>(point3(0, 3, 0), 1.0, difflight));
 
@@ -55,6 +83,28 @@ int main()
             }
         }
     }
+
+    //Model("resources/cyborg.obj", material2);
+    */
+
+    auto red = make_shared<lambertian>(vec3(.65, .05, .05));
+    auto white = make_shared<lambertian>(vec3(.73, .73, .73));
+    auto green = make_shared<lambertian>(vec3(.12, .45, .15));
+    auto light = make_shared<diffuseLight>(vec3(15, 15, 15));
+
+    addBox(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), vec3(-1, 0, 0), green);
+    addBox(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), vec3(1, 0, 0), red);
+    addBox(point3(343, 554, 332), vec3(-130, 0, 0), vec3(0, 0, -105), vec3(0, -1, 0), light);
+    addBox(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), vec3(0, 1, 0), white);
+    addBox(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), vec3(0, -1, 0), white);
+    addBox(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, -1), white);
+
+    box(vec3(130, 0, 65), vec3(295, 165, 230), white);
+    box(vec3(265, 0, 295), vec3(430, 330, 460), white);
+
+    for (int i = 0; i < meshes.size(); ++i)
+        for (int j = 0; j < meshes[i].nTriangles; ++j)
+            World.add(make_shared<Triangle>(i, j));
 
     cam.render(bvhNode(make_shared<primitiveList>(World)));
     return 0;

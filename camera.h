@@ -12,21 +12,20 @@
 
 static vec3 ans[3010][2210];
 
-
 class camera
 {
 public:
-	const int ImageWidth = 200;
-	const int ImageHeight = 100;
-	double fov = 20.0;
-	vec3 lookfrom = vec3(13.0, 2.0, 3.0);
-	vec3 lookat = vec3(0.0, 0.0, 0.0);
+	const int ImageWidth = 600;
+	const int ImageHeight = 600;
+	double fov = 40.0;
+	vec3 lookfrom = vec3(278.0, 278.0, -800.0);
+	vec3 lookat = vec3(278.0, 278.0, 0.0);
 	vec3 vup = vec3(0.0, 1.0, 0.0);
-	double defocusAngle = 0.6;
+	double defocusAngle = 0.0;
 	double focusDist = 10.0;
 	int samplePixel = 1024;
-	int maxDepth = 20;
-	vec3 background = vec3(0.0);
+	int maxDepth = 10;
+	vec3 background = vec3(0.3);
 
 	void render(const bvhNode& World)
 	{
@@ -46,7 +45,7 @@ public:
 						vec3 pixel = pixelCenter + (-0.5 + (1.0 / sqrtSPP) * (oi + randomDouble())) * pixelDeltaU + (-0.5 + (1.0 / sqrtSPP) * (oj + randomDouble())) * pixelDeltaV;
 						vec3 ro = (defocusAngle <= 0.0) ? cameraCenter : cameraCenter + defocusDiskSample(defocusDiskU, defocusDiskV);
 						vec3 rd = pixel - ro;
-						SampledWaveLengths sample = (randomDouble());
+						SampledWaveLengths sample(randomDouble());
 						xyz = xyz + (renderRay(ray(ro, rd), maxDepth, sample, World)).ToXYZ(sample);
 					}
 				RGBColor rgb = sRGB.ToRGB(xyz / (double)(samplePixel));
@@ -117,6 +116,7 @@ private:
 		std::optional<hitRecord> rec = World.Intersect(r, interval(0.001, infinity));
 		if (!rec)
 		{
+			return SampledSpectrum(0.0);
 			RGBAlbedoSpectrum spec(sRGB, RGBColor(background));
 			return spec.Sample(sample);
 		}

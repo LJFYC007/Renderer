@@ -15,19 +15,18 @@ public:
 		y = interval(fmin(a[1], b[1]), fmax(a[1], b[1]));
 		z = interval(fmin(a[2], b[2]), fmax(a[2], b[2]));
 	}
+	AABB(const vec3& a, const vec3& b, const vec3& c) {
+		const double eps = 1e-8;
+		x = interval(fmin(a[0], fmin(b[0], c[0])) - eps, fmax(a[0], fmax(b[0], c[0])) + eps);
+		y = interval(fmin(a[1], fmin(b[1], c[1])) - eps, fmax(a[1], fmax(b[1], c[1])) + eps);
+		z = interval(fmin(a[2], fmin(b[2], c[2])) - eps, fmax(a[2], fmax(b[2], c[2])) + eps);
+	}
 	AABB(const AABB& a, const AABB& b) {
 		x = interval(a.x, b.x);
 		y = interval(a.y, b.y);
 		z = interval(a.z, b.z);
 	}
 
-	AABB Union(vec3 a)
-	{
-		x = interval(fmin(x.Min, a[0]), fmax(x.Max, a[0]));
-		y = interval(fmin(y.Min, a[1]), fmax(y.Max, a[1]));
-		z = interval(fmin(z.Min, a[2]), fmax(z.Max, a[2]));
-		return *this;
-	}
 
 	const interval& axis(int n) const {
 		if (n == 0) return x;

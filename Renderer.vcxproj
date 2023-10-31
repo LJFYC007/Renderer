@@ -162,6 +162,7 @@
     <ClInclude Include="interaction.h" />
     <ClInclude Include="interval.h" />
     <ClInclude Include="math.h" />
+    <ClInclude Include="model.h" />
     <ClInclude Include="primitive.h" />
     <ClInclude Include="ray.h" />
     <ClInclude Include="sample.h" />
