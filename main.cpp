@@ -13,7 +13,7 @@
 
 primitiveList World;
 
-void addBox(vec3 a, vec3 b, vec3 c, vec3 n, shared_ptr<material> mat)
+void addBox(vec3 a, vec3 b, vec3 c, vec3 n, shared_ptr<material> mat, Transform t = Transform())
 {
 	vector<Vertex> vertices;
 	vector<int> vertexIndices;
@@ -23,20 +23,20 @@ void addBox(vec3 a, vec3 b, vec3 c, vec3 n, shared_ptr<material> mat)
     vertices.push_back(Vertex(a + b + c, n));
     vertexIndices.push_back(0); vertexIndices.push_back(1); vertexIndices.push_back(2);
     vertexIndices.push_back(1); vertexIndices.push_back(2); vertexIndices.push_back(3);
-    meshes.push_back(TriangleMesh(vertexIndices, vertices, mat));
+    meshes.push_back(TriangleMesh(t, vertexIndices, vertices, mat));
 }
 
-void box(vec3 a, vec3 b, shared_ptr<material> mat)
+void box(vec3 a, vec3 b, shared_ptr<material> mat, Transform t = Transform())
 {
     auto dx = vec3(b[0] - a[0], 0, 0);
     auto dy = vec3(0, b[1] - a[1], 0);
     auto dz = vec3(0, 0, b[2] - a[2]);
-    addBox(vec3(a[0], a[1], b[2]), dx, dy, vec3(0, 0, -1), mat);
-    addBox(vec3(b[0], a[1], b[2]), -dz, dy, vec3(1, 0, 0), mat);
-    addBox(vec3(b[0], a[1], a[2]), -dx, dy, vec3(0, 0, 1), mat);
-    addBox(vec3(a[0], a[1], a[2]), dz, dy, vec3(-1, 0, 0), mat);
-    addBox(vec3(a[0], b[1], b[2]), dx, -dz, vec3(0, 1, 0), mat);
-    addBox(vec3(a[0], a[1], a[2]), dx, dz, vec3(0, -1, 0), mat);
+    addBox(vec3(a[0], a[1], b[2]), dx, dy, vec3(0, 0, -1), mat, t);
+    addBox(vec3(b[0], a[1], b[2]), -dz, dy, vec3(1, 0, 0), mat, t);
+    addBox(vec3(b[0], a[1], a[2]), -dx, dy, vec3(0, 0, 1), mat, t);
+    addBox(vec3(a[0], a[1], a[2]), dz, dy, vec3(-1, 0, 0), mat, t);
+    addBox(vec3(a[0], b[1], b[2]), dx, -dz, vec3(0, 1, 0), mat, t);
+    addBox(vec3(a[0], a[1], a[2]), dx, dz, vec3(0, -1, 0), mat, t);
 }
 
 int main()
@@ -99,8 +99,8 @@ int main()
     addBox(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), vec3(0, -1, 0), white);
     addBox(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, -1), white);
 
-    box(vec3(130, 0, 65), vec3(295, 165, 230), white);
-    box(vec3(265, 0, 295), vec3(430, 330, 460), white);
+    box(vec3(130, 0, 65), vec3(295, 165, 230), white, Transform::RotateY(pi / 12));
+    box(vec3(265, 0, 295), vec3(430, 330, 460), white, Transform::RotateY(-pi / 50));
 
     for (int i = 0; i < meshes.size(); ++i)
         for (int j = 0; j < meshes[i].nTriangles; ++j)

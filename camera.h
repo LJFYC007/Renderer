@@ -23,7 +23,7 @@ public:
 	vec3 vup = vec3(0.0, 1.0, 0.0);
 	double defocusAngle = 0.0;
 	double focusDist = 10.0;
-	int samplePixel = 1024;
+	int samplePixel = 4096;
 	int maxDepth = 10;
 	vec3 background = vec3(0.3);
 

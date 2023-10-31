@@ -4,9 +4,11 @@
 class ray
 {
 public : 
-	vec3 ro, rd;
+	point3 ro;
+	vec3 rd;
+	double tMax, time;
 
 	ray() {}
-	ray(const vec3& origin, const vec3& direction) { ro = origin; rd = direction; }
+	ray(const point3& origin, const vec3& direction) { ro = origin; rd = direction; }
 	vec3 at(double t) const { return ro + t * rd; }
 };

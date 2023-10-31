@@ -88,6 +88,6 @@ private:
 		if (mesh->mMaterialIndex >= 0)
 			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-		return TriangleMesh(indices, vertices, mat);
+		return TriangleMesh(SquareMatrix<4>(), indices, vertices, mat);
 	}
 };

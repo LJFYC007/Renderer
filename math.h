@@ -121,26 +121,37 @@ public:
 		init(0, 0, x, args...);
 	}
 
-	const double* operator [](int i) const { return a[i]; }
-	double* operator [](int i) { return a[i]; }
-
-	SquareMatrix operator +(const SquareMatrix<N>& other) const {
-		SquareMatrix r = *this;
-		for (int i = 0; i < N; i++)
-			for (int j = 0; j < N; j++)
-				r.a[i][j] += other.a[i][j];
-		return r;
-	}
-
-	double Determinant() const {
+	double Determinant() const
+	{
 		if (N == 2) return a[0][0] * a[1][1] - a[0][1] * a[1][0];
 		if (N == 3) return a[0][0] * (a[1][1] * a[2][2] - a[1][2] * a[2][1]) -
 			a[0][1] * (a[1][0] * a[2][2] - a[1][2] * a[2][0]) +
 			a[0][2] * (a[1][0] * a[2][1] - a[1][1] * a[2][0]);
+		if (N == 4)
+		{
+			double det = 0.0;
+			for (int i = 0; i < 4; ++i) {
+				double submat[3][3];
+				for (int j = 0; j < 3; j++) {
+					int k = 0;
+					for (int l = 0; l < 4; l++) {
+						if (l == i) continue;
+						submat[j][k] = a[j + 1][l];
+						k++;
+					}
+				}
+				double subDet = submat[0][0] * (submat[1][1] * submat[2][2] - submat[1][2] * submat[2][1]) -
+					submat[0][1] * (submat[1][0] * submat[2][2] - submat[1][2] * submat[2][0]) +
+					submat[0][2] * (submat[1][0] * submat[2][1] - submat[1][1] * submat[2][0]);
+				if (i % 2 == 0) det += subDet;
+				else det -= subDet;
+			}
+			return det;
+		}
 		return 0;
 	}
-
-	SquareMatrix Invert() const {
+	SquareMatrix<N> Invert() const
+	{
 		SquareMatrix<N> result;
 		double det = Determinant();
 		assert(det != 0);
@@ -163,7 +174,61 @@ public:
 			result[2][1] = (a[0][1] * a[2][0] - a[0][0] * a[2][1]) * invDet;
 			result[2][2] = (a[0][0] * a[1][1] - a[0][1] * a[1][0]) * invDet;
 		}
+		if (N == 4)
+		{
+			double A00 = a[0][0], A01 = a[0][1], A02 = a[0][2], A03 = a[0][3];
+			double A10 = a[1][0], A11 = a[1][1], A12 = a[1][2], A13 = a[1][3];
+			double A20 = a[2][0], A21 = a[2][1], A22 = a[2][2], A23 = a[2][3];
+			double A30 = a[3][0], A31 = a[3][1], A32 = a[3][2], A33 = a[3][3];
+
+			double cofactor00 = A11 * (A22 * A33 - A23 * A32) - A12 * (A21 * A33 - A23 * A31) + A13 * (A21 * A32 - A22 * A31);
+			double cofactor01 = -(A10 * (A22 * A33 - A23 * A32) - A12 * (A20 * A33 - A23 * A30) + A13 * (A20 * A32 - A22 * A30));
+			double cofactor02 = A10 * (A21 * A33 - A23 * A31) - A11 * (A20 * A33 - A23 * A30) + A13 * (A20 * A31 - A21 * A30);
+			double cofactor03 = -(A10 * (A21 * A32 - A22 * A31) - A11 * (A20 * A32 - A22 * A30) + A12 * (A20 * A31 - A21 * A30));
+
+			double cofactor10 = -(A01 * (A22 * A33 - A23 * A32) - A02 * (A21 * A33 - A23 * A31) + A03 * (A21 * A32 - A22 * A31));
+			double cofactor11 = A00 * (A22 * A33 - A23 * A32) - A02 * (A20 * A33 - A23 * A30) + A03 * (A20 * A32 - A22 * A30);
+			double cofactor12 = -(A00 * (A21 * A33 - A23 * A31) - A01 * (A20 * A33 - A23 * A30) + A03 * (A20 * A31 - A21 * A30));
+			double cofactor13 = A00 * (A21 * A32 - A22 * A31) - A01 * (A20 * A32 - A22 * A30) + A02 * (A20 * A31 - A21 * A30);
+
+			double cofactor20 = A01 * (A12 * A33 - A13 * A32) - A02 * (A11 * A33 - A13 * A31) + A03 * (A11 * A32 - A12 * A31);
+			double cofactor21 = -(A00 * (A12 * A33 - A13 * A32) - A02 * (A10 * A33 - A13 * A30) + A03 * (A10 * A32 - A12 * A30));
+			double cofactor22 = A00 * (A11 * A33 - A13 * A31) - A01 * (A10 * A33 - A13 * A30) + A03 * (A10 * A31 - A11 * A30);
+			double cofactor23 = -(A00 * (A11 * A32 - A12 * A31) - A01 * (A10 * A32 - A12 * A30) + A02 * (A10 * A31 - A11 * A30));
+
+			double cofactor30 = -(A01 * (A12 * A23 - A13 * A22) - A02 * (A11 * A23 - A13 * A21) + A03 * (A11 * A22 - A12 * A21));
+			double cofactor31 = A00 * (A12 * A23 - A13 * A22) - A02 * (A10 * A23 - A13 * A20) + A03 * (A10 * A22 - A12 * A20);
+			double cofactor32 = -(A00 * (A11 * A23 - A13 * A21) - A01 * (A10 * A23 - A13 * A20) + A03 * (A10 * A21 - A11 * A20));
+			double cofactor33 = A00 * (A11 * A22 - A12 * A21) - A01 * (A10 * A22 - A12 * A20) + A02 * (A10 * A21 - A11 * A20);
+
+			result[0][0] = cofactor00 * invDet;
+			result[0][1] = cofactor01 * invDet;
+			result[0][2] = cofactor02 * invDet;
+			result[0][3] = cofactor03 * invDet;
+			result[1][0] = cofactor10 * invDet;
+			result[1][1] = cofactor11 * invDet;
+			result[1][2] = cofactor12 * invDet;
+			result[1][3] = cofactor13 * invDet;
+			result[2][0] = cofactor20 * invDet;
+			result[2][1] = cofactor21 * invDet;
+			result[2][2] = cofactor22 * invDet;
+			result[2][3] = cofactor23 * invDet;
+			result[3][0] = cofactor30 * invDet;
+			result[3][1] = cofactor31 * invDet;
+			result[3][2] = cofactor32 * invDet;
+			result[3][3] = cofactor33 * invDet;
+		}
 		return result;
+	}
+	const double* operator [](int i) const { return a[i]; }
+	double* operator [](int i) { return a[i]; }
+
+	SquareMatrix operator +(const SquareMatrix<N>& other) const {
+		SquareMatrix r = *this;
+		for (int i = 0; i < N; i++)
+			for (int j = 0; j < N; j++)
+				r.a[i][j] += other.a[i][j];
+		return r;
 	}
 
 private:
@@ -190,9 +255,36 @@ template<int N> SquareMatrix<N> operator *(const SquareMatrix<N>& m1, const Squa
 	return ans;
 }
 
+// =========== transform ============
+class Transform
+{
+public : 
+	Transform(const SquareMatrix<4> _mat) : mat(_mat) { inv = _mat.Invert(); }
+	Transform(const SquareMatrix<4> _mat, const SquareMatrix<4> _inv) : mat(_mat), inv(_inv) {}
+	Transform(const double mat[4][4]) : Transform(SquareMatrix<4>(mat)) {}
+	Transform() : Transform(SquareMatrix<4>()) {}
+
+	Transform Inverse() {
+		return Transform(inv, mat);
+	}
+
+	vec3 operator()(const vec3& p) const;
+	static Transform Translate(const vec3& delta);
+	static Transform Scale(double x, double y, double z);
+	static Transform RotateX(double theta);
+	static Transform RotateY(double theta);
+	static Transform RotateZ(double theta);
+	static Transform Rotate(double theta, const vec3& axis);
+
+private : 
+	SquareMatrix<4> mat;
+	SquareMatrix<4> inv;
+};
+
 // =========== others ============
 
 inline double Lerp(double t, double x, double y)
 {
 	return (1 - t) * x + t * y;
 }
+
