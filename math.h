@@ -4,6 +4,8 @@
 
 // =========== vector ============
 
+const double pi = 3.141592653589793238463;
+
 class vec2
 {
 public:

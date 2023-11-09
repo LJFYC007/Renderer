@@ -145,6 +145,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="bxdf.cpp" />
     <ClCompile Include="color.cpp" />
     <ClCompile Include="declaration.h" />
     <ClCompile Include="main.cpp" />
@@ -155,6 +156,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aabb.h" />
+    <ClInclude Include="bsdf.h" />
     <ClInclude Include="bvh.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="color.h" />
@@ -165,10 +167,10 @@
     <ClInclude Include="model.h" />
     <ClInclude Include="primitive.h" />
     <ClInclude Include="ray.h" />
+    <ClInclude Include="bxdf.h" />
     <ClInclude Include="sample.h" />
     <ClInclude Include="shape.h" />
     <ClInclude Include="spectrum.h" />
-    <ClInclude Include="sphere.h" />
     <ClInclude Include="texture.h" />
   </ItemGroup>
   <ItemGroup>

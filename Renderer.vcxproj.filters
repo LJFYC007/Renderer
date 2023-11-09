@@ -36,12 +36,12 @@
     <ClCompile Include="spectra_sRGB.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="bxdf.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="primitive.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="sphere.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="ray.h">
@@ -84,6 +84,12 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="model.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="bxdf.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="bsdf.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

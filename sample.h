@@ -4,8 +4,6 @@
 
 #include "math.h"
 
-const double pi = 3.1415926535897932385;
-
 inline double radians(double x) { return x * pi / 180.0;  }
 inline double fract(double x) { return x - floor(x); }
 inline double randomDouble()
@@ -45,3 +43,11 @@ static vec3 randInHemisphere(double seed, vec3 normal)
     return dot(p, normal) > 0.0 ? p : -p;
 }
 
+static vec3 SampleUniformHemisphere(const vec2& u) {
+    double z = u[0];
+    double r = std::sqrt(std::max(0.0, 1.0 - z * z));
+    double phi = 2 * pi * u[1];
+    return vec3(r * std::cos(phi), r * std::sin(phi), z);
+}
+
+static double UniformHemispherePDF() { return 1 / (2 * pi); }

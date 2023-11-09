@@ -51,7 +51,7 @@ private:
 		vector<Vertex> vertices;
 		vector<int> indices;
 
-		for (int i = 0; i < mesh->mNumVertices; ++i)
+		for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
 		{
 			Vertex vertex;
 
