@@ -290,3 +290,12 @@ inline double Lerp(double t, double x, double y)
 	return (1 - t) * x + t * y;
 }
 
+class Frame {
+public : 
+	vec3 x, y, z;
+	Frame() : x(1, 0, 0), y(0, 1, 0), z(0, 0, 1) {}
+	Frame(vec3 _x, vec3 _y, vec3 _z) : x(_x), y(_y), z(_z) {}
+	vec3 ToLocal(vec3 v) const { return vec3(dot(v, x), dot(v, y), dot(v, z)); }
+	vec3 FromLocal(vec3 v) const { return v.x() * x + v.y() * y + v.z() * z; }
+};
+static Frame FromXZ(vec3 x, vec3 z) { return Frame(x, cross(x, z), z); }
