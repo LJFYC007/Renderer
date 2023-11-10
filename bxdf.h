@@ -38,9 +38,9 @@ struct BSDFSample {
 class BxDF
 {
 public : 
-	SampledSpectrum f(vec3 wo, vec3 wi) const;
-	std::optional<BSDFSample> Sample_f(vec3 wo, double uc, vec2 u, BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const;
-	double PDF(vec3 wo, vec3 wi, BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const;
-	SampledSpectrum rho(vec3 wo, int nSamples, double* uc, vec2* u2) const;
-	SampledSpectrum rho(int nSamples, vec2* u1, double* uc, vec2* u2) const;
+	virtual SampledSpectrum f(vec3 wo, vec3 wi) const = 0;
+	virtual std::optional<BSDFSample> Sample_f(vec3 wo, double uc, vec2 u, BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const = 0;
+	virtual double PDF(vec3 wo, vec3 wi, BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const = 0;
+	virtual SampledSpectrum rho(vec3 wo, int nSamples, double* uc, vec2* u2) const;
+	virtual SampledSpectrum rho(int nSamples, vec2* u1, double* uc, vec2* u2) const;
 };

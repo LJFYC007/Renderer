@@ -1,21 +1,6 @@
 #include "bxdf.h"
 #include "sample.h"
 
-SampledSpectrum BxDF::f(vec3 wo, vec3 wi) const
-{
-    return SampledSpectrum(0.0);
-}
-
-std::optional<BSDFSample> BxDF::Sample_f(vec3 wo, double uc, vec2 u, BxDFReflTransFlags sampleFlags) const
-{
-    return std::optional<BSDFSample>();
-}
-
-double BxDF::PDF(vec3 wo, vec3 wi, BxDFReflTransFlags sampleFlags) const
-{
-    return 0.0;
-}
-
 SampledSpectrum BxDF::rho(vec3 wo, int nSamples, double* uc, vec2* u2) const
 {
     SampledSpectrum r(0.0);

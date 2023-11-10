@@ -92,6 +92,9 @@
     <ClInclude Include="bsdf.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="bxdfs.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="material.h">

@@ -396,6 +396,14 @@ public:
 		return SampledSpectrum(v);
 	}
 
+	SampledSpectrum operator /(const double y) const
+	{
+		double v[NSpectrumSamples];
+		for (int i = 0; i < NSpectrumSamples; ++i)
+			v[i] = values[i] / y;
+		return SampledSpectrum(v);
+	}
+
 	XYZ ToXYZ(const SampledWaveLengths& lambda) const;
 	RGBColor ToRGB(const SampledWaveLengths& lambda, const RGBColorSpace& space) const;
 private:

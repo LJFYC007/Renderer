@@ -50,4 +50,34 @@ static vec3 SampleUniformHemisphere(const vec2& u) {
     return vec3(r * std::cos(phi), r * std::sin(phi), z);
 }
 
-static double UniformHemispherePDF() { return 1 / (2 * pi); }
+inline double UniformHemispherePDF() { return 1 / (2 * pi); }
+
+inline bool SameHemisphere(vec3 x, vec3 y) { return x.z() * y.z() > 0.0; }
+
+static vec2 SampleConcentricDisk(vec2 u)
+{
+    vec2 _u = u * 2 - vec2(1);
+    if (_u.x() == 0 && _u.y() == 0) return vec2(0);
+    double theta, r;
+    if (std::abs(_u.x()) > std::abs(_u.y()))
+    {
+        r = _u.x();
+        theta = pi / 4 * (_u.y() / _u.x());
+    }
+    else
+    {
+        r = _u.y();
+        theta = pi / 2 - pi / 4 * (_u.x() / _u.y());
+    }
+    return r * vec2(std::cos(theta), std::sin(theta));
+}
+
+static vec3 SampleCosineHemisphere(vec2 u)
+{
+    vec2 d = SampleConcentricDisk(u);
+    double z = std::sqrt(std::max(0.0, 1 - d.x() * d.x() - d.y() * d.y()));
+    return vec3(d.x(), d.y(), z);
+}
+
+inline double CosineHemispherePDF(double cosTheta) { return cosTheta / pi; }
+
