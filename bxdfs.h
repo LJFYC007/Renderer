@@ -16,6 +16,7 @@ public:
 	}
 
 	std::optional<BSDFSample> Sample_f(vec3 wo, double uc, vec2 u, BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const override {
+		if ((sampleFlags & BxDFReflTransFlags::Reflection) == BxDFReflTransFlags::Unset) return {};
 		vec3 wi = SampleCosineHemisphere(u);
 		if (wo.z() < 0.0) wi.a[2] *= -1;
 		double pdf = CosineHemispherePDF(abs(wi.z()));

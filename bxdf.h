@@ -10,6 +10,8 @@ enum class BxDFReflTransFlags {
 	Transmission = 1 << 1,
 	All = Reflection | Transmission
 };
+inline BxDFReflTransFlags operator |(BxDFReflTransFlags a, BxDFReflTransFlags b) { return BxDFReflTransFlags((int)a | (int)b); }
+inline BxDFReflTransFlags operator &(BxDFReflTransFlags a, BxDFReflTransFlags b) { return BxDFReflTransFlags((int)a & (int)b); }
 
 enum BxDFFlags {
 	Unset = 0,
@@ -26,6 +28,8 @@ enum BxDFFlags {
 	SpecularTransmission = Specular | Transmission,
 	All = Diffuse | Glossy | Specular | Reflection | Transmission
 };
+inline BxDFFlags operator |(BxDFFlags a, BxDFFlags b) { return BxDFFlags((int)a | (int)b); }
+inline BxDFFlags operator &(BxDFFlags a, BxDFFlags b) { return BxDFFlags((int)a & (int)b); }
 
 struct BSDFSample {
 	SampledSpectrum f;
