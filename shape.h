@@ -16,10 +16,10 @@ class hitRecord
 {
 public : 
 	point3 p;
-	vec3 normal;
+	vec3 normal, dpdu;
 	double t, u, v;
 	bool frontFace;
-	shared_ptr<material> mat;
+	shared_ptr<Material> mat;
 };
 
 class QuadricIntersection
@@ -41,7 +41,7 @@ public :
 class Sphere : public Shape
 {
 public:
-	Sphere(point3 _center, double _radius, shared_ptr<material> _mat) : center(_center), radius(_radius), mat(_mat) {}
+	Sphere(point3 _center, double _radius, shared_ptr<Material> _mat) : center(_center), radius(_radius), mat(_mat) {}
 
 	AABB Bounds() const override {
 		return AABB(center - vec3(radius), center + vec3(radius));
@@ -82,7 +82,7 @@ public:
 private:
 	vec3 center;
 	double radius;
-	shared_ptr<material> mat;
+	shared_ptr<Material> mat;
 };
 
 class TriangleIntersection 
@@ -104,9 +104,9 @@ public:
 	int nTriangles, nVertices;
 	vector<int> vertexIndices;
 	vector<Vertex> vertices;
-	shared_ptr<material> mat;
+	shared_ptr<Material> mat;
 
-	TriangleMesh(const Transform& ObjectToWorld, vector<int> _vertexIndices, vector<Vertex> _vertices, shared_ptr<material> _mat) :
+	TriangleMesh(const Transform& ObjectToWorld, vector<int> _vertexIndices, vector<Vertex> _vertices, shared_ptr<Material> _mat) :
 		nTriangles(_vertexIndices.size() / 3), nVertices(_vertices.size()), vertexIndices(_vertexIndices), mat(_mat) {
 		vertices.resize(nVertices);
 		for (int i = 0; i < nVertices; ++i)
@@ -149,6 +149,7 @@ public:
 		hitRecord rec;
 		rec.t = ints->t;
 		rec.p = p0 + (p1 - p0) * ints->u + (p2 - p0) * ints->v;
+		rec.dpdu = p1 - p0;
 		rec.normal = mesh->vertices[v[0]].n
 			+ (mesh->vertices[v[1]].n - mesh->vertices[v[1]].n) * ints->u
 			+ (mesh->vertices[v[2]].n - mesh->vertices[v[1]].n) * ints->v;

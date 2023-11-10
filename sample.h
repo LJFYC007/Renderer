@@ -14,6 +14,7 @@ inline double randomDouble()
 }
 inline double randomDouble(double min, double max) { return min + randomDouble() * (max - min); }
 inline int randomInt(int min, int max) { return static_cast<int>(randomDouble(min, max + 1)); }
+inline vec2 vec2Random() { return vec2(randomDouble(), randomDouble()); }
 inline vec3 vec3Random() { return vec3(randomDouble(), randomDouble(), randomDouble()); }
 inline vec3 vec3Random(double min, double max) { return vec3(randomDouble(min, max), randomDouble(min, max), randomDouble(min, max)); }
 

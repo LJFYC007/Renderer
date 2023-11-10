@@ -6,6 +6,7 @@
 #include "spectrum.h"
 #include "color.h"
 #include "colorspace.h"
+#include "bsdf.h"
 
 #include <Windows.h>
 #include <omp.h>
@@ -15,8 +16,8 @@ static vec3 ans[3010][2210];
 class camera
 {
 public:
-	const int ImageWidth = 100;
-	const int ImageHeight = 100;
+	const int ImageWidth = 400;
+	const int ImageHeight = 400;
 	double fov = 40.0;
 	vec3 lookfrom = vec3(278.0, 278.0, -800.0);
 	vec3 lookat = vec3(278.0, 278.0, 0.0);
@@ -116,11 +117,19 @@ private:
 		std::optional<hitRecord> rec = World.Intersect(r, interval(0.001, infinity));
 		if (!rec)
 		{
-			return SampledSpectrum(0.0);
+			// return SampledSpectrum(0.0);
 			RGBAlbedoSpectrum spec(sRGB, RGBColor(background));
 			return spec.Sample(sample);
 		}
 
+		BSDF bsdf = rec->mat->GetBSDF(rec->normal, rec->dpdu, sample);
+		std::optional<BSDFSample> bs = bsdf.Sample_f(-r.rd, randomDouble(), vec2Random());
+		if (!bs) return SampledSpectrum(0.0);
+
+		SampledSpectrum beta = bs->f * std::abs(dot(bs->wi, rec->normal)) / bs->pdf;
+		return beta * renderRay(ray(rec->p, bs->wi), depth - 1, sample, World);
+
+		/*
 		ray scattered;
 		SampledSpectrum attenuation(0.0);
 		SampledSpectrum emissionColor = rec->mat->emitted(rec->u, rec->v, rec->p, sample);
@@ -129,6 +138,7 @@ private:
 
 		SampledSpectrum scatterColor = attenuation * renderRay(scattered, depth - 1, sample, World);
 		return emissionColor + scatterColor;
+		*/
 	}
 
 	vec3 defocusDiskSample(vec3 u, vec3 v)

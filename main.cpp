@@ -13,7 +13,7 @@
 
 primitiveList World;
 
-void addBox(vec3 a, vec3 b, vec3 c, vec3 n, shared_ptr<material> mat, Transform t = Transform())
+void addBox(vec3 a, vec3 b, vec3 c, vec3 n, shared_ptr<Material> mat, Transform t = Transform())
 {
 	vector<Vertex> vertices;
 	vector<int> vertexIndices;
@@ -26,7 +26,7 @@ void addBox(vec3 a, vec3 b, vec3 c, vec3 n, shared_ptr<material> mat, Transform 
     meshes.push_back(TriangleMesh(t, vertexIndices, vertices, mat));
 }
 
-void box(vec3 a, vec3 b, shared_ptr<material> mat, Transform t = Transform())
+void box(vec3 a, vec3 b, shared_ptr<Material> mat, Transform t = Transform())
 {
     auto dx = vec3(b[0] - a[0], 0, 0);
     auto dy = vec3(0, b[1] - a[1], 0);
@@ -87,14 +87,14 @@ int main()
     //Model("resources/cyborg.obj", material2);
     */
 
-    auto red = make_shared<lambertian>(vec3(.65, .05, .05));
-    auto white = make_shared<lambertian>(vec3(.73, .73, .73));
-    auto green = make_shared<lambertian>(vec3(.12, .45, .15));
-    auto light = make_shared<diffuseLight>(vec3(15, 15, 15));
+    auto red = make_shared<DiffuseMaterial>(vec3(.65, .05, .05));
+    auto white = make_shared<DiffuseMaterial>(vec3(.73, .73, .73));
+    auto green = make_shared<DiffuseMaterial>(vec3(.12, .45, .15));
+    // auto light = make_shared<diffuseLight>(vec3(15, 15, 15));
 
     addBox(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), vec3(-1, 0, 0), green);
     addBox(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), vec3(1, 0, 0), red);
-    addBox(point3(343, 554, 332), vec3(-130, 0, 0), vec3(0, 0, -105), vec3(0, -1, 0), light);
+    // addBox(point3(343, 554, 332), vec3(-130, 0, 0), vec3(0, 0, -105), vec3(0, -1, 0), light);
     addBox(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), vec3(0, 1, 0), white);
     addBox(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), vec3(0, -1, 0), white);
     addBox(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, -1), white);

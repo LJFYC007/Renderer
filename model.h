@@ -20,10 +20,10 @@ class Model
 public:
 	bool gammaCorrection;
 
-	Model(string const& path, shared_ptr<material> mat) { loadModel(path, mat); }
+	Model(string const& path, shared_ptr<Material> mat) { loadModel(path, mat); }
 
 private:
-	void loadModel(string const& path, shared_ptr<material> mat)
+	void loadModel(string const& path, shared_ptr<Material> mat)
 	{
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
@@ -35,7 +35,7 @@ private:
 		processNode(scene->mRootNode, scene, mat);
 	}
 
-	void processNode(aiNode* node, const aiScene* scene, shared_ptr<material> mat)
+	void processNode(aiNode* node, const aiScene* scene, shared_ptr<Material> mat)
 	{
 		for (unsigned int i = 0; i < node->mNumMeshes; ++i)
 		{
@@ -46,7 +46,7 @@ private:
 			processNode(node->mChildren[i], scene, mat);
 	}
 
-	TriangleMesh processMesh(aiMesh* mesh, const aiScene* scene, shared_ptr<material> mat)
+	TriangleMesh processMesh(aiMesh* mesh, const aiScene* scene, shared_ptr<Material> mat)
 	{
 		vector<Vertex> vertices;
 		vector<int> indices;
