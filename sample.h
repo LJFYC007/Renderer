@@ -18,17 +18,6 @@ inline vec2 vec2Random() { return vec2(randomDouble(), randomDouble()); }
 inline vec3 vec3Random() { return vec3(randomDouble(), randomDouble(), randomDouble()); }
 inline vec3 vec3Random(double min, double max) { return vec3(randomDouble(min, max), randomDouble(min, max), randomDouble(min, max)); }
 
-static vec3 randInSphere()
-{
-    while (true)
-    {
-        vec3 p = vec3Random(-1.0, 1.0);
-        if (p.length() < 1.0) return p;
-    }
-}
-
-static vec3 randUnitVector() { return normalize(randInSphere()); }
-
 static vec3 randInDisk()
 {
     while (true)
@@ -36,12 +25,6 @@ static vec3 randInDisk()
         vec3 p = vec3(randomDouble(-1, 1), randomDouble(-1, 1), 0);
         if (p.length() < 1.0) return p;
     }
-}
-
-static vec3 randInHemisphere(double seed, vec3 normal)
-{
-    vec3 p = normalize(randInSphere());
-    return dot(p, normal) > 0.0 ? p : -p;
 }
 
 static vec3 SampleUniformHemisphere(const vec2& u) {

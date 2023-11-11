@@ -2,6 +2,39 @@
 #include <cmath>
 #include <assert.h>
 
+// =========== others ============
+
+inline double Lerp(double t, double x, double y) { return (1 - t) * x + t * y; }
+inline double Clamp(double x, double a, double b) { if (x < a) return a; if (x > b) return b; return x; }
+
+// =========== complex ============
+
+class complex {
+public:
+	double re, im;
+	complex(double _re) : re(_re), im(0) {}
+	complex(double _re, double _im) : re(_re), im(_im) {}
+
+	double norm() const { return re * re + im * im; }
+	complex operator -() const { return { -re, -im }; }
+	complex operator +(complex x) const { return { re + x.re, im + x.im }; }
+	complex operator -(complex x) const { return { re - x.re, im - x.im }; }
+	complex operator *(complex x) const { return { re * x.re - im * x.im, re * x.im + im * x.re }; }
+	complex operator /(complex x) const {
+		double scale = 1.0 / norm();
+		return { scale * (re * x.re + im * x.im), scale * (im * x.re - re * x.im) };
+	}
+
+	complex sqrt() const {
+		double n = std::sqrt(norm());
+		if (n == 0) return { 0 };
+		double t1 = std::sqrt(0.5 * (n + std::abs(re)));
+		double t2 = 0.5 * im / t1;
+		if (re >= 0) return { t1, t2 };
+		return { std::abs(t2), im > 0 ? t1 : -t1 };
+	}
+};
+
 // =========== vector ============
 
 const double pi = 3.141592653589793238463;
@@ -86,19 +119,48 @@ inline vec3 operator *(const vec3& x, const vec3& y) { return vec3(x.a[0] * y.a[
 inline vec2 operator /(const vec2& x, const double y) { return vec2(x.a[0] / y, x.a[1] / y); }
 inline vec3 operator /(const vec3& x, const double y) { return vec3(x.a[0] / y, x.a[1] / y, x.a[2] / y); }
 
+inline double AbsCosTheta(vec3 x) { return std::abs(x.z()); }
 inline vec3 normalize(const vec3& x) { return x / x.length(); }
 inline double dot(const vec2& x, const vec2& y) { return x.a[0] * y.a[0] + x.a[1] * y.a[1]; }
 inline double dot(const vec3& x, const vec3& y) { return x.a[0] * y.a[0] + x.a[1] * y.a[1] + x.a[2] * y.a[2]; }
 inline vec3 cross(const vec3& x, const vec3& y) { return vec3(x.a[1] * y.a[2] - x.a[2] * y.a[1], x.a[2] * y.a[0] - x.a[0] * y.a[2], x.a[0] * y.a[1] - x.a[1] * y.a[0]); };
-inline vec3 reflect(const vec3& x, const vec3& y)
-{
-	return x - 2 * dot(x, y) * y;
+inline vec3 Reflect(vec3 x, vec3 y) { return -x + 2 * dot(x, y) * y; }
+inline bool Refract(vec3 wi, vec3 n, double eta, double* etap, vec3* wt) {
+	double cosThetai = dot(n, wi);
+	if (cosThetai < 0) { eta = 1 / eta; cosThetai = -cosThetai; n = -n; }
+
+	double sin2Thetai = std::fmax(0.0, 1 - cosThetai * cosThetai);
+	double sin2Thetat = sin2Thetai / (eta * eta);
+	if (sin2Thetat >= 1) return false;
+	double cosThetat = std::sqrt(1.0 - sin2Thetat);
+
+	*wt = -wi / eta + (cosThetai / eta - cosThetat) * n;
+	if (etap) *etap = eta;
+	return true;
 }
-inline vec3 refract(const vec3& uv, const vec3& n, double etai_over_etat) {
-	auto cos_theta = fmin(dot(-uv, n), 1.0);
-	vec3 r_out_perp = etai_over_etat * (uv + cos_theta * n);
-	vec3 r_out_parallel = -sqrt(fabs(1.0 - r_out_perp.lengthSquared())) * n;
-	return r_out_perp + r_out_parallel;
+inline double FrDielectric(double cosThetai, double eta) {
+	cosThetai = Clamp(cosThetai, -1, 1);
+	if (cosThetai < 0) { eta = 1 / eta; cosThetai = -cosThetai; }
+
+	double sin2Thetai = 1 - cosThetai * cosThetai;
+	double sin2Thetat = sin2Thetai / (eta * eta);
+	if (sin2Thetat >= 1) return 1.0;
+	double cosThetat = std::sqrt(1.0 - sin2Thetat);
+
+	double r_parl = (eta * cosThetai - cosThetat) / (eta * cosThetai + cosThetat);
+	double r_perp = (cosThetai - eta * cosThetat) / (cosThetai + eta * cosThetat);
+	return (r_parl * r_parl + r_perp * r_perp) / 2.0;
+}
+inline double FrComplex(double cosThetai, complex eta) {
+	cosThetai = Clamp(cosThetai, 0, 1);
+
+	double sin2Thetai = 1 - cosThetai * cosThetai;
+	complex sin2Thetat = complex(sin2Thetai) / (eta * eta);
+	complex cosThetat = (complex(1) - sin2Thetat).sqrt();
+
+	complex r_parl = (eta * cosThetai - cosThetat) / (eta * cosThetai + cosThetat);
+	complex r_perp = (complex(cosThetai) - eta * cosThetat) / (complex(cosThetai) + eta * cosThetat);
+	return (r_parl.norm() + r_perp.norm()) / 2;
 }
 
 // =========== matrix ============
@@ -283,13 +345,7 @@ private :
 	SquareMatrix<4> inv;
 };
 
-// =========== others ============
-
-inline double Lerp(double t, double x, double y)
-{
-	return (1 - t) * x + t * y;
-}
-
+// =========== frame ================
 class Frame {
 public : 
 	vec3 x, y, z;
@@ -299,3 +355,4 @@ public :
 	vec3 FromLocal(vec3 v) const { return v.x() * x + v.y() * y + v.z() * z; }
 };
 static Frame FromXZ(vec3 x, vec3 z) { return Frame(x, cross(x, z), z); }
+

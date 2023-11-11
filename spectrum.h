@@ -364,40 +364,35 @@ public:
 	}
 	double Average() const { return Sum() / NSpectrumSamples; }
 
-	SampledSpectrum operator +(const SampledSpectrum& y)
-	{
+	SampledSpectrum operator +(const SampledSpectrum& y) {
 		double v[NSpectrumSamples];
 		for (int i = 0; i < NSpectrumSamples; ++i)
 			v[i] = values[i] + y[i];
 		return SampledSpectrum(v);
 	}
 
-	SampledSpectrum operator *(const SampledSpectrum& y)
-	{
+	SampledSpectrum operator *(const SampledSpectrum& y) {
 		double v[NSpectrumSamples];
 		for (int i = 0; i < NSpectrumSamples; ++i)
 			v[i] = values[i] * y[i];
 		return SampledSpectrum(v);
 	}
 
-	SampledSpectrum operator /(const SampledSpectrum& y)
-	{
+	SampledSpectrum operator /(const SampledSpectrum& y) {
 		double v[NSpectrumSamples];
 		for (int i = 0; i < NSpectrumSamples; ++i)
 			v[i] = (y[i] == 0 ? 0 : values[i] / y[i]);
 		return SampledSpectrum(v);
 	}
 
-	SampledSpectrum operator /(double y)
-	{
+	SampledSpectrum operator /(double y) {
 		double v[NSpectrumSamples];
 		for (int i = 0; i < NSpectrumSamples; ++i)
 			v[i] = values[i] / y;
 		return SampledSpectrum(v);
 	}
 
-	SampledSpectrum operator /(const double y) const
-	{
+	SampledSpectrum operator /(const double y) const {
 		double v[NSpectrumSamples];
 		for (int i = 0; i < NSpectrumSamples; ++i)
 			v[i] = values[i] / y;

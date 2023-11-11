@@ -90,6 +90,8 @@ int main()
     auto red = make_shared<DiffuseMaterial>(vec3(.65, .05, .05));
     auto white = make_shared<DiffuseMaterial>(vec3(.73, .73, .73));
     auto green = make_shared<DiffuseMaterial>(vec3(.12, .45, .15));
+
+    auto metal = make_shared<ConductorMaterial>(0.0, 0.0, 2.0, 4.0);
     // auto light = make_shared<diffuseLight>(vec3(15, 15, 15));
 
     addBox(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), vec3(-1, 0, 0), green);
@@ -99,7 +101,7 @@ int main()
     addBox(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), vec3(0, -1, 0), white);
     addBox(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, -1), white);
 
-    box(vec3(130, 0, 65), vec3(295, 165, 230), white, Transform::RotateY(pi / 12));
+    box(vec3(130, 0, 65), vec3(295, 165, 230), metal, Transform::RotateY(pi / 8));
     box(vec3(265, 0, 295), vec3(430, 330, 460), white, Transform::RotateY(-pi / 50));
 
     for (int i = 0; i < meshes.size(); ++i)

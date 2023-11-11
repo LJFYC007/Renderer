@@ -27,3 +27,15 @@ private:
     shared_ptr<texture> albedo;
 };
 
+
+class ConductorMaterial : public Material {
+public:
+    ConductorMaterial(double _alphax, double _alphay, double _eta, double _k) : alphax(_alphax), alphay(_alphay), eta(_eta), k(_k) {}
+
+    BSDF GetBSDF(vec3 n, vec3 dpduv, const SampledWaveLengths& sample) const override {
+        return BSDF(n, dpduv, make_shared<ConductorBxDF>(TrowbridgeReitzDistribution(alphax, alphay), SampledSpectrum(eta), SampledSpectrum(k)));
+    }
+
+private:
+    double alphax, alphay, eta, k;
+};

@@ -107,7 +107,7 @@ public:
 	shared_ptr<Material> mat;
 
 	TriangleMesh(const Transform& ObjectToWorld, vector<int> _vertexIndices, vector<Vertex> _vertices, shared_ptr<Material> _mat) :
-		nTriangles(_vertexIndices.size() / 3), nVertices(_vertices.size()), vertexIndices(_vertexIndices), mat(_mat) {
+		nTriangles(static_cast<int>(_vertexIndices.size()) / 3), nVertices(static_cast<int>(_vertices.size())), vertexIndices(_vertexIndices), mat(_mat) {
 		vertices.resize(nVertices);
 		for (int i = 0; i < nVertices; ++i)
 		{
