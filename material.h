@@ -39,3 +39,15 @@ public:
 private:
     double alphax, alphay, eta, k;
 };
+
+class DielectrivMaterial : public Material {
+public:
+    DielectrivMaterial(double _alphax, double _alphay, double _eta) : alphax(_alphax), alphay(_alphay), eta(_eta) {}
+
+    BSDF GetBSDF(vec3 n, vec3 dpduv, const SampledWaveLengths& sample) const override {
+        return BSDF(n, dpduv, make_shared<DielectricBxDF>(TrowbridgeReitzDistribution(alphax, alphay), eta));
+    }
+
+private:
+    double alphax, alphay, eta;
+};
