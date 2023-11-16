@@ -119,6 +119,18 @@ inline vec3 operator *(const vec3& x, const vec3& y) { return vec3(x.a[0] * y.a[
 inline vec2 operator /(const vec2& x, const double y) { return vec2(x.a[0] / y, x.a[1] / y); }
 inline vec3 operator /(const vec3& x, const double y) { return vec3(x.a[0] / y, x.a[1] / y, x.a[2] / y); }
 
+inline double Sqr(double x) { return x * x; }
+
+inline double CosTheta(vec3 x) { return x.z(); }
+inline double Cos2Theta(vec3 x) { return x.z() * x.z(); }
+inline double Sin2Theta(vec3 x) { return std::fmax(0.0, 1 - Cos2Theta(x)); }
+inline double SinTheta(vec3 x) { return std::sqrt(Sin2Theta(x)); }
+inline double TanTheta(vec3 x) { return SinTheta(x) / CosTheta(x); }
+inline double Tan2Theta(vec3 x) { return Sin2Theta(x) / Cos2Theta(x); }
+
+inline double CosPhi(vec3 x) { double sinTheta = SinTheta(x); return (sinTheta == 0) ? 1 : Clamp(x.x() / sinTheta, -1, 1); }
+inline double sinPhi(vec3 x) { double sinTheta = SinTheta(x); return (sinTheta == 0) ? 0 : Clamp(x.y() / sinTheta, -1, 1); }
+
 inline double AbsCosTheta(vec3 x) { return std::abs(x.z()); }
 inline vec3 normalize(const vec3& x) { return x / x.length(); }
 inline double dot(const vec2& x, const vec2& y) { return x.a[0] * y.a[0] + x.a[1] * y.a[1]; }

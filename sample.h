@@ -65,3 +65,10 @@ static vec3 SampleCosineHemisphere(vec2 u)
 
 inline double CosineHemispherePDF(double cosTheta) { return cosTheta / pi; }
 
+static vec2 SampleUniformDiskPolar(vec2 u)
+{
+    double r = std::sqrt(u.x());
+    double theta = 2 * pi * u.y();
+    return vec2(r * std::cos(theta), r * std::sin(theta));
+}
+

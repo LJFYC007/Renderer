@@ -339,8 +339,7 @@ static const double CIE_Illum_D6500[107 * 2] = {
 
 class SampledSpectrum {
 public:
-	SampledSpectrum() = default;
-	SampledSpectrum(double c) {
+	SampledSpectrum(double c = 0) {
 		for (int i = 0; i < NSpectrumSamples; ++i)
 			values[i] = c;
 	}

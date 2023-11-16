@@ -10,7 +10,7 @@ public:
 	DiffuseBxDF(SampledSpectrum _R) : R(_R) {}
 
 	SampledSpectrum f(vec3 wo, vec3 wi) const override {
-		if (!SameHemisphere(wo, wi)) return SampledSpectrum(0.0);
+		if (!SameHemisphere(wo, wi)) return	{};
 		return R / pi;
 	}
 
@@ -48,6 +48,40 @@ public:
 	bool EffectivelySmooth() const { return std::fmax(alphax, alphay) < 1e-3f; }
 
 	double D(vec3 wm) const {
+		double tan2Theta = Tan2Theta(wm);
+		if (tan2Theta > 1e16 || tan2Theta < -1e16) return 0;
+		double cos4Theta = Sqr(Cos2Theta(wm));
+		if (cos4Theta < 1e-16) return 0;
+		double e = tan2Theta * (Sqr(CosPhi(wm) / alphax) + Sqr(CosPhi(wm) / alphay));
+		return 1.0 / (pi * alphax * alphay * cos4Theta * Sqr(1 + e));
+	}
+
+	double Lambda(vec3 w) const {
+		double tan2Theta = Tan2Theta(w);
+		if (tan2Theta > 1e16 || tan2Theta < -1e16) return 0;
+		double alpha2 = Sqr(CosPhi(w) * alphax) + Sqr(CosPhi(w) * alphay);
+		return (std::sqrt(1 + alpha2 * tan2Theta) - 1) / 2.0;
+	}
+
+	double G1(vec3 w) const { return 1 / (1 + Lambda(w)); }
+	double G(vec3 wo, vec3 wi) const { return 1.0 / (1 + Lambda(wo) + Lambda(wi)); }
+	double D(vec3 w, vec3 wm) const { return G1(w) / AbsCosTheta(w) * D(wm) * std::abs(dot(w, wm)); }
+	double PDF(vec3 w, vec3 wm) const { return D(w, wm); }
+
+	vec3 Sample_wm(vec3 w, vec2 u) const {
+		vec3 wh = normalize(vec3(alphax * w.x(), alphay * w.y(), w.z()));
+		if (wh.z() < 0) wh = -wh;
+		vec3 T1 = (wh.z() < 0.99999) ? normalize(cross(vec3(0, 0, 1), wh)) : vec3(1, 0, 0);
+		vec3 T2 = cross(wh, T1);
+		vec3 T3 = wh;
+
+		vec2 p = SampleUniformDiskPolar(u);
+		double h = std::sqrt(1 - p.x() * p.x());
+		p.a[1] = Lerp((1 + wh.z() / 2), h, p.y()); // ºÃÇÉÃîµÄ±ä»»
+
+		double pz = std::sqrt(std::fmax(0, 1 - p.lengthSquared()));
+		vec3 nh = p.x() * T1 + p.y() * T2 + pz * T3;
+		return normalize(vec3(alphax * nh.x(), alphay * nh.y(), std::fmax(1e-6, nh.z())));
 	}
 
 private:
@@ -63,29 +97,100 @@ public:
 	BxDFFlags Flags() const { return mfDistrib.EffectivelySmooth() ? BxDFFlags::SpecularReflection : BxDFFlags::GlossyReflection; }
 
 	SampledSpectrum f(vec3 wo, vec3 wi) const override {
-		if (!SameHemisphere(wo, wi)) return SampledSpectrum(0.0);
+		if (!SameHemisphere(wo, wi)) return {};
 		if (mfDistrib.EffectivelySmooth()) return {};
-		return {};
+
+		double cosThetao = AbsCosTheta(wo), cosThetai = AbsCosTheta(wi);
+		if (cosThetai == 0 || cosThetao == 0) return {};
+		vec3 wm = wi + wo;
+		if (wm.lengthSquared() == 0) return {};
+		wm = normalize(wm);
+		SampledSpectrum F = FrComplex(std::abs(dot(wo, wm)), eta, k);
+		return F * mfDistrib.D(wm) * mfDistrib.G(wo, wi) / (4 * cosThetai * cosThetao);
 	}
 
 	std::optional<BSDFSample> Sample_f(vec3 wo, double uc, vec2 u, BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const override {
 		if ((sampleFlags & BxDFReflTransFlags::Reflection) == BxDFReflTransFlags::Unset) return {};
 		if (mfDistrib.EffectivelySmooth()) {
-			vec3 wi(-wo.x(), -wo.y(), wo.z());
-			SampledSpectrum f = FrComplex(AbsCosTheta(wi), eta, k) / AbsCosTheta(wi);
+			vec3 wi = vec3(-wo.x(), -wo.y(), wo.z());
+			SampledSpectrum f = SampledSpectrum(FrComplex(AbsCosTheta(wi), eta, k) / AbsCosTheta(wi));
 			return BSDFSample(f, wi, 1, BxDFFlags::SpecularReflection);
 		}
-		return {};
+
+		vec3 wm = mfDistrib.Sample_wm(wo, u);
+		vec3 wi = Reflect(wo, wm);
+		if (!SameHemisphere(wo, wi)) return {};
+		double pdf = mfDistrib.PDF(wo, wm) / (4 * std::abs(dot(wo, wm)));
+		double cosThetao = AbsCosTheta(wo), cosThetai = AbsCosTheta(wi);
+		if (cosThetai == 0 || cosThetao == 0) return {};
+		SampledSpectrum F = FrComplex(std::abs(dot(wo, wm)), eta, k);
+		SampledSpectrum f = F * mfDistrib.D(wm) * mfDistrib.G(wo, wi) / (4 * cosThetai * cosThetao);
+		return BSDFSample(f, wi, pdf, BxDFFlags::GlossyReflection);
 	}
 
 	double PDF(vec3 wo, vec3 wi, BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const override {
 		if ((sampleFlags & BxDFReflTransFlags::Reflection) == BxDFReflTransFlags::Unset || !SameHemisphere(wo, wi)) return 0.0;
 		if (!SameHemisphere(wo, wi)) return 0.0;
 		if (mfDistrib.EffectivelySmooth()) return 0.0;
-		return 0.0;
+		vec3 wm = wo + wi;
+		if (wm.lengthSquared() == 0) return 0.0;
+		wm = normalize(wm);
+		if (dot(wm, vec3(0, 0, 1)) < 0) wm = -wm;
+		return mfDistrib.PDF(wo, wm) / (4 * std::abs(dot(wo, wm)));
 	}
 
 private:
 	TrowbridgeReitzDistribution mfDistrib;
 	SampledSpectrum eta, k;
+};
+
+class DielectricBxDF : public BxDF
+{
+public:
+	DielectricBxDF() = default;
+	DielectricBxDF(const TrowbridgeReitzDistribution& _mfDistrib, double _eta) : mfDistrib(_mfDistrib), eta(_eta) {}
+
+	BxDFFlags Flags() const { 
+		BxDFFlags flags = (eta == 1) ? BxDFFlags::Transmission : (BxDFFlags::Transmission | BxDFFlags::Reflection);
+		return flags | (mfDistrib.EffectivelySmooth() ? BxDFFlags::SpecularReflection : BxDFFlags::GlossyReflection); 
+	}
+
+	SampledSpectrum f(vec3 wo, vec3 wi) const override {
+		if (eta == 1 || mfDistrib.EffectivelySmooth()) return {};
+	}
+
+	std::optional<BSDFSample> Sample_f(vec3 wo, double uc, vec2 u, BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const override {
+		if (eta == 1 || mfDistrib.EffectivelySmooth()) {
+			double R = FrDielectric(CosTheta(wo), eta);
+
+			double pr = R, pt = 1 - R;
+			if ((sampleFlags & BxDFReflTransFlags::Reflection) == BxDFReflTransFlags::Unset) pr = 0;
+			if ((sampleFlags & BxDFReflTransFlags::Transmission) == BxDFReflTransFlags::Unset) pt = 0;
+			if (pr == 0 && pt == 0) return {};
+
+			if (uc < pr / (pr + pt)) {
+				vec3 wi = vec3(-wo.x(), -wo.y(), wo.z());
+				SampledSpectrum fr = SampledSpectrum(R / AbsCosTheta(wi));
+				return BSDFSample(fr, wi, pr / (pr + pt), BxDFFlags::SpecularReflection);
+			}
+			else {
+				vec3 wi; double etap;
+				if (!Refract(wo, vec3(0, 0, 1), eta, &etap, &wi)) return {};
+				SampledSpectrum ft = SampledSpectrum((1 - R) / AbsCosTheta(wi));
+				return BSDFSample(ft, wi, pt / (pr + pt), BxDFFlags::SpecularTransmission);
+			}
+		}
+		else {
+
+		}
+		return {};
+	}
+
+	double PDF(vec3 wo, vec3 wi, BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const override {
+		if (eta == 1 || mfDistrib.EffectivelySmooth()) return 0.0;
+	}
+
+private:
+	TrowbridgeReitzDistribution mfDistrib;
+	double eta;
 };
