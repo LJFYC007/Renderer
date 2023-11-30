@@ -41,6 +41,7 @@ public:
 			{
 				XYZ xyz(0.0);
 				SampledSpectrum spec(0.0);
+				vec3 col = vec3(0.0);
 				for (int oi = 0; oi < sqrtSPP; ++oi)
 					for (int oj = 0; oj < sqrtSPP; ++oj)
 					{
@@ -49,10 +50,9 @@ public:
 						vec3 ro = (defocusAngle <= 0.0) ? cameraCenter : cameraCenter + defocusDiskSample(defocusDiskU, defocusDiskV);
 						vec3 rd = pixel - ro;
 						SampledWaveLengths sample(randomDouble());
-						xyz = xyz + (Li(ray(ro, rd), maxDepth, sample, World, lights)).ToXYZ(sample);
+						RGBColor rgb = sRGB.ToRGB((Li(ray(ro, rd), maxDepth, sample, World, lights)).ToXYZ(sample));
+						col = col + vec3(rgb.r, rgb.g, rgb.b) / samplePixel;
 					}
-				RGBColor rgb = sRGB.ToRGB(xyz / (double)(samplePixel));
-				vec3 col = vec3(rgb.r, rgb.g, rgb.b);
 
 				if (col.a[0] < 0) col.a[0] = 0;
 				if (col.a[1] < 0) col.a[1] = 0;

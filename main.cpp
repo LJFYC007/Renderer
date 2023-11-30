@@ -112,7 +112,7 @@ int main()
 
 
     std::vector<shared_ptr<Light>> lights;
-    lights.push_back(make_shared<PointLight>(Transform::Translate(vec3(278, 550, 278)), SpectrasRGB, 60000.0));
+    lights.push_back(make_shared<PointLight>(Transform::Translate(vec3(278, 550, 278)), SpectrasRGB, 1.0));
 
     cam.render(bvhNode(make_shared<primitiveList>(World)), lights);
     return 0;
