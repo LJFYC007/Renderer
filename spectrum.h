@@ -377,6 +377,20 @@ public:
 		return SampledSpectrum(v);
 	}
 
+	SampledSpectrum operator *(double y) {
+		double v[NSpectrumSamples];
+		for (int i = 0; i < NSpectrumSamples; ++i)
+			v[i] = values[i] * y;
+		return SampledSpectrum(v);
+	}
+
+	SampledSpectrum operator *(const double y) const {
+		double v[NSpectrumSamples];
+		for (int i = 0; i < NSpectrumSamples; ++i)
+			v[i] = values[i] * y;
+		return SampledSpectrum(v);
+	}
+
 	SampledSpectrum operator /(const SampledSpectrum& y) {
 		double v[NSpectrumSamples];
 		for (int i = 0; i < NSpectrumSamples; ++i)

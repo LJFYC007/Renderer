@@ -163,6 +163,8 @@
     <ClInclude Include="colorspace.h" />
     <ClInclude Include="interaction.h" />
     <ClInclude Include="interval.h" />
+    <ClInclude Include="light.h" />
+    <ClInclude Include="lights.h" />
     <ClInclude Include="math.h" />
     <ClInclude Include="model.h" />
     <ClInclude Include="primitive.h" />

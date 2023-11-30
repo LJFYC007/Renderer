@@ -7,28 +7,30 @@
 #include "color.h"
 #include "colorspace.h"
 #include "bsdf.h"
+#include "lights.h"
 
 #include <Windows.h>
 #include <omp.h>
+#include <optional>
 
 static vec3 ans[3010][2210];
 
 class camera
 {
 public:
-	const int ImageWidth = 800;
-	const int ImageHeight = 800;
+	const int ImageWidth = 600;
+	const int ImageHeight = 600;
 	double fov = 40.0;
 	vec3 lookfrom = vec3(278.0, 278.0, -800.0);
 	vec3 lookat = vec3(278.0, 278.0, 0.0);
 	vec3 vup = vec3(0.0, 1.0, 0.0);
 	double defocusAngle = 0.0;
 	double focusDist = 10.0;
-	int samplePixel = 1024;
+	int samplePixel = 256;
 	int maxDepth = 10;
-	vec3 background = vec3(0.5);
+	vec3 background = vec3(0.05);
 
-	void render(const bvhNode& World)
+	void render(const bvhNode& World, const std::vector<shared_ptr<Light>> lights)
 	{
 		initialize();
 #pragma omp parallel for schedule(dynamic) 
@@ -47,7 +49,7 @@ public:
 						vec3 ro = (defocusAngle <= 0.0) ? cameraCenter : cameraCenter + defocusDiskSample(defocusDiskU, defocusDiskV);
 						vec3 rd = pixel - ro;
 						SampledWaveLengths sample(randomDouble());
-						xyz = xyz + (renderRay(ray(ro, rd), maxDepth, sample, World)).ToXYZ(sample);
+						xyz = xyz + (Li(ray(ro, rd), maxDepth, sample, World, lights)).ToXYZ(sample);
 					}
 				RGBColor rgb = sRGB.ToRGB(xyz / (double)(samplePixel));
 				vec3 col = vec3(rgb.r, rgb.g, rgb.b);
@@ -109,36 +111,46 @@ private:
 		defocusDiskV = v * defocusRadius;
 	}
 
-	SampledSpectrum renderRay(ray r, const int depth, const SampledWaveLengths& sample, const bvhNode& World)
-	{
-		if (depth <= 0) return SampledSpectrum(0.0);
-		r.rd = normalize(r.rd);
+	bool Unoccluded(const bvhNode& World, const vec3& p0, const vec3& p1) const {
+		ray r(p0, p1 - p0);
+		std::optional<hitRecord> rec = World.Intersect(r, interval(0.001, 0.999));
+		return !rec;
+	}
 
-		std::optional<hitRecord> rec = World.Intersect(r, interval(0.001, infinity));
-		if (!rec)
-		{
-			// return SampledSpectrum(0.0);
-			RGBAlbedoSpectrum spec(sRGB, RGBColor(background));
-			return spec.Sample(sample);
+	SampledSpectrum Li(ray r, const int maxDepth, SampledWaveLengths& lambda, const bvhNode& World, const std::vector<shared_ptr<Light>> lights) {
+		SampledSpectrum L(0.0), beta(1.0);
+		int depth = 0;
+		while (beta) {
+			r.rd = normalize(r.rd);
+			std::optional<hitRecord> rec = World.Intersect(r, interval(0.001, infinity));
+			if (!rec)
+			{
+				RGBAlbedoSpectrum spec(sRGB, RGBColor(background));
+				L = L + beta * spec.Sample(lambda);
+				break;
+			}
+
+			if (depth++ == maxDepth) break;
+			BSDF bsdf = rec->mat->GetBSDF(rec->normal, rec->dpdu, lambda);
+
+			vec3 wo = -r.rd;
+			for (auto light : lights) {
+				vec2 u = vec2Random();
+				std::optional<LightLiSample> ls = light->SampleLi(LightSampleContext(rec.value()), u, lambda);
+				if (ls && ls->L && ls->pdf > 0.0) {
+					vec3 wi = ls->wi;
+					SampledSpectrum f = bsdf.f(wo, wi) * std::abs(dot(wi, rec->normal));
+					if ( f && Unoccluded(World, rec->p, ls->p))
+						L = L + beta * f * ls->L / ls->pdf;
+				}
+			}
+
+			std::optional<BSDFSample> bs = bsdf.Sample_f(-r.rd, randomDouble(), vec2Random());
+			if (!bs) break;
+			beta = beta * bs->f * std::abs(dot(bs->wi, rec->normal)) / bs->pdf;
+			r = ray(rec->p, bs->wi);
 		}
-
-		BSDF bsdf = rec->mat->GetBSDF(rec->normal, rec->dpdu, sample);
-		std::optional<BSDFSample> bs = bsdf.Sample_f(-r.rd, randomDouble(), vec2Random());
-		if (!bs) return SampledSpectrum(0.0);
-
-		SampledSpectrum beta = bs->f * std::abs(dot(bs->wi, rec->normal)) / bs->pdf;
-		return beta * renderRay(ray(rec->p, bs->wi), depth - 1, sample, World);
-
-		/*
-		ray scattered;
-		SampledSpectrum attenuation(0.0);
-		SampledSpectrum emissionColor = rec->mat->emitted(rec->u, rec->v, rec->p, sample);
-		if (!rec->mat->scatter(r, rec.value(), sample, attenuation, scattered))
-			return emissionColor;
-
-		SampledSpectrum scatterColor = attenuation * renderRay(scattered, depth - 1, sample, World);
-		return emissionColor + scatterColor;
-		*/
+		return L;
 	}
 
 	vec3 defocusDiskSample(vec3 u, vec3 v)
