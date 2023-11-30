@@ -18,15 +18,15 @@ static vec3 ans[3010][2210];
 class camera
 {
 public:
-	const int ImageWidth = 600;
-	const int ImageHeight = 600;
+	const int ImageWidth = 200;
+	const int ImageHeight = 200;
 	double fov = 40.0;
 	vec3 lookfrom = vec3(278.0, 278.0, -800.0);
 	vec3 lookat = vec3(278.0, 278.0, 0.0);
 	vec3 vup = vec3(0.0, 1.0, 0.0);
 	double defocusAngle = 0.0;
 	double focusDist = 10.0;
-	int samplePixel = 256;
+	int samplePixel = 64;
 	int maxDepth = 10;
 	vec3 background = vec3(0.05);
 
@@ -140,8 +140,13 @@ private:
 				if (ls && ls->L && ls->pdf > 0.0) {
 					vec3 wi = ls->wi;
 					SampledSpectrum f = bsdf.f(wo, wi) * std::abs(dot(wi, rec->normal));
+					for (int i = 0; i < NSpectrumSamples; ++i)
+						assert((beta * f * ls->L / ls -> pdf)[i] <= 10.0);
 					if ( f && Unoccluded(World, rec->p, ls->p))
-						L = L + beta * f * ls->L / ls->pdf;
+					{
+						L = L + beta * f * light->Phi(lambda) / 4 / pi;
+						// L = L + beta * f * ls->L / ls->pdf;
+					}
 				}
 			}
 
@@ -149,6 +154,7 @@ private:
 			if (!bs) break;
 			beta = beta * bs->f * std::abs(dot(bs->wi, rec->normal)) / bs->pdf;
 			r = ray(rec->p, bs->wi);
+			if (depth == 2) break;
 		}
 		return L;
 	}

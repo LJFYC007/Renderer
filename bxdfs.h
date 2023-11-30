@@ -52,14 +52,14 @@ public:
 		if (tan2Theta > 1e16 || tan2Theta < -1e16) return 0;
 		double cos4Theta = Sqr(Cos2Theta(wm));
 		if (cos4Theta < 1e-16) return 0;
-		double e = tan2Theta * (Sqr(CosPhi(wm) / alphax) + Sqr(CosPhi(wm) / alphay));
+		double e = tan2Theta * (Sqr(CosPhi(wm) / alphax) + Sqr(SinPhi(wm) / alphay));
 		return 1.0 / (pi * alphax * alphay * cos4Theta * Sqr(1 + e));
 	}
 
 	double Lambda(vec3 w) const {
 		double tan2Theta = Tan2Theta(w);
 		if (tan2Theta > 1e16 || tan2Theta < -1e16) return 0;
-		double alpha2 = Sqr(CosPhi(w) * alphax) + Sqr(CosPhi(w) * alphay);
+		double alpha2 = Sqr(CosPhi(w) * alphax) + Sqr(SinPhi(w) * alphay);
 		return (std::sqrt(1 + alpha2 * tan2Theta) - 1) / 2.0;
 	}
 

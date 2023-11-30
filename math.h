@@ -12,6 +12,7 @@ inline double Clamp(double x, double a, double b) { if (x < a) return a; if (x >
 class complex {
 public:
 	double re, im;
+	complex() : re(0), im(0) {}
 	complex(double _re) : re(_re), im(0) {}
 	complex(double _re, double _im) : re(_re), im(_im) {}
 
@@ -21,7 +22,7 @@ public:
 	complex operator -(complex x) const { return { re - x.re, im - x.im }; }
 	complex operator *(complex x) const { return { re * x.re - im * x.im, re * x.im + im * x.re }; }
 	complex operator /(complex x) const {
-		double scale = 1.0 / norm();
+		double scale = 1.0 / x.norm();
 		return { scale * (re * x.re + im * x.im), scale * (im * x.re - re * x.im) };
 	}
 
@@ -129,7 +130,7 @@ inline double TanTheta(vec3 x) { return SinTheta(x) / CosTheta(x); }
 inline double Tan2Theta(vec3 x) { return Sin2Theta(x) / Cos2Theta(x); }
 
 inline double CosPhi(vec3 x) { double sinTheta = SinTheta(x); return (sinTheta == 0) ? 1 : Clamp(x.x() / sinTheta, -1, 1); }
-inline double sinPhi(vec3 x) { double sinTheta = SinTheta(x); return (sinTheta == 0) ? 0 : Clamp(x.y() / sinTheta, -1, 1); }
+inline double SinPhi(vec3 x) { double sinTheta = SinTheta(x); return (sinTheta == 0) ? 0 : Clamp(x.y() / sinTheta, -1, 1); }
 
 inline double AbsCosTheta(vec3 x) { return std::abs(x.z()); }
 inline vec3 normalize(const vec3& x) { return x / x.length(); }
@@ -170,7 +171,7 @@ inline double FrComplex(double cosThetai, complex eta) {
 	complex sin2Thetat = complex(sin2Thetai) / (eta * eta);
 	complex cosThetat = (complex(1) - sin2Thetat).sqrt();
 
-	complex r_parl = (eta * cosThetai - cosThetat) / (eta * cosThetai + cosThetat);
+	complex r_parl = (eta * complex(cosThetai) - cosThetat) / (eta * complex(cosThetai) + cosThetat);
 	complex r_perp = (complex(cosThetai) - eta * cosThetat) / (complex(cosThetai) + eta * cosThetat);
 	return (r_parl.norm() + r_perp.norm()) / 2;
 }
