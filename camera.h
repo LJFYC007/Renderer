@@ -143,10 +143,7 @@ private:
 					for (int i = 0; i < NSpectrumSamples; ++i)
 						assert((beta * f * ls->L / ls -> pdf)[i] <= 10.0);
 					if ( f && Unoccluded(World, rec->p, ls->p))
-					{
-						L = L + beta * f * light->Phi(lambda) / 4 / pi;
-						// L = L + beta * f * ls->L / ls->pdf;
-					}
+						L = L + beta * f * ls->L / ls->pdf;
 				}
 			}
 
@@ -154,7 +151,6 @@ private:
 			if (!bs) break;
 			beta = beta * bs->f * std::abs(dot(bs->wi, rec->normal)) / bs->pdf;
 			r = ray(rec->p, bs->wi);
-			if (depth == 2) break;
 		}
 		return L;
 	}
