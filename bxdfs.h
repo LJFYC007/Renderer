@@ -63,7 +63,7 @@ public:
 		return (std::sqrt(1 + alpha2 * tan2Theta) - 1) / 2.0;
 	}
 
-	double G1(vec3 w) const { return 1 / (1 + Lambda(w)); }
+	double G1(vec3 w) const { return 1.0 / (1 + Lambda(w)); }
 	double G(vec3 wo, vec3 wi) const { return 1.0 / (1 + Lambda(wo) + Lambda(wi)); }
 	double D(vec3 w, vec3 wm) const { return G1(w) / AbsCosTheta(w) * D(wm) * std::abs(dot(w, wm)); }
 	double PDF(vec3 w, vec3 wm) const { return D(w, wm); }
@@ -152,23 +152,23 @@ public:
 
 	BxDFFlags Flags() const { 
 		BxDFFlags flags = (eta == 1) ? BxDFFlags::Transmission : (BxDFFlags::Transmission | BxDFFlags::Reflection);
-		return flags | (mfDistrib.EffectivelySmooth() ? BxDFFlags::SpecularReflection : BxDFFlags::GlossyReflection); 
+		return flags | (mfDistrib.EffectivelySmooth() ? BxDFFlags::Specular : BxDFFlags::Glossy); 
 	}
 
 	SampledSpectrum f(vec3 wo, vec3 wi) const override {
-		if (eta == 1 || mfDistrib.EffectivelySmooth()) return {};
+		if (eta == 1 || mfDistrib.EffectivelySmooth()) return SampledSpectrum(0.0);
 
 		double cosThetao = CosTheta(wo), cosThetai = CosTheta(wi);
-		if (cosThetai == 0 || cosThetao == 0) return 0.0;
+		if (cosThetai == 0 || cosThetao == 0) return SampledSpectrum(0.0);
 		bool reflect = cosThetai * cosThetao > 0;
 		double etap = 1;
 		if (!reflect) etap = cosThetao > 0 ? eta : (1 / eta);
 
 		vec3 wm = wi * etap + wo;
-		if (wm.lengthSquared() == 0) return 0.0;
+		if (wm.lengthSquared() == 0.0 ) return SampledSpectrum(0.0);
 		wm = normalize(wm);
 		if (dot(wm, vec3(0, 0, 1)) < 0) wm = -wm;
-		if (dot(wm, wi) * cosThetai < 0 || dot(wm, wo) * cosThetao < 0) return 0.0;
+		if (dot(wm, wi) * cosThetai < 0 || dot(wm, wo) * cosThetao < 0) return SampledSpectrum(0.0);
 
 		double F = FrDielectric(dot(wo, wm), eta);
 		if (reflect)
@@ -212,13 +212,13 @@ public:
 			vec3 wi = Reflect(wo, wm);
 			if (!SameHemisphere(wo, wi)) return {};
 			double pdf =  mfDistrib.PDF(wo, wm) / (4 * std::abs(dot(wo, wm))) * pr / (pr + pt);
-			SampledSpectrum f = SampledSpectrum(mfDistrib.D(wm) * mfDistrib.G(wo, wi) * R / std::abs(4 * CosTheta(wi) * CosTheta(wo)));
+			SampledSpectrum f = SampledSpectrum(mfDistrib.D(wm) * mfDistrib.G(wo, wi) * R / (4 * CosTheta(wi) * CosTheta(wo)));
 			return BSDFSample(f, wi, pdf, BxDFFlags::GlossyReflection);
 		}
 		else {
 			double etap; vec3 wi;
-			if (!Refract(wo, normalize(wm), eta, &etap, &wi)) return {};
-			if (SameHemisphere(wo, wi)) return {};
+			if (!Refract(wo, wm, eta, &etap, &wi)) return {};
+			if (SameHemisphere(wo, wi) || wi.z() == 0) return {};
 			double denom = Sqr(dot(wi, wm) + dot(wo, wm) / etap);
 			double pdf = mfDistrib.PDF(wo, wm) * std::abs(dot(wi, wm)) / denom * pt / (pr + pt);
 			SampledSpectrum f = SampledSpectrum(mfDistrib.D(wm) * mfDistrib.G(wo, wi) * (1 - R) * std::abs(dot(wi, wm) * dot(wo, wm) / (CosTheta(wi) * CosTheta(wo) * denom)));
@@ -236,7 +236,7 @@ public:
 		if (!reflect) etap = cosThetao > 0 ? eta : (1 / eta);
 
 		vec3 wm = wi * etap + wo;
-		if (wm.lengthSquared() == 0) return 0.0;
+		if (wm.lengthSquared() == 0.0) return 0.0;
 		wm = normalize(wm);
 		if (dot(wm, vec3(0, 0, 1)) < 0) wm = -wm;
 		if (dot(wm, wi) * cosThetai < 0 || dot(wm, wo) * cosThetao < 0) return 0.0;
@@ -245,7 +245,7 @@ public:
 		double pr = R, pt = 1 - R;
 		if ((sampleFlags & BxDFReflTransFlags::Reflection) == BxDFReflTransFlags::Unset) pr = 0;
 		if ((sampleFlags & BxDFReflTransFlags::Transmission) == BxDFReflTransFlags::Unset) pt = 0;
-		if (pr == 0 && pt == 0) return {};
+		if (pr == 0 && pt == 0) return 0.0;
 
 		if (reflect) 
 			return mfDistrib.PDF(wo, wm) / (4 * std::abs(dot(wo, wm))) * pr / (pr + pt);
