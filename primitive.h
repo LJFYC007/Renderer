@@ -26,11 +26,9 @@ public :
 	void add(shared_ptr<Shape> object) { objects.push_back(object); box = AABB(box, object->Bounds()); }
 	AABB Bounds() const override { return box; }
 
-	std::optional<hitRecord> Intersect(const ray& r, interval t) const override
-	{
-		assert(-1);
-		return {};
-	}
+	std::optional<hitRecord> Intersect(const ray& r, interval t) const override { assert(-1); return {}; }
+	double Area() const override { assert(-1); return 0; }
+	std::optional<ShapeSample> Sample(vec2 uv) const override { return {}; }
 };
 
 class bvhNode : public Shape
@@ -73,6 +71,8 @@ public:
 	}
 
 	AABB Bounds() const override { return box; }
+	double Area() const override { assert(-1); return 0; }
+	std::optional<ShapeSample> Sample(vec2 uv) const override { return {}; }
 
 private:
 	static bool box_compare(const shared_ptr<Shape> a, const shared_ptr<Shape> b, int axis_index) {

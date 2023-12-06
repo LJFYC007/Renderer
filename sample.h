@@ -72,3 +72,10 @@ static vec2 SampleUniformDiskPolar(vec2 u)
     return vec2(r * std::cos(theta), r * std::sin(theta));
 }
 
+static vec3 SampleUniformTriangle(vec2 u)
+{
+    double b0, b1;
+    if (u.x() < u.y()) { b0 = u.x() / 2; b1 = u.y() - b0; }
+    else { b1 = u.y() / 2; b0 = u.x() - b1; }
+    return vec3(b0, b1, 1 - b0 - b1);
+}

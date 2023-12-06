@@ -369,3 +369,5 @@ public :
 };
 static Frame FromXZ(vec3 x, vec3 z) { return Frame(x, cross(x, z), z); }
 
+// =========== others ============
+inline vec3 FaceForward(vec3 n, vec3 v) { return (dot(n, v) < 0) ? -n : n; }

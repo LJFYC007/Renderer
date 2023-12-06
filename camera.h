@@ -140,7 +140,7 @@ private:
 				if (ls && ls->L && ls->pdf > 0.0) {
 					vec3 wi = ls->wi;
 					SampledSpectrum f = bsdf.f(wo, wi) * std::abs(dot(wi, rec->normal));
-					if (f && Unoccluded(World, rec->p, ls->p))
+					if (f && Unoccluded(World, rec->p, ls->pLight.p))
 						L = L + beta * f * ls->L / ls->pdf;
 				}
 			}

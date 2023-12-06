@@ -12,7 +12,7 @@ public :
 		vec3 p = renderFromLight(vec3(0.0));
 		vec3 wi = normalize(p - sample.p);
 		SampledSpectrum Li = intensity.Sample(lambda) * scale; // TODO: fix this, need add / (p - sample.p).lengthSquared();
-		return LightLiSample(Li, wi, 1.0, p);
+		return LightLiSample(Li, wi, 1.0, Interaction(p));
 	}
 
 	double PDF_Li(LightSampleContext sample, vec3 wi, bool allowIncompletePDF = false) const override {
@@ -37,7 +37,7 @@ public:
 		vec3 wi = normalize(renderFromLight(vec3(0, 0, 1)));
 		vec3 pOutside = sample.p + wi * 1000000.0; // TODO: fix this, need to multiply R
 		SampledSpectrum Li = intensity.Sample(lambda) * scale;
-		return LightLiSample(Li, wi, 1.0, pOutside);
+		return LightLiSample(Li, wi, 1.0, Interaction(pOutside));
 	}
 
 	double PDF_Li(LightSampleContext sample, vec3 wi, bool allowIncompletePDF = false) const override {
@@ -50,4 +50,11 @@ public:
 private:
 	DenselySampledSpectrum intensity;
 	double scale;
+};
+
+class AreaLight : public Light
+{
+public: 
+private: 
+
 };

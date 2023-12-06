@@ -29,13 +29,21 @@ public:
 	vec3 p;
 };
 
+class ShapeSample 
+{
+public: 
+	Interaction intr;
+	double pdf;
+};
+
 class Shape
 {
 public : 
 	virtual AABB Bounds() const = 0;
 	virtual std::optional<hitRecord> Intersect(const ray& r, interval t) const = 0;
-	//virtual bool IntersectP(const ray& r, interval t) const = 0;
-	// virtual double Area() const = 0;
+	// virtual bool IntersectP(const ray& r, interval t) const = 0;
+	virtual double Area() const = 0;
+	virtual std::optional<ShapeSample> Sample(vec2 u) const = 0;
 };
 
 class Sphere : public Shape
@@ -77,6 +85,14 @@ public:
 			if (!t.surrounds(root)) return {};
 		}
 		return QuadricIntersection{ root, r.at(root) };
+	}
+
+	double Area() const override {
+		return 4.0 * pi * radius * radius;
+	}
+
+	std::optional<ShapeSample> Sample(vec2 uv) const override {
+		return {};
 	}
 
 private:
@@ -130,18 +146,14 @@ public:
 	AABB Bounds() const override {
 		const TriangleMesh* mesh = GetMesh();
 		const int* v = &mesh->vertexIndices[3 * triIndex];
-		vec3 p0 = mesh->vertices[v[0]].p;
-		vec3 p1 = mesh->vertices[v[1]].p;
-		vec3 p2 = mesh->vertices[v[2]].p;
+		vec3 p0 = mesh->vertices[v[0]].p, p1 = mesh->vertices[v[1]].p, p2 = mesh->vertices[v[2]].p;
 		return AABB(p0, p1,p2);
 	}
 
 	std::optional<hitRecord> Intersect(const ray& r, interval t) const override {
 		const TriangleMesh* mesh = GetMesh();
 		const int* v = &mesh->vertexIndices[3 * triIndex];
-		vec3 p0 = mesh->vertices[v[0]].p;
-		vec3 p1 = mesh->vertices[v[1]].p;
-		vec3 p2 = mesh->vertices[v[2]].p;
+		vec3 p0 = mesh->vertices[v[0]].p, p1 = mesh->vertices[v[1]].p, p2 = mesh->vertices[v[2]].p;
 
 		std::optional<TriangleIntersection> ints = BasicIntersect(r, t, p0, p1, p2);
 		if (!ints) return {};
@@ -172,6 +184,28 @@ public:
 		if (T >= 0 && U >= 0 && V >= 0 && (1 - U - V) >= 0)
 			return TriangleIntersection{ T, U, V };
 		return {};
+	}
+	
+	double Area() const override {
+		const TriangleMesh* mesh = GetMesh();
+		const int* v = &mesh->vertexIndices[3 * triIndex];
+		vec3 p0 = mesh->vertices[v[0]].p, p1 = mesh->vertices[v[1]].p, p2 = mesh->vertices[v[2]].p;
+		return 0.5 * cross(p1 - p0, p2 - p0).length();
+	}
+
+	std::optional<ShapeSample> Sample(vec2 uv) const override { 
+		const TriangleMesh* mesh = GetMesh();
+		const int* v = &mesh->vertexIndices[3 * triIndex];
+		vec3 p0 = mesh->vertices[v[0]].p, p1 = mesh->vertices[v[1]].p, p2 = mesh->vertices[v[2]].p;
+
+		vec3 b = SampleUniformTriangle(uv);
+		vec3 p = b.x() * p0 + b.y() * p1 + b.z() * p2;
+
+		vec3 n = normalize(cross(p1 - p0, p2 - p0)); 
+		vec3 ns = b.x() * mesh->vertices[v[0]].n + b.y() * mesh->vertices[v[1]].n + b.z() * mesh->vertices[v[2]].n;
+		n = FaceForward(n, ns);
+		vec2 uvSample = b.x() * mesh->vertices[v[0]].uv + b.y() * mesh->vertices[v[1]].uv + b.z() * mesh->vertices[v[2]].uv;
+		return ShapeSample{Interaction(p, n, uvSample), 1 / Area()};
 	}
 
 private:

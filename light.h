@@ -3,6 +3,7 @@
 #include "shape.h"
 #include "spectrum.h"
 #include "ray.h"
+#include "interaction.h"
 
 #include <optional>
 
@@ -24,8 +25,8 @@ public :
 	SampledSpectrum L;
 	vec3 wi;
 	double pdf;
-	vec3 p;
-	LightLiSample(SampledSpectrum _L, vec3 _wi, double _pdf, vec3 _p) : L(_L), wi(_wi), pdf(_pdf), p(_p) {}
+	Interaction pLight;
+	LightLiSample(SampledSpectrum _L, vec3 _wi, double _pdf, const Interaction &_pLight) : L(_L), wi(_wi), pdf(_pdf), pLight(_pLight) {}
 };
 
 class Light
