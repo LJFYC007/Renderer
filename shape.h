@@ -12,9 +12,8 @@ using std::vector;
 
 class material;
 
-class hitRecord
+struct hitRecord
 {
-public : 
 	point3 p;
 	vec3 normal, dpdu;
 	double t, u, v;
@@ -22,18 +21,23 @@ public :
 	shared_ptr<Material> mat;
 };
 
-class QuadricIntersection
+struct QuadricIntersection
 {
-public:
 	double tHit;
 	vec3 p;
 };
 
-class ShapeSample 
+struct ShapeSample
 {
-public: 
 	Interaction intr;
 	double pdf;
+};
+
+struct ShapeSampleContext
+{
+	ShapeSampleContext(vec3 _p, vec3 _n, vec3 _ns, double _t) : p(_p), n(_n), ns(_ns), t(_t) {}
+	vec3 p, n, ns;
+	double t;
 };
 
 class Shape
@@ -44,6 +48,15 @@ public :
 	// virtual bool IntersectP(const ray& r, interval t) const = 0;
 	virtual double Area() const = 0;
 	virtual std::optional<ShapeSample> Sample(vec2 u) const = 0;
+	virtual double PDF(ShapeSampleContext sample) const {
+		return 1.0 / Area();
+	}
+	virtual std::optional<ShapeSample> Sample(ShapeSampleContext sample, vec2 u) const {
+		return {};
+	}
+	virtual double PDF(ShapeSampleContext sample, vec3 wi) const {
+		return 0.0;
+	}
 };
 
 class Sphere : public Shape
@@ -206,6 +219,26 @@ public:
 		n = FaceForward(n, ns);
 		vec2 uvSample = b.x() * mesh->vertices[v[0]].uv + b.y() * mesh->vertices[v[1]].uv + b.z() * mesh->vertices[v[2]].uv;
 		return ShapeSample{Interaction(p, n, uvSample), 1 / Area()};
+	}
+
+	std::optional<ShapeSample> Sample(ShapeSampleContext sample, vec2 u) const override {
+		std::optional<ShapeSample> ss = Sample(u);
+		if (!ss) return {};
+		vec3 wi = ss->intr.p - sample.p;
+		if (wi.lengthSquared() == 0.0) return ShapeSample{ ss->intr, 0.0 };
+		wi = normalize(wi);
+		double pdf = ss->pdf * (sample.p - ss->intr.p).lengthSquared() / std::abs(dot(ss->intr.n, -wi));
+		if (std::isinf(pdf)) pdf = 0.0;
+		return ShapeSample{ ss->intr, pdf };
+	}
+
+	double PDF(ShapeSampleContext sample, vec3 wi) const override {
+		ray r(sample.p, wi);
+		std::optional<hitRecord> rec = Intersect(r, interval(0.001, infinity));
+		if (!rec) return 0.0;
+		double pdf = (sample.p - rec->p).lengthSquared() / std::abs(dot(rec->normal, -wi)) / Area();
+		if (std::isinf(pdf)) pdf = 0.0;
+		return pdf;
 	}
 
 private:

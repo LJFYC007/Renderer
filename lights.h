@@ -1,6 +1,7 @@
 #pragma once
 #include "light.h"
 #include "math.h"
+#include "shape.h"
 
 class PointLight : public Light
 {
@@ -52,9 +53,37 @@ private:
 	double scale;
 };
 
-class AreaLight : public Light
+class DiffuseAreaLight : public Light
 {
 public: 
-private: 
+	DiffuseAreaLight(const Transform& _renderFromLight, const Spectrum& _intensity, double _scale, shared_ptr<Shape> _shape) :
+		Light(LightType::Area, _renderFromLight), intensity(_intensity), scale(_scale), shape(_shape), area(_shape->Area()) {}
 
+	SampledSpectrum L(vec3 p, vec3 n, vec2 uv, vec3 w, const SampledWaveLengths& lambda) const override {
+		return intensity.Sample(lambda) * scale;
+	}
+
+	std::optional<LightLiSample> SampleLi(LightSampleContext sample, vec2 u, SampledWaveLengths lambda, bool allowIncompletePDF = false) const override {
+		ShapeSampleContext shapeSample(sample.p, sample.n, sample.ns, 0);
+		std::optional<ShapeSample> ss = shape->Sample(shapeSample, u);
+		if(!ss || ss->pdf == 0.0 || (ss->intr.p - sample.p).lengthSquared() == 0.0) return {};
+
+		vec3 wi = normalize(ss->intr.p - sample.p);
+		SampledSpectrum Li = L(ss->intr.p, ss->intr.n, ss->intr.uv, -wi, lambda);
+		if (!Li) return {};
+		return LightLiSample(Li, wi, ss->pdf, ss->intr);
+	}
+
+	double PDF_Li(LightSampleContext sample, vec3 wi, bool allowIncompletePDF = false) const override {
+		ShapeSampleContext shapeSample(sample.p, sample.n, sample.ns, 0);
+		return shape->PDF(shapeSample, wi);
+	}
+
+	SampledSpectrum Phi(SampledWaveLengths lambda) const override {
+		return intensity.Sample(lambda) * scale * pi * area;
+	}
+private: 
+	DenselySampledSpectrum intensity;
+	double scale, area;
+	shared_ptr<Shape> shape;
 };

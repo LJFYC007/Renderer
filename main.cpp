@@ -98,21 +98,29 @@ int main()
 
     addBox(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), vec3(-1, 0, 0), green);
     addBox(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), vec3(1, 0, 0), red);
-    // addBox(point3(343, 554, 332), vec3(-130, 0, 0), vec3(0, 0, -105), vec3(0, -1, 0), light);
     addBox(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), vec3(0, 1, 0), white);
     addBox(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), vec3(0, -1, 0), white);
     addBox(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, -1), white);
 
     box(vec3(130, 0, 65), vec3(295, 165, 230), white, Transform::RotateY(pi / 8));
     box(vec3(265, 0, 295), vec3(430, 330, 460), metal, Transform::RotateY(-pi / 50));
+    
 
     for (int i = 0; i < meshes.size(); ++i)
         for (int j = 0; j < meshes[i].nTriangles; ++j)
             World.add(make_shared<Triangle>(i, j));
 
+    addBox(point3(343, 554, 332), vec3(-130, 0, 0), vec3(0, 0, -105), vec3(0, -1, 0), white);
 
     std::vector<shared_ptr<Light>> lights;
-    lights.push_back(make_shared<PointLight>(Transform::Translate(vec3(278, 550, 278)), SpectrasRGB, 1.0));
+    {
+        int i = meshes.size() - 1;
+        for (int j = 0; j < meshes[i].nTriangles; ++j)
+            lights.push_back(make_shared<DiffuseAreaLight>(Transform(), SpectrasRGB, 1.0, make_shared<Triangle>(i, j)));
+    }
+
+
+    //lights.push_back(make_shared<PointLight>(Transform::Translate(vec3(278, 550, 278)), SpectrasRGB, 1.0));
     // lights.push_back(make_shared<DistantLight>(Transform::RotateX(4 * pi / 3), SpectrasRGB, 1.0));
 
     cam.render(bvhNode(make_shared<primitiveList>(World)), lights);
