@@ -113,20 +113,19 @@ private:
 
 	bool Unoccluded(const bvhNode& World, const vec3& p0, const vec3& p1) const {
 		ray r(p0, p1 - p0);
-		std::optional<hitRecord> rec = World.Intersect(r, interval(0.001, 0.999));
-		return !rec;
+		std::optional<ShapeIntersection> isect = World.Intersect(r, interval(0.001, 0.999));
+		return !isect;
 	}
 
-	SampledSpectrum SampleLd(vec3 wo, const hitRecord& rec, const BSDF& bsdf, SampledWaveLengths& lambda, const bvhNode& World, const std::vector<shared_ptr<Light>>& lights) {
-		LightSampleContext sample(rec);
+	SampledSpectrum SampleLd(vec3 wo, const SurfaceInteraction& intr, const BSDF& bsdf, SampledWaveLengths& lambda, const bvhNode& World, const std::vector<shared_ptr<Light>>& lights) {
 		shared_ptr<Light> light = (randomDouble() < 0.5) ? lights.front() : lights.back();
 		vec2 u = vec2Random();
-		std::optional<LightLiSample> ls = light->SampleLi(LightSampleContext(rec), u, lambda);
+		std::optional<LightLiSample> ls = light->SampleLi(LightSampleContext(intr), u, lambda);
 		if (!ls || !ls->L || ls->pdf == 0.0) return SampledSpectrum(0.0);
 
 		vec3 wi = ls->wi;
-		SampledSpectrum f = bsdf.f(wo, wi) * std::abs(dot(wi, rec.normal));
-		if(!f || !Unoccluded(World, rec.p, ls->pLight.p)) return SampledSpectrum(0.0);
+		SampledSpectrum f = bsdf.f(wo, wi) * std::abs(dot(wi, intr.n));
+		if(!f || !Unoccluded(World, intr.p, ls->pLight.p)) return SampledSpectrum(0.0);
 
 		double p_l = 0.5 * ls -> pdf;
 		double p_b = bsdf.PDF(wo, wi);
@@ -140,30 +139,31 @@ private:
 		double p_b = 1.0, eta_scale = 1.0;
 		while (beta) {
 			r.rd = normalize(r.rd);
-			std::optional<hitRecord> rec = World.Intersect(r, interval(0.001, infinity));
-			if (!rec)
+			std::optional<ShapeIntersection> isect = World.Intersect(r, interval(0.001, infinity));
+			if (!isect)
 			{
 				// RGBAlbedoSpectrum spec(sRGB, RGBColor(background));
 				// L = L + beta * spec.Sample(lambda);
 				break;
 			}
 
+			SurfaceInteraction intr = isect->intr;
 			if (depth++ == maxDepth) break;
-			BSDF bsdf = rec->mat->GetBSDF(rec->normal, rec->dpdu, lambda);
+			BSDF bsdf = intr.material->GetBSDF(intr.n, intr.dpdu, lambda);
 			if (IsNonSpecular(bsdf.Flags())) {
-				SampledSpectrum Ld = SampleLd(-r.rd, rec.value(), bsdf, lambda, World, lights);
+				SampledSpectrum Ld = SampleLd(-r.rd, intr, bsdf, lambda, World, lights);
 				L = L + beta * Ld;	
 			}
 
 			vec3 wo = -r.rd;
 			std::optional<BSDFSample> bs = bsdf.Sample_f(-r.rd, randomDouble(), vec2Random());
 			if (!bs) break;
-			beta = beta * bs->f * std::abs(dot(bs->wi, rec->normal)) / bs->pdf;
+			beta = beta * bs->f * std::abs(dot(bs->wi, intr.n)) / bs->pdf;
 			p_b = bs->pdf;
 
 			if (bs->IsTransmission())
 				eta_scale *= Sqr(bs->eta);
-			r = ray(rec->p, bs->wi);
+			r = ray(intr.p, bs->wi);
 
 			SampledSpectrum rrBeta = beta * eta_scale;
 			if (rrBeta.MaxComponentValue() < 1.0 && depth > 1)

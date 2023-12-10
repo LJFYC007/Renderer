@@ -1,7 +1,6 @@
 #pragma once
 #include "spectrum.h"
 #include "shape.h"
-#include "spectrum.h"
 #include "ray.h"
 #include "interaction.h"
 
@@ -17,7 +16,7 @@ enum class LightType {
 class LightSampleContext {
 public :
 	vec3 p, n, ns;
-	LightSampleContext(const hitRecord& rec) : p(rec.p), n(rec.normal), ns(rec.normal) {};
+	LightSampleContext(const SurfaceInteraction& intr) : p(intr.p), n(intr.n), ns(intr.shading.n) {}
 };
 
 class LightLiSample {

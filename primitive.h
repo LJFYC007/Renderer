@@ -26,7 +26,7 @@ public :
 	void add(shared_ptr<Shape> object) { objects.push_back(object); box = AABB(box, object->Bounds()); }
 	AABB Bounds() const override { return box; }
 
-	std::optional<hitRecord> Intersect(const ray& r, interval t) const override { assert(-1); return {}; }
+	std::optional<ShapeIntersection> Intersect(const ray& r, interval t) const override { assert(-1); return {}; }
 	double Area() const override { assert(-1); return 0; }
 	std::optional<ShapeSample> Sample(vec2 uv) const override { return {}; }
 };
@@ -61,12 +61,12 @@ public:
 		box = AABB(left->Bounds(), right->Bounds());
 	}
 
-	std::optional<hitRecord> Intersect(const ray& r, interval t) const override
+	std::optional<ShapeIntersection> Intersect(const ray& r, interval t) const override
 	{
 		double t0, t1;
 		if (!box.Intersect(r, t, t0, t1)) return {};
-		std::optional<hitRecord> hitLeft = left->Intersect(r, t);
-		std::optional<hitRecord> hitRight = right->Intersect(r, interval(t.Min, hitLeft ? hitLeft->t : t.Max));
+		std::optional<ShapeIntersection> hitLeft = left->Intersect(r, t);
+		std::optional<ShapeIntersection> hitRight = right->Intersect(r, interval(t.Min, hitLeft ? hitLeft->tHit : t.Max));
 		return hitRight ? hitRight : hitLeft;
 	}
 

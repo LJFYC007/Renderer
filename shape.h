@@ -10,21 +10,10 @@ using std::shared_ptr;
 using std::make_shared;
 using std::vector;
 
-class material;
-
-struct hitRecord
+struct ShapeIntersection
 {
-	point3 p;
-	vec3 normal, dpdu;
-	double t, u, v;
-	bool frontFace;
-	shared_ptr<Material> mat;
-};
-
-struct QuadricIntersection
-{
+	SurfaceInteraction intr;
 	double tHit;
-	vec3 p;
 };
 
 struct ShapeSample
@@ -44,7 +33,7 @@ class Shape
 {
 public : 
 	virtual AABB Bounds() const = 0;
-	virtual std::optional<hitRecord> Intersect(const ray& r, interval t) const = 0;
+	virtual std::optional<ShapeIntersection> Intersect(const ray& r, interval t) const = 0;
 	// virtual bool IntersectP(const ray& r, interval t) const = 0;
 	virtual double Area() const = 0;
 	virtual std::optional<ShapeSample> Sample(vec2 u) const = 0;
@@ -57,61 +46,6 @@ public :
 	virtual double PDF(ShapeSampleContext sample, vec3 wi) const {
 		return 0.0;
 	}
-};
-
-class Sphere : public Shape
-{
-public:
-	Sphere(point3 _center, double _radius, shared_ptr<Material> _mat) : center(_center), radius(_radius), mat(_mat) {}
-
-	AABB Bounds() const override {
-		return AABB(center - vec3(radius), center + vec3(radius));
-	}
-
-	std::optional<hitRecord> Intersect(const ray& r, interval t) const override {
-		std::optional<QuadricIntersection> ints = BasicIntersect(r, t);
-		if (!ints) return {};
-
-		hitRecord rec;
-		rec.t = ints->tHit; rec.p = ints->p;
-		rec.mat = mat;
-		rec.normal = (rec.p - center) / radius;
-
-		rec.frontFace = dot(rec.normal, r.rd) < 0.0;
-		rec.normal = rec.frontFace ? rec.normal : -rec.normal;
-		return rec;
-	}
-
-	std::optional<QuadricIntersection> BasicIntersect(const ray& r, interval t) const {
-		vec3 oc = r.ro - center;
-		double a = dot(r.rd, r.rd);
-		double halfb = dot(oc, r.rd);
-		double c = dot(oc, oc) - radius * radius;
-
-		double discriminant = halfb * halfb - a * c;
-		if (discriminant < 0.0) return {};
-		discriminant = sqrt(discriminant);
-		double root = (-halfb - discriminant) / a;
-		if (!t.surrounds(root))
-		{
-			root = (-halfb + discriminant) / a;
-			if (!t.surrounds(root)) return {};
-		}
-		return QuadricIntersection{ root, r.at(root) };
-	}
-
-	double Area() const override {
-		return 4.0 * pi * radius * radius;
-	}
-
-	std::optional<ShapeSample> Sample(vec2 uv) const override {
-		return {};
-	}
-
-private:
-	vec3 center;
-	double radius;
-	shared_ptr<Material> mat;
 };
 
 class TriangleIntersection 
@@ -163,7 +97,7 @@ public:
 		return AABB(p0, p1,p2);
 	}
 
-	std::optional<hitRecord> Intersect(const ray& r, interval t) const override {
+	std::optional<ShapeIntersection> Intersect(const ray& r, interval t) const override {
 		const TriangleMesh* mesh = GetMesh();
 		const int* v = &mesh->vertexIndices[3 * triIndex];
 		vec3 p0 = mesh->vertices[v[0]].p, p1 = mesh->vertices[v[1]].p, p2 = mesh->vertices[v[2]].p;
@@ -171,16 +105,35 @@ public:
 		std::optional<TriangleIntersection> ints = BasicIntersect(r, t, p0, p1, p2);
 		if (!ints) return {};
 
-		hitRecord rec;
-		rec.t = ints->t;
-		rec.p = p0 + (p1 - p0) * ints->u + (p2 - p0) * ints->v;
-		rec.dpdu = p1 - p0;
-		rec.normal = mesh->vertices[v[0]].n
-			+ (mesh->vertices[v[1]].n - mesh->vertices[v[1]].n) * ints->u
-			+ (mesh->vertices[v[2]].n - mesh->vertices[v[1]].n) * ints->v;
+		vec3 p = p0 + (p1 - p0) * ints->u + (p2 - p0) * ints->v;
+		vec2 uv = mesh->vertices[v[0]].uv * (1 - ints->u - ints->v) +
+			mesh->vertices[v[1]].uv * ints->u +
+			mesh->vertices[v[2]].uv * ints->v;
 
-		rec.mat = mesh->mat;
-		return rec;
+		vec3 n0 = mesh->vertices[v[0]].n;
+		vec3 n1 = mesh->vertices[v[1]].n;
+		vec3 n2 = mesh->vertices[v[2]].n;
+
+		vec2 uv0 = mesh->vertices[v[0]].uv;
+		vec2 uv1 = mesh->vertices[v[1]].uv;
+		vec2 uv2 = mesh->vertices[v[2]].uv;
+
+		vec3 edge1 = p1 - p0;
+		vec3 edge2 = p2 - p0;
+		vec2 deltaUV1 = uv1 - uv0;
+		vec2 deltaUV2 = uv2 - uv0;
+		float invDet = 1.0f / (deltaUV1.x() * deltaUV2.y() - deltaUV1.y() * deltaUV2.x());
+		vec3 tangent = invDet * (deltaUV2.y() * edge1 - deltaUV1.y() * edge2);
+		vec3 bitangent = invDet * (-deltaUV2.x() * edge1 + deltaUV1.x() * edge2);
+		vec3 interpolatedNormal = normalize((1 - ints->u - ints->v) * n0 + ints->u * n1 + ints->v * n2);
+		vec3 dndu = cross(bitangent, interpolatedNormal);
+		vec3 dndv = cross(interpolatedNormal, tangent);
+		dndu = normalize(dndu);
+		dndv = normalize(dndv);
+
+		SurfaceInteraction intr(p, uv, -r.rd, p1 - p0, p2 - p0, dndu, dndv, ints->t, false);
+		intr.material = mesh->mat;
+		return ShapeIntersection{ intr, ints->t };
 	}
 
 	std::optional<TriangleIntersection> BasicIntersect(const ray& r, interval t, vec3 p0, vec3 p1, vec3 p2) const {
@@ -234,9 +187,10 @@ public:
 
 	double PDF(ShapeSampleContext sample, vec3 wi) const override {
 		ray r(sample.p, wi);
-		std::optional<hitRecord> rec = Intersect(r, interval(0.001, infinity));
-		if (!rec) return 0.0;
-		double pdf = (sample.p - rec->p).lengthSquared() / std::abs(dot(rec->normal, -wi)) / Area();
+		std::optional<ShapeIntersection> isect = Intersect(r, interval(0.001, infinity));
+		if (!isect) return 0.0;
+		SurfaceInteraction intr = isect->intr;
+		double pdf = (sample.p - intr.p).lengthSquared() / std::abs(dot(intr.n, -wi)) / Area();
 		if (std::isinf(pdf)) pdf = 0.0;
 		return pdf;
 	}
