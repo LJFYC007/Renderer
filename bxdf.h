@@ -30,13 +30,17 @@ enum BxDFFlags {
 };
 inline BxDFFlags operator |(BxDFFlags a, BxDFFlags b) { return BxDFFlags((int)a | (int)b); }
 inline BxDFFlags operator &(BxDFFlags a, BxDFFlags b) { return BxDFFlags((int)a & (int)b); }
+inline bool IsNonSpecular(BxDFFlags f) { return f & (BxDFFlags::Diffuse | BxDFFlags::Glossy); }
 
 struct BSDFSample {
 	SampledSpectrum f;
 	vec3 wi;
 	double pdf = 0;
 	BxDFFlags flags;
-	BSDFSample(SampledSpectrum _f, vec3 _wi, double _pdf, BxDFFlags _flags) : f(_f), wi(_wi), pdf(_pdf), flags(_flags) {}
+	double eta = 1;
+	BSDFSample(SampledSpectrum _f, vec3 _wi, double _pdf, BxDFFlags _flags, double _eta = 1) : f(_f), wi(_wi), pdf(_pdf), flags(_flags), eta(_eta) {}
+
+	bool IsTransmission() const { return flags & BxDFFlags::Transmission; }
 };
 
 class BxDF
@@ -47,4 +51,5 @@ public :
 	virtual double PDF(vec3 wo, vec3 wi, BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const = 0;
 	virtual SampledSpectrum rho(vec3 wo, int nSamples, double* uc, vec2* u2) const;
 	virtual SampledSpectrum rho(int nSamples, vec2* u1, double* uc, vec2* u2) const;
+	virtual BxDFFlags Flags() const = 0;
 };

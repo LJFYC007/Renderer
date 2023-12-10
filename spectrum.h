@@ -412,6 +412,13 @@ public:
 		return SampledSpectrum(v);
 	}
 
+	double MaxComponentValue() const {
+		double m = values[0];
+		for (int i = 1; i < NSpectrumSamples; ++i)
+			m = std::fmax(m, values[i]);
+		return m;
+	}
+
 	XYZ ToXYZ(const SampledWaveLengths& lambda) const;
 	RGBColor ToRGB(const SampledWaveLengths& lambda, const RGBColorSpace& space) const;
 private:

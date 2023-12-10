@@ -117,9 +117,27 @@ private:
 		return !rec;
 	}
 
-	SampledSpectrum Li(ray r, const int maxDepth, SampledWaveLengths& lambda, const bvhNode& World, const std::vector<shared_ptr<Light>> lights) {
+	SampledSpectrum SampleLd(vec3 wo, const hitRecord& rec, const BSDF& bsdf, SampledWaveLengths& lambda, const bvhNode& World, const std::vector<shared_ptr<Light>>& lights) {
+		LightSampleContext sample(rec);
+		shared_ptr<Light> light = (randomDouble() < 0.5) ? lights.front() : lights.back();
+		vec2 u = vec2Random();
+		std::optional<LightLiSample> ls = light->SampleLi(LightSampleContext(rec), u, lambda);
+		if (!ls || !ls->L || ls->pdf == 0.0) return SampledSpectrum(0.0);
+
+		vec3 wi = ls->wi;
+		SampledSpectrum f = bsdf.f(wo, wi) * std::abs(dot(wi, rec.normal));
+		if(!f || !Unoccluded(World, rec.p, ls->pLight.p)) return SampledSpectrum(0.0);
+
+		double p_l = 0.5 * ls -> pdf;
+		double p_b = bsdf.PDF(wo, wi);
+		double w_l = PowerHeuristic(1, p_l , 1, p_b);
+		return ls->L * w_l * f / p_l;
+	}
+
+	SampledSpectrum Li(ray r, const int maxDepth, SampledWaveLengths& lambda, const bvhNode& World, const std::vector<shared_ptr<Light>>& lights) {
 		SampledSpectrum L(0.0), beta(1.0);
 		int depth = 0;
+		double eta_scale = 1.0;
 		while (beta) {
 			r.rd = normalize(r.rd);
 			std::optional<hitRecord> rec = World.Intersect(r, interval(0.001, infinity));
@@ -132,23 +150,27 @@ private:
 
 			if (depth++ == maxDepth) break;
 			BSDF bsdf = rec->mat->GetBSDF(rec->normal, rec->dpdu, lambda);
-
-			vec3 wo = -r.rd;
-			for (auto light : lights) {
-				vec2 u = vec2Random();
-				std::optional<LightLiSample> ls = light->SampleLi(LightSampleContext(rec.value()), u, lambda);
-				if (ls && ls->L && ls->pdf > 0.0) {
-					vec3 wi = ls->wi;
-					SampledSpectrum f = bsdf.f(wo, wi) * std::abs(dot(wi, rec->normal));
-					if (f && Unoccluded(World, rec->p, ls->pLight.p))
-						L = L + beta * f * ls->L / ls->pdf;
-				}
+			if (IsNonSpecular(bsdf.Flags())) {
+				SampledSpectrum Ld = SampleLd(-r.rd, rec.value(), bsdf, lambda, World, lights);
+				L = L + beta * Ld;	
 			}
 
+			vec3 wo = -r.rd;
 			std::optional<BSDFSample> bs = bsdf.Sample_f(-r.rd, randomDouble(), vec2Random());
 			if (!bs) break;
 			beta = beta * bs->f * std::abs(dot(bs->wi, rec->normal)) / bs->pdf;
+
+			if (bs->IsTransmission())
+				eta_scale *= Sqr(bs->eta);
 			r = ray(rec->p, bs->wi);
+
+			SampledSpectrum rrBeta = beta * eta_scale;
+			if (rrBeta.MaxComponentValue() < 1.0 && depth > 1)
+			{
+				double q = std::fmax(0.0, 1 - rrBeta.MaxComponentValue());
+				if (randomDouble() < q) break;
+				beta = beta / (1 - q);
+			}
 		}
 		return L;
 	}

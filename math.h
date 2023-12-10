@@ -6,6 +6,10 @@
 
 inline double Lerp(double t, double x, double y) { return (1 - t) * x + t * y; }
 inline double Clamp(double x, double a, double b) { if (x < a) return a; if (x > b) return b; return x; }
+inline double PowerHeuristic(int nf, double fPdf, int ng, double gPdf) {
+	double f = nf * fPdf, g = ng * gPdf;
+	return (f * f) / (f * f + g * g);
+}
 
 // =========== complex ============
 

@@ -43,6 +43,8 @@ public:
 		return bxdf->rho(nSamples, u1, uc, u2);
 	}
 
+	BxDFFlags Flags() const { return bxdf->Flags(); }
+
 private:
 	shared_ptr<BxDF> bxdf;
 	Frame shadingFrame;

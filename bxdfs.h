@@ -9,6 +9,8 @@ public:
 	DiffuseBxDF() = default;
 	DiffuseBxDF(SampledSpectrum _R) : R(_R) {}
 
+	BxDFFlags Flags() const override { return R ? BxDFFlags::DiffuseReflection : BxDFFlags::Unset; }
+
 	SampledSpectrum f(vec3 wo, vec3 wi) const override {
 		if (!SameHemisphere(wo, wi)) return	{};
 		return R / pi;
@@ -94,7 +96,7 @@ public:
 	ConductorBxDF() = default;
 	ConductorBxDF(const TrowbridgeReitzDistribution& _mfDistrib, SampledSpectrum _eta, SampledSpectrum _k) : mfDistrib(_mfDistrib), eta(_eta), k(_k) {}
 
-	BxDFFlags Flags() const { return mfDistrib.EffectivelySmooth() ? BxDFFlags::SpecularReflection : BxDFFlags::GlossyReflection; }
+	BxDFFlags Flags() const override { return mfDistrib.EffectivelySmooth() ? BxDFFlags::SpecularReflection : BxDFFlags::GlossyReflection; }
 
 	SampledSpectrum f(vec3 wo, vec3 wi) const override {
 		if (!SameHemisphere(wo, wi)) return {};
@@ -150,7 +152,7 @@ public:
 	DielectricBxDF() = default;
 	DielectricBxDF(const TrowbridgeReitzDistribution& _mfDistrib, double _eta) : mfDistrib(_mfDistrib), eta(_eta) {}
 
-	BxDFFlags Flags() const { 
+	BxDFFlags Flags() const override { 
 		BxDFFlags flags = (eta == 1) ? BxDFFlags::Transmission : (BxDFFlags::Transmission | BxDFFlags::Reflection);
 		return flags | (mfDistrib.EffectivelySmooth() ? BxDFFlags::Specular : BxDFFlags::Glossy); 
 	}
@@ -197,7 +199,7 @@ public:
 				vec3 wi; double etap;
 				if (!Refract(wo, vec3(0, 0, 1), eta, &etap, &wi)) return {};
 				SampledSpectrum ft = SampledSpectrum((1 - R) / AbsCosTheta(wi));
-				return BSDFSample(ft, wi, pt / (pr + pt), BxDFFlags::SpecularTransmission);
+				return BSDFSample(ft, wi, pt / (pr + pt), BxDFFlags::SpecularTransmission, etap);
 			}
 		}
 
@@ -222,7 +224,7 @@ public:
 			double denom = Sqr(dot(wi, wm) + dot(wo, wm) / etap);
 			double pdf = mfDistrib.PDF(wo, wm) * std::abs(dot(wi, wm)) / denom * pt / (pr + pt);
 			SampledSpectrum f = SampledSpectrum(mfDistrib.D(wm) * mfDistrib.G(wo, wi) * (1 - R) * std::abs(dot(wi, wm) * dot(wo, wm) / (CosTheta(wi) * CosTheta(wo) * denom)));
-			return BSDFSample(f, wi, pdf, BxDFFlags::GlossyTransmission);
+			return BSDFSample(f, wi, pdf, BxDFFlags::GlossyTransmission, etap);
 		}
 	}
 
