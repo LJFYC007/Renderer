@@ -137,7 +137,7 @@ private:
 	SampledSpectrum Li(ray r, const int maxDepth, SampledWaveLengths& lambda, const bvhNode& World, const std::vector<shared_ptr<Light>>& lights) {
 		SampledSpectrum L(0.0), beta(1.0);
 		int depth = 0;
-		double eta_scale = 1.0;
+		double p_b = 1.0, eta_scale = 1.0;
 		while (beta) {
 			r.rd = normalize(r.rd);
 			std::optional<hitRecord> rec = World.Intersect(r, interval(0.001, infinity));
@@ -159,6 +159,7 @@ private:
 			std::optional<BSDFSample> bs = bsdf.Sample_f(-r.rd, randomDouble(), vec2Random());
 			if (!bs) break;
 			beta = beta * bs->f * std::abs(dot(bs->wi, rec->normal)) / bs->pdf;
+			p_b = bs->pdf;
 
 			if (bs->IsTransmission())
 				eta_scale *= Sqr(bs->eta);
