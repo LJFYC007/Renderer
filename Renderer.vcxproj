@@ -148,6 +148,7 @@
     <ClCompile Include="bxdf.cpp" />
     <ClCompile Include="color.cpp" />
     <ClCompile Include="declaration.h" />
+    <ClCompile Include="lightsampler.h" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="math.cpp" />
     <ClCompile Include="spectra_sRGB.cpp" />

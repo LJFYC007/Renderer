@@ -31,6 +31,9 @@ enum BxDFFlags {
 inline BxDFFlags operator |(BxDFFlags a, BxDFFlags b) { return BxDFFlags((int)a | (int)b); }
 inline BxDFFlags operator &(BxDFFlags a, BxDFFlags b) { return BxDFFlags((int)a & (int)b); }
 inline bool IsNonSpecular(BxDFFlags f) { return f & (BxDFFlags::Diffuse | BxDFFlags::Glossy); }
+inline bool IsTransmissive(BxDFFlags f) { return f & BxDFFlags::Transmission; }
+inline bool IsReflective(BxDFFlags f) { return f & BxDFFlags::Reflection; }	
+inline bool IsSpecular(BxDFFlags f) { return f & BxDFFlags::Specular; }
 
 struct BSDFSample {
 	SampledSpectrum f;
@@ -41,6 +44,7 @@ struct BSDFSample {
 	BSDFSample(SampledSpectrum _f, vec3 _wi, double _pdf, BxDFFlags _flags, double _eta = 1) : f(_f), wi(_wi), pdf(_pdf), flags(_flags), eta(_eta) {}
 
 	bool IsTransmission() const { return flags & BxDFFlags::Transmission; }
+	bool IsSpecular() const { return flags & BxDFFlags::Specular; }
 };
 
 class BxDF

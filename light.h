@@ -16,6 +16,7 @@ enum class LightType {
 class LightSampleContext {
 public :
 	vec3 p, n, ns;
+	LightSampleContext() = default;
 	LightSampleContext(const SurfaceInteraction& intr) : p(intr.p), n(intr.n), ns(intr.shading.n) {}
 };
 

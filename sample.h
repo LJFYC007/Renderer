@@ -79,3 +79,13 @@ static vec3 SampleUniformTriangle(vec2 u)
     else { b1 = u.y() / 2; b0 = u.x() - b1; }
     return vec3(b0, b1, 1 - b0 - b1);
 }
+
+static vec3 SampleUniformSphere(vec2 u)
+{
+    double z = 1 - 2 * u.x();
+    double r = std::sqrt(std::fmax(0, 1 - z * z));
+    double phi = 2 * pi * u.y();
+    return vec3(r * std::cos(phi), r * std::sin(phi), z);
+}
+
+inline double UniformSpherePDF() { return 1 / (4 * pi); } 
