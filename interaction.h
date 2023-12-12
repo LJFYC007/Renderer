@@ -33,6 +33,8 @@ public:
 		shading.dndv = dndv;
 	}
 
+	void SetIntersectionProperties(shared_ptr<Material> _material, shared_ptr<Light> _areaLight) { material = _material; areaLight = _areaLight; }
+
 	SampledSpectrum Le(vec3 w, const SampledWaveLengths& lambda) const;
 
 	vec3 dpdu, dpdv, dndu, dndv;

@@ -21,10 +21,10 @@ class Model
 public:
 	bool gammaCorrection;
 
-	Model(string const& path, shared_ptr<Material> mat, shared_ptr<Light> areaLight = nullptr) { loadModel(path, mat, areaLight); }
+	Model(string const& path) { loadModel(path); }
 
 private:
-	void loadModel(string const& path, shared_ptr<Material> mat, shared_ptr<Light> areaLight)
+	void loadModel(string const& path)
 	{
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
@@ -33,21 +33,21 @@ private:
 			exit(-1);
 			return;
 		}
-		processNode(scene->mRootNode, scene, mat, areaLight);
+		processNode(scene->mRootNode, scene);
 	}
 
-	void processNode(aiNode* node, const aiScene* scene, shared_ptr<Material> mat, shared_ptr<Light> areaLight)
+	void processNode(aiNode* node, const aiScene* scene)
 	{
 		for (unsigned int i = 0; i < node->mNumMeshes; ++i)
 		{
 			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-			meshes.push_back(processMesh(mesh, scene, mat, areaLight));
+			meshes.push_back(processMesh(mesh, scene));
 		}
 		for (unsigned int i = 0; i < node->mNumChildren; ++i)
-			processNode(node->mChildren[i], scene, mat, areaLight);
+			processNode(node->mChildren[i], scene);
 	}
 
-	TriangleMesh processMesh(aiMesh* mesh, const aiScene* scene, shared_ptr<Material> mat, shared_ptr<Light> areaLight)
+	TriangleMesh processMesh(aiMesh* mesh, const aiScene* scene)
 	{
 		vector<Vertex> vertices;
 		vector<int> indices;
@@ -89,6 +89,6 @@ private:
 		if (mesh->mMaterialIndex >= 0)
 			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-		return TriangleMesh(SquareMatrix<4>(), indices, vertices, mat, areaLight);
+		return TriangleMesh(SquareMatrix<4>(), indices, vertices);
 	}
 };

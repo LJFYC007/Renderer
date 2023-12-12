@@ -29,9 +29,8 @@ public:
 	double focusDist = 10.0;
 	int samplePixel = 256;
 	int maxDepth = 10;
-	vec3 background = vec3(0.0);
 
-	void render(const bvhNode& World, const std::vector<shared_ptr<Light>>& _lights)
+	void render(const BvhNode& World, const std::vector<shared_ptr<Light>>& _lights)
 	{
 		initialize(_lights);
 #pragma omp parallel for schedule(dynamic) 
@@ -122,13 +121,13 @@ private:
 		defocusDiskV = v * defocusRadius;
 	}
 
-	bool Unoccluded(const bvhNode& World, const vec3& p0, const vec3& p1) const {
+	bool Unoccluded(const BvhNode& World, const vec3& p0, const vec3& p1) const {
 		ray r(p0, p1 - p0);
 		std::optional<ShapeIntersection> isect = World.Intersect(r, interval(0.001, 0.999));
 		return !isect;
 	}
 
-	SampledSpectrum SampleLd(vec3 wo, const SurfaceInteraction& intr, const BSDF& bsdf, SampledWaveLengths& lambda, const bvhNode& World) {
+	SampledSpectrum SampleLd(vec3 wo, const SurfaceInteraction& intr, const BSDF& bsdf, SampledWaveLengths& lambda, const BvhNode& World) {
 		std::optional<SampledLight> sampledLight = lightSampler->Sample(randomDouble());
 		if (!sampledLight) return {};
 		shared_ptr<Light> light = sampledLight->light;
@@ -146,7 +145,7 @@ private:
 		return ls->L * w_l * f / p_l;
 	}
 
-	SampledSpectrum Li(ray r, const int maxDepth, SampledWaveLengths& lambda, const bvhNode& World) {
+	SampledSpectrum Li(ray r, const int maxDepth, SampledWaveLengths& lambda, const BvhNode& World) {
 		SampledSpectrum L(0.0), beta(1.0);
 		int depth = 0;
 		double p_b = 1.0, eta_scale = 1.0;
