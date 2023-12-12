@@ -99,7 +99,7 @@ int main()
     addBox(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), vec3(-1, 0, 0), green, nullptr);
     addBox(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), vec3(1, 0, 0), red, nullptr);
     addBox(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), vec3(0, 1, 0), white, nullptr);
-    // addBox(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), vec3(0, -1, 0), white);
+    addBox(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), vec3(0, -1, 0), white, nullptr);
     addBox(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, -1), white, nullptr);
 
     box(vec3(130, 0, 65), vec3(295, 165, 230), dielectric, nullptr, Transform::RotateY(pi / 8));
@@ -118,7 +118,7 @@ int main()
 		vertexIndices.push_back(0); vertexIndices.push_back(1); vertexIndices.push_back(2);
         meshes.push_back(TriangleMesh(Transform(), vertexIndices, vertices, white, nullptr));
 
-        DiffuseAreaLight areaLight(Transform(), SpectrasRGB, 15.0, make_shared<Triangle>(meshes.size() - 1, 0));
+        DiffuseAreaLight areaLight(Transform(), SpectrasRGB, 5.0, make_shared<Triangle>(meshes.size() - 1, 0));
         lights.push_back(make_shared<DiffuseAreaLight>(areaLight));
         meshes.back().areaLight = make_shared<DiffuseAreaLight>(areaLight);
     }
@@ -132,7 +132,7 @@ int main()
 		vertexIndices.push_back(0); vertexIndices.push_back(1); vertexIndices.push_back(2);
         meshes.push_back(TriangleMesh(Transform(), vertexIndices, vertices, white, nullptr));
 
-        DiffuseAreaLight areaLight(Transform(), SpectrasRGB, 15.0, make_shared<Triangle>(meshes.size() - 1, 0));
+        DiffuseAreaLight areaLight(Transform(), SpectrasRGB, 5.0, make_shared<Triangle>(meshes.size() - 1, 0));
         lights.push_back(make_shared<DiffuseAreaLight>(areaLight));
         meshes.back().areaLight = make_shared<DiffuseAreaLight>(areaLight);
     }
