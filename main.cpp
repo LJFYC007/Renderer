@@ -14,7 +14,7 @@
 
 primitiveList World;
 
-void addBox(vec3 a, vec3 b, vec3 c, vec3 n, shared_ptr<Material> mat, Transform t = Transform())
+void addBox(vec3 a, vec3 b, vec3 c, vec3 n, shared_ptr<Material> mat, shared_ptr<Light> areaLight, Transform t = Transform())
 {
 	vector<Vertex> vertices;
 	vector<int> vertexIndices;
@@ -24,20 +24,20 @@ void addBox(vec3 a, vec3 b, vec3 c, vec3 n, shared_ptr<Material> mat, Transform 
     vertices.push_back(Vertex(a + b + c, n));
     vertexIndices.push_back(0); vertexIndices.push_back(1); vertexIndices.push_back(2);
     vertexIndices.push_back(1); vertexIndices.push_back(2); vertexIndices.push_back(3);
-    meshes.push_back(TriangleMesh(t, vertexIndices, vertices, mat));
+    meshes.push_back(TriangleMesh(t, vertexIndices, vertices, mat, areaLight));
 }
 
-void box(vec3 a, vec3 b, shared_ptr<Material> mat, Transform t = Transform())
+void box(vec3 a, vec3 b, shared_ptr<Material> mat, shared_ptr<Light> areaLight, Transform t = Transform())
 {
     auto dx = vec3(b[0] - a[0], 0, 0);
     auto dy = vec3(0, b[1] - a[1], 0);
     auto dz = vec3(0, 0, b[2] - a[2]);
-    addBox(vec3(a[0], a[1], b[2]), dx, dy, vec3(0, 0, -1), mat, t);
-    addBox(vec3(b[0], a[1], b[2]), -dz, dy, vec3(1, 0, 0), mat, t);
-    addBox(vec3(b[0], a[1], a[2]), -dx, dy, vec3(0, 0, 1), mat, t);
-    addBox(vec3(a[0], a[1], a[2]), dz, dy, vec3(-1, 0, 0), mat, t);
-    addBox(vec3(a[0], b[1], b[2]), dx, -dz, vec3(0, 1, 0), mat, t);
-    addBox(vec3(a[0], a[1], a[2]), dx, dz, vec3(0, -1, 0), mat, t);
+    addBox(vec3(a[0], a[1], b[2]), dx, dy, vec3(0, 0, -1), mat, areaLight, t);
+    addBox(vec3(b[0], a[1], b[2]), -dz, dy, vec3(1, 0, 0), mat, areaLight, t);
+    addBox(vec3(b[0], a[1], a[2]), -dx, dy, vec3(0, 0, 1), mat, areaLight, t);
+    addBox(vec3(a[0], a[1], a[2]), dz, dy, vec3(-1, 0, 0), mat, areaLight, t);
+    addBox(vec3(a[0], b[1], b[2]), dx, -dz, vec3(0, 1, 0), mat, areaLight, t);
+    addBox(vec3(a[0], a[1], a[2]), dx, dz, vec3(0, -1, 0), mat, areaLight, t);
 }
 
 int main()
@@ -96,29 +96,50 @@ int main()
     auto dielectric = make_shared<DielectrivMaterial>(0.3, 0.2, 1 / 1.5);
     // auto light = make_shared<diffuseLight>(vec3(15, 15, 15));
 
-    addBox(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), vec3(-1, 0, 0), green);
-    addBox(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), vec3(1, 0, 0), red);
-    addBox(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), vec3(0, 1, 0), white);
+    addBox(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), vec3(-1, 0, 0), green, nullptr);
+    addBox(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), vec3(1, 0, 0), red, nullptr);
+    addBox(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), vec3(0, 1, 0), white, nullptr);
     // addBox(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), vec3(0, -1, 0), white);
-    addBox(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, -1), white);
+    addBox(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, -1), white, nullptr);
 
-    box(vec3(130, 0, 65), vec3(295, 165, 230), dielectric, Transform::RotateY(pi / 8));
-    box(vec3(265, 0, 295), vec3(430, 330, 460), metal, Transform::RotateY(-pi / 50));
-    
+    box(vec3(130, 0, 65), vec3(295, 165, 230), dielectric, nullptr, Transform::RotateY(pi / 8));
+    box(vec3(265, 0, 295), vec3(430, 330, 460), metal, nullptr, Transform::RotateY(-pi / 50));
+
+    vec3 a(343, 554, 332), b(-130, 0, 0), c(0, 0, -105);
+    vec3 n = (0, -1, 0);
+
+    std::vector<shared_ptr<Light>> lights;
+    {
+		vector<Vertex> vertices;
+		vector<int> vertexIndices;
+		vertices.push_back(Vertex(a, n));
+		vertices.push_back(Vertex(a + b, n));
+		vertices.push_back(Vertex(a + c, n));
+		vertexIndices.push_back(0); vertexIndices.push_back(1); vertexIndices.push_back(2);
+        meshes.push_back(TriangleMesh(Transform(), vertexIndices, vertices, white, nullptr));
+
+        DiffuseAreaLight areaLight(Transform(), SpectrasRGB, 15.0, make_shared<Triangle>(meshes.size() - 1, 0));
+        lights.push_back(make_shared<DiffuseAreaLight>(areaLight));
+        meshes.back().areaLight = make_shared<DiffuseAreaLight>(areaLight);
+    }
+
+    {
+		vector<Vertex> vertices;
+		vector<int> vertexIndices;
+		vertices.push_back(Vertex(a + b, n));
+		vertices.push_back(Vertex(a + c, n));
+		vertices.push_back(Vertex(a + b + c, n));
+		vertexIndices.push_back(0); vertexIndices.push_back(1); vertexIndices.push_back(2);
+        meshes.push_back(TriangleMesh(Transform(), vertexIndices, vertices, white, nullptr));
+
+        DiffuseAreaLight areaLight(Transform(), SpectrasRGB, 15.0, make_shared<Triangle>(meshes.size() - 1, 0));
+        lights.push_back(make_shared<DiffuseAreaLight>(areaLight));
+        meshes.back().areaLight = make_shared<DiffuseAreaLight>(areaLight);
+    }
 
     for (int i = 0; i < meshes.size(); ++i)
         for (int j = 0; j < meshes[i].nTriangles; ++j)
             World.add(make_shared<Triangle>(i, j));
-
-    addBox(point3(343, 554, 332), vec3(-130, 0, 0), vec3(0, 0, -105), vec3(0, -1, 0), white);
-
-    std::vector<shared_ptr<Light>> lights;
-    std::vector<shared_ptr<Light>> infinityLights;
-    {
-        int i = meshes.size() - 1;
-        for (int j = 0; j < meshes[i].nTriangles; ++j)
-            lights.push_back(make_shared<DiffuseAreaLight>(Transform(), SpectrasRGB, 30.0, make_shared<Triangle>(i, j)));
-    }
 
 
     //lights.push_back(make_shared<PointLight>(Transform::Translate(vec3(278, 550, 278)), SpectrasRGB, 1.0));

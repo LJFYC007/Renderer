@@ -1,6 +1,7 @@
 #pragma once
 #include "aabb.h"
 #include "interaction.h"
+#include "light.h"
 #include "material.h"
 
 #include <optional>
@@ -68,9 +69,10 @@ public:
 	vector<int> vertexIndices;
 	vector<Vertex> vertices;
 	shared_ptr<Material> mat;
+	shared_ptr<Light> areaLight;
 
-	TriangleMesh(const Transform& ObjectToWorld, vector<int> _vertexIndices, vector<Vertex> _vertices, shared_ptr<Material> _mat) :
-		nTriangles(static_cast<int>(_vertexIndices.size()) / 3), nVertices(static_cast<int>(_vertices.size())), vertexIndices(_vertexIndices), mat(_mat) {
+	TriangleMesh(const Transform& ObjectToWorld, vector<int> _vertexIndices, vector<Vertex> _vertices, shared_ptr<Material> _mat, shared_ptr<Light> _areaLight) :
+		nTriangles(static_cast<int>(_vertexIndices.size()) / 3), nVertices(static_cast<int>(_vertices.size())), vertexIndices(_vertexIndices), mat(_mat), areaLight(_areaLight) {
 		vertices.resize(nVertices);
 		for (int i = 0; i < nVertices; ++i)
 		{
@@ -133,6 +135,7 @@ public:
 
 		SurfaceInteraction intr(p, uv, -r.rd, p1 - p0, p2 - p0, dndu, dndv, ints->t, false);
 		intr.material = mesh->mat;
+		intr.areaLight = mesh->areaLight;
 		return ShapeIntersection{ intr, ints->t };
 	}
 

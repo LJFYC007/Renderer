@@ -1,4 +1,7 @@
 #pragma once
+#include "math.h"
+#include "spectrum.h"
+
 #include <memory>
 using std::shared_ptr;
 
@@ -29,6 +32,8 @@ public:
 		shading.dndu = dndu;
 		shading.dndv = dndv;
 	}
+
+	SampledSpectrum Le(vec3 w, const SampledWaveLengths& lambda) const;
 
 	vec3 dpdu, dpdv, dndu, dndv;
 	struct {

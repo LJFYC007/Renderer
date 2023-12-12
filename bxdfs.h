@@ -34,7 +34,7 @@ private:
 	SampledSpectrum R;
 };
 
-SampledSpectrum FrComplex(double cosThetai, SampledSpectrum eta, SampledSpectrum k) {
+inline SampledSpectrum FrComplex(double cosThetai, SampledSpectrum eta, SampledSpectrum k) {
 	SampledSpectrum result;
 	for (int i = 0; i < NSpectrumSamples; ++i)
 		result[i] = FrComplex(cosThetai, complex(eta[i], k[i]));

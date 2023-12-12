@@ -19,8 +19,8 @@ static vec3 ans[3010][2210];
 class camera
 {
 public:
-	const int ImageWidth = 400;
-	const int ImageHeight = 400;
+	const int ImageWidth = 1200;
+	const int ImageHeight = 1200;
 	double fov = 40.0;
 	vec3 lookfrom = vec3(278.0, 278.0, -800.0);
 	vec3 lookat = vec3(278.0, 278.0, 0.0);
@@ -158,7 +158,6 @@ private:
 			std::optional<ShapeIntersection> isect = World.Intersect(r, interval(0.001, infinity));
 			if (!isect)
 			{
-				/*
 				for (const auto &light : infiniteLights)
 				{ 
 					SampledSpectrum Le = light->Le(r, lambda);
@@ -170,8 +169,19 @@ private:
 						L = L + beta * Le * w_b;		
 					}
 				}
-				*/
 				break;
+			}
+
+			SampledSpectrum Le = isect->intr.Le(-r.rd, lambda);
+			if (Le) {
+				if (depth == 0 || specularBounce)
+					L = L + beta * Le;
+				else {
+					shared_ptr<Light> areaLight = isect->intr.areaLight;
+					double p_l = lightSampler->PMF(prevIntrCtx, areaLight) * areaLight->PDF_Li(prevIntrCtx, r.rd, true);
+					double w_l = PowerHeuristic(1, p_b, 1, p_l);
+					L = L + beta * Le * w_l;	
+				}
 			}
 
 			SurfaceInteraction intr = isect->intr;
@@ -191,6 +201,7 @@ private:
 
 			if (bs->IsTransmission())
 				eta_scale *= Sqr(bs->eta);
+			prevIntrCtx = intr;
 			r = ray(intr.p, bs->wi);
 
 			SampledSpectrum rrBeta = beta * eta_scale;

@@ -2,6 +2,7 @@
 #include "math.h"
 #include "shape.h"
 #include "material.h"
+#include "light.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -20,10 +21,10 @@ class Model
 public:
 	bool gammaCorrection;
 
-	Model(string const& path, shared_ptr<Material> mat) { loadModel(path, mat); }
+	Model(string const& path, shared_ptr<Material> mat, shared_ptr<Light> areaLight = nullptr) { loadModel(path, mat, areaLight); }
 
 private:
-	void loadModel(string const& path, shared_ptr<Material> mat)
+	void loadModel(string const& path, shared_ptr<Material> mat, shared_ptr<Light> areaLight)
 	{
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
@@ -32,21 +33,21 @@ private:
 			exit(-1);
 			return;
 		}
-		processNode(scene->mRootNode, scene, mat);
+		processNode(scene->mRootNode, scene, mat, areaLight);
 	}
 
-	void processNode(aiNode* node, const aiScene* scene, shared_ptr<Material> mat)
+	void processNode(aiNode* node, const aiScene* scene, shared_ptr<Material> mat, shared_ptr<Light> areaLight)
 	{
 		for (unsigned int i = 0; i < node->mNumMeshes; ++i)
 		{
 			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-			meshes.push_back(processMesh(mesh, scene, mat));
+			meshes.push_back(processMesh(mesh, scene, mat, areaLight));
 		}
 		for (unsigned int i = 0; i < node->mNumChildren; ++i)
-			processNode(node->mChildren[i], scene, mat);
+			processNode(node->mChildren[i], scene, mat, areaLight);
 	}
 
-	TriangleMesh processMesh(aiMesh* mesh, const aiScene* scene, shared_ptr<Material> mat)
+	TriangleMesh processMesh(aiMesh* mesh, const aiScene* scene, shared_ptr<Material> mat, shared_ptr<Light> areaLight)
 	{
 		vector<Vertex> vertices;
 		vector<int> indices;
@@ -88,6 +89,6 @@ private:
 		if (mesh->mMaterialIndex >= 0)
 			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-		return TriangleMesh(SquareMatrix<4>(), indices, vertices, mat);
+		return TriangleMesh(SquareMatrix<4>(), indices, vertices, mat, areaLight);
 	}
 };
