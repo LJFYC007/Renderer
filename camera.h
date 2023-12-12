@@ -27,7 +27,7 @@ public:
 	vec3 vup = vec3(0.0, 1.0, 0.0);
 	double defocusAngle = 0.0;
 	double focusDist = 10.0;
-	int samplePixel = 256;
+	int samplePixel = 1024;
 	int maxDepth = 10;
 
 	void render(const BvhNode& World, const std::vector<shared_ptr<Light>>& _lights)
@@ -121,9 +121,9 @@ private:
 		defocusDiskV = v * defocusRadius;
 	}
 
-	bool Unoccluded(const BvhNode& World, const vec3& p0, const vec3& p1) const {
-		ray r(p0, p1 - p0);
-		std::optional<ShapeIntersection> isect = World.Intersect(r, interval(0.001, 0.999));
+	bool Unoccluded(const BvhNode& World, const Interaction& p0, const Interaction& p1) const {
+		ray r = SpawnRayTo(p0.pi, p0.n, p1.pi, p1.n);
+		std::optional<ShapeIntersection> isect = World.Intersect(r, interval(0, 0.9999999));
 		return !isect;
 	}
 
@@ -137,7 +137,7 @@ private:
 
 		vec3 wi = ls->wi;
 		SampledSpectrum f = bsdf.f(wo, wi) * std::abs(dot(wi, intr.n));
-		if(!f || !Unoccluded(World, intr.p, ls->pLight.p)) return SampledSpectrum(0.0);
+		if(!f || !Unoccluded(World, intr, ls->pLight)) return SampledSpectrum(0.0);
 
 		double p_l = sampledLight->p * ls -> pdf;
 		double p_b = bsdf.PDF(wo, wi);
@@ -154,7 +154,7 @@ private:
 
 		while (beta) {
 			r.rd = normalize(r.rd);
-			std::optional<ShapeIntersection> isect = World.Intersect(r, interval(0.001, infinity));
+			std::optional<ShapeIntersection> isect = World.Intersect(r, interval(0, infinity));
 			if (!isect)
 			{
 				for (const auto &light : infiniteLights)
@@ -201,7 +201,7 @@ private:
 			if (bs->IsTransmission())
 				eta_scale *= Sqr(bs->eta);
 			prevIntrCtx = intr;
-			r = ray(intr.p, bs->wi);
+			r = SpawnRay(intr.pi, intr.n, bs->wi);
 
 			SampledSpectrum rrBeta = beta * eta_scale;
 			if (rrBeta.MaxComponentValue() < 1.0 && depth > 1)

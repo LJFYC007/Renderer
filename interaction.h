@@ -1,6 +1,7 @@
 #pragma once
 #include "math.h"
 #include "spectrum.h"
+#include "ray.h"
 
 #include <memory>
 using std::shared_ptr;
@@ -11,11 +12,13 @@ class Light;
 class Interaction
 {
 public: 
-	Interaction(vec3 _p) : p(_p) {}
-	Interaction(vec3 _p, vec3 _n, vec2 _uv) : p(_p), n(_n), uv(_uv) {}
-	Interaction(vec3 _p, vec3 _n, vec2 _uv, vec3 _wo, double _t) : p(_p), n(_n), uv(_uv), wo(_wo), t(_t) {}
+	Interaction(Vector3fi _pi) : pi(_pi) {}
+	Interaction(Vector3fi _pi, vec3 _n, vec2 _uv) : pi(_pi), n(_n), uv(_uv) {}
+	Interaction(Vector3fi _pi, vec3 _n, vec2 _uv, vec3 _wo, double _t) : pi(_pi), n(_n), uv(_uv), wo(_wo), t(_t) {}
+	vec3 p() const { return vec3(pi.x.Midpoint(), pi.y.Midpoint(), pi.z.Midpoint()); }
 
-	vec3 p, wo, n;
+	Vector3fi pi;
+	vec3 wo, n;
 	double t;
 	vec2 uv;
 };
@@ -23,8 +26,8 @@ public:
 class SurfaceInteraction : public Interaction
 {
 public:
-	SurfaceInteraction(vec3 p, vec2 uv, vec3 wo, vec3 dpdu, vec3 dpdv, vec3 dndu, vec3 dndv, double t, bool flipNormal) :
-		Interaction(p, normalize(cross(dpdu, dpdv)), uv, wo, t), dpdu(dpdu), dpdv(dpdv), dndu(dndu), dndv(dndv) {
+	SurfaceInteraction(Vector3fi pi, vec2 uv, vec3 wo, vec3 dpdu, vec3 dpdv, vec3 dndu, vec3 dndv, double t, bool flipNormal) :
+		Interaction(pi, normalize(cross(dpdu, dpdv)), uv, wo, t), dpdu(dpdu), dpdv(dpdv), dndu(dndu), dndv(dndv) {
 		if (flipNormal) n = -n;
 		shading.n = n;
 		shading.dpdu = dpdu;

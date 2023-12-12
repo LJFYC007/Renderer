@@ -1,6 +1,9 @@
 #pragma once
-#include <cmath>
 #include <assert.h>
+#include <cmath>
+#include <cstdint>
+#include <climits>
+#include <memory>
 
 // =========== others ============
 
@@ -10,6 +13,50 @@ inline double PowerHeuristic(int nf, double fPdf, int ng, double gPdf) {
 	double f = nf * fPdf, g = ng * gPdf;
 	return (f * f) / (f * f + g * g);
 }
+
+#define MachineEpsilon (std::numeric_limits<double>::epsilon() * 0.5)
+inline double gamma(int n) {
+	return (n * MachineEpsilon) / (1 - n * MachineEpsilon);
+}
+
+inline uint64_t DoubleToBits(double f) {
+	uint64_t ui;
+	memcpy(&ui, &f, sizeof(double));
+	return ui;
+}
+
+inline double BitsToDouble(uint64_t ui) {
+	double f;
+	memcpy(&f, &ui, sizeof(uint64_t));
+	return f;
+}
+
+inline double NextDoubleUp(double v) {
+	if (std::isinf(v) && v > 0.0) return v;
+	if (v == -0.f) v = 0.f;
+	uint64_t ui = DoubleToBits(v);
+	if (v >= 0) ++ui;
+	else --ui;
+	return BitsToDouble(ui);
+}
+
+inline double NextDoubleDown(double v) {
+	if (std::isinf(v) && v < 0.0) return v;
+	if (v == 0.f) v = -0.f;
+	uint64_t ui = DoubleToBits(v);
+	if (v > 0) --ui;
+	else ++ui;
+	return BitsToDouble(ui);
+}
+
+inline double AddRoundUp(double a, double b) { return NextDoubleUp(a + b); }
+inline double AddRoundDown(double a, double b) { return NextDoubleDown(a + b); }
+inline double SubRoundUp(double a, double b) { return AddRoundUp(a, -b); }
+inline double SubRoundDown(double a, double b) { return AddRoundDown(a, -b); }
+inline double MulRoundUp(double a, double b) { return NextDoubleUp(a * b); }
+inline double MulRoundDown(double a, double b) { return NextDoubleDown(a * b); }
+inline double DivRoundUp(double a, double b) { return NextDoubleUp(a / b); }
+inline double DivRoundDown(double a, double b) { return NextDoubleDown(a / b); }
 
 // =========== complex ============
 
@@ -103,8 +150,6 @@ public :
 	}
 };
 
-using point3 = vec3;
-
 inline vec2 sin(const vec2& x) { return vec2(sin(x.a[0]), sin(x.a[1])); }
 inline vec3 sin(const vec3& x) { return vec3(sin(x.a[0]), sin(x.a[1]), sin(x.a[2])); }
 
@@ -123,6 +168,8 @@ inline vec3 operator *(const vec3& x, const vec3& y) { return vec3(x.a[0] * y.a[
 
 inline vec2 operator /(const vec2& x, const double y) { return vec2(x.a[0] / y, x.a[1] / y); }
 inline vec3 operator /(const vec3& x, const double y) { return vec3(x.a[0] / y, x.a[1] / y, x.a[2] / y); }
+
+inline vec3 Abs(vec3 x) { return vec3(std::abs(x.a[0]), std::abs(x.a[1]), std::abs(x.a[2])); }
 
 inline double Sqr(double x) { return x * x; }
 
@@ -179,6 +226,95 @@ inline double FrComplex(double cosThetai, complex eta) {
 	complex r_perp = (complex(cosThetai) - eta * cosThetat) / (complex(cosThetai) + eta * cosThetat);
 	return (r_parl.norm() + r_perp.norm()) / 2;
 }
+
+// ======== interval ==========
+class Interval
+{
+public:
+	double low, high;
+	Interval(double _low, double _high) : low(std::fmin(_low, _high)), high(std::fmax(_low, _high)) {}
+	Interval(double x) : low(x), high(x) {}
+	Interval() : low(0), high(0) {}
+
+	Interval operator +(const Interval& other) const { return Interval(AddRoundDown(low, other.low), AddRoundUp(high, other.high)); }
+	Interval operator -(const Interval& other) const { return Interval(SubRoundDown(low, other.low), SubRoundUp(high, other.high)); }
+	Interval operator *(const Interval& other) const {
+		double a = MulRoundDown(low, other.low), b = MulRoundDown(low, other.high), c = MulRoundDown(high, other.low), d = MulRoundDown(high, other.high);
+		double A = MulRoundUp(low, other.low), B = MulRoundUp(low, other.high), C = MulRoundUp(high, other.low), D = MulRoundUp(high, other.high);
+		return Interval(std::min(std::min(a, b), std::min(c, d)), std::max(std::max(A, B), std::max(C, D)));
+	}
+	Interval operator /(const Interval& other) const {
+		if (other.low <= 0 && other.high >= 0) return Interval(-INFINITY, INFINITY);
+		double a = DivRoundDown(low, other.low), b = DivRoundDown(low, other.high), c = DivRoundDown(high, other.low), d = DivRoundDown(high, other.high);
+		double A = DivRoundUp(low, other.low), B = DivRoundUp(low, other.high), C = DivRoundUp(high, other.low), D = DivRoundUp(high, other.high);
+		return Interval(std::min(std::min(a, b), std::min(c, d)), std::max(std::max(A, B), std::max(C, D)));
+	}
+	Interval operator -() const { return Interval(-high, -low); }
+
+	Interval& operator +=(Interval other) { return *this = *this + other; }
+	Interval& operator -=(Interval other) { return *this = *this - other; }
+	Interval& operator *=(Interval other) { return *this = *this * other; }
+	Interval& operator /=(Interval other) { return *this = *this / other; }
+
+	Interval& operator +=(double f) { return *this += Interval(f); }
+	Interval& operator -=(double f) { return *this -= Interval(f); }
+	Interval& operator *=(double f) {
+		if (f > 0) *this = Interval(MulRoundDown(low, f), MulRoundUp(high, f));
+		else *this = Interval(MulRoundDown(high, f), MulRoundUp(low, f));
+		return *this;
+	}
+	Interval& operator /=(double f) {
+		if (f > 0) *this = Interval(DivRoundDown(low, f), DivRoundUp(high, f));
+		else *this = Interval(DivRoundDown(high, f), DivRoundUp(low, f));
+		return *this;
+	}
+
+	bool operator ==(const Interval& other) const { return low == other.low && high == other.high; }
+	bool operator !=(const Interval& other) const { return low != other.low || high != other.high; }
+
+	double Midpoint() const { return (low + high) / 2; }
+	double Width() const { return high - low; }
+};
+
+inline Interval operator +(Interval i, double f) { return i + Interval(f); }
+inline Interval operator -(Interval i, double f) { return i - Interval(f); }
+inline Interval operator *(Interval i, double f) { 
+	if (f > 0) return Interval(MulRoundDown(i.low, f), MulRoundUp(i.high, f));
+	return Interval(MulRoundDown(i.high, f), MulRoundUp(i.low, f));
+}
+inline Interval operator /(Interval i, double f) { 
+	if (f > 0) return Interval(DivRoundDown(i.low, f), DivRoundUp(i.high, f));
+	return Interval(DivRoundDown(i.high, f), DivRoundUp(i.low, f));
+}
+
+static Interval FromValueAndError(double v, double err) {
+	if (err == 0) return Interval(v);
+	return Interval(SubRoundDown(v, err), AddRoundUp(v, err));
+}
+
+// =========== vector3fi ============
+class Vector3fi
+{
+public:
+	Interval x, y, z;
+	Vector3fi(double _x, double _y, double _z) : x(_x), y(_y), z(_z) {}
+	Vector3fi(Interval _x, Interval _y, Interval _z) : x(_x), y(_y), z(_z) {}
+	Vector3fi(vec3 p) : x(p.x()), y(p.y()), z(p.z()) {}
+	Vector3fi(vec3 v, vec3 e) : x(FromValueAndError(v.x(), e.x())), y(FromValueAndError(v.y(), e.y())), z(FromValueAndError(v.z(), e.z())) {}
+	Vector3fi() : x(0), y(0), z(0) {}
+
+	vec3 Error() const { return vec3(x.Width() / 2, y.Width() / 2, z.Width() / 2); }
+	bool IsExact() const { return x.Width() == 0 && y.Width() == 0 && z.Width() == 0; }
+
+	Vector3fi operator +(const Vector3fi& other) const { return Vector3fi(x + other.x, y + other.y, z + other.z); }
+	Vector3fi operator -(const Vector3fi& other) const { return Vector3fi(x - other.x, y - other.y, z - other.z); }
+	Vector3fi operator *(const Vector3fi& other) const { return Vector3fi(x * other.x, y * other.y, z * other.z); }
+	Vector3fi operator /(const Vector3fi& other) const { return Vector3fi(x / other.x, y / other.y, z / other.z); }
+	Vector3fi operator +(const double& f) const { return Vector3fi(x + f, y + f, z + f); }
+	Vector3fi operator -(const double& f) const { return Vector3fi(x - f, y - f, z - f); }
+	Vector3fi operator *(const double& f) const { return Vector3fi(x * f, y * f, z * f); }
+	Vector3fi operator /(const double& f) const { return Vector3fi(x / f, y / f, z / f); }
+};
 
 // =========== matrix ============
 
@@ -350,6 +486,7 @@ public :
 	}
 
 	vec3 operator()(const vec3& p) const;
+	Vector3fi operator()(const Vector3fi& p) const;
 	static Transform Translate(const vec3& delta);
 	static Transform Scale(double x, double y, double z);
 	static Transform RotateX(double theta);

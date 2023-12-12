@@ -94,16 +94,17 @@ int main()
     auto white = make_shared<DiffuseMaterial>(vec3(.73, .73, .73));
     auto green = make_shared<DiffuseMaterial>(vec3(.12, .45, .15));
 
-    auto metal = make_shared<ConductorMaterial>(0.1, 0.2, 2.0, 4.0);
-    auto dielectric = make_shared<DielectrivMaterial>(0.3, 0.2, 1 / 1.5);
+    auto metal = make_shared<ConductorMaterial>(0.1, 0.1, 2.0, 4.0);
+    auto dielectric = make_shared<DielectricMaterial>(0.3, 0.2, 1 / 1.5);
+    auto mirror = make_shared<ConductorMaterial>(0.0, 0.0, 2.0, 4.0);
 
-    addBox(point3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), vec3(-1, 0, 0), green);
-    addBox(point3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), vec3(1, 0, 0), red);
-    addBox(point3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), vec3(0, 1, 0), white);
-    addBox(point3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), vec3(0, -1, 0), white);
-    addBox(point3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, -1), white);
+    addBox(vec3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), vec3(-1, 0, 0), green);
+    addBox(vec3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), vec3(1, 0, 0), red);
+    addBox(vec3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), vec3(0, 1, 0), white);
+    addBox(vec3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), vec3(0, -1, 0), white);
+    addBox(vec3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, -1), white);
 
-    box(vec3(130, 0, 65), vec3(295, 165, 230), dielectric, Transform::RotateY(pi / 8));
+    box(vec3(130, 0, 65), vec3(295, 165, 230), mirror, Transform::RotateY(pi / 8));
     box(vec3(265, 0, 295), vec3(430, 330, 460), metal, Transform::RotateY(-pi / 50));
 
     vec3 a(343, 554, 332), b(-130, 0, 0), c(0, 0, -105);
@@ -119,7 +120,7 @@ int main()
 		vertexIndices.push_back(0); vertexIndices.push_back(1); vertexIndices.push_back(2);
         meshes.push_back(TriangleMesh(Transform(), vertexIndices, vertices));
 
-        DiffuseAreaLight areaLight(Transform(), SpectrasRGB, 5.0, make_shared<Triangle>(meshes.size() - 1, 0));
+        DiffuseAreaLight areaLight(Transform(), SpectrasRGB, 10.0, make_shared<Triangle>(meshes.size() - 1, 0));
         lights.push_back(make_shared<DiffuseAreaLight>(areaLight));
 		World.add(make_shared<GeometricPrimitive>(make_shared<Triangle>(meshes.size() - 1, 0), white, make_shared<DiffuseAreaLight>(areaLight)));
     }
@@ -133,13 +134,13 @@ int main()
 		vertexIndices.push_back(0); vertexIndices.push_back(1); vertexIndices.push_back(2);
         meshes.push_back(TriangleMesh(Transform(), vertexIndices, vertices));
 
-        DiffuseAreaLight areaLight(Transform(), SpectrasRGB, 5.0, make_shared<Triangle>(meshes.size() - 1, 0));
+        DiffuseAreaLight areaLight(Transform(), SpectrasRGB, 10.0, make_shared<Triangle>(meshes.size() - 1, 0));
         lights.push_back(make_shared<DiffuseAreaLight>(areaLight));
 		World.add(make_shared<GeometricPrimitive>(make_shared<Triangle>(meshes.size() - 1, 0), white, make_shared<DiffuseAreaLight>(areaLight)));
     }
 
     //lights.push_back(make_shared<PointLight>(Transform::Translate(vec3(278, 550, 278)), SpectrasRGB, 1.0));
-    lights.push_back(make_shared<DistantLight>(Transform::RotateX(4 * pi / 3), SpectrasRGB, 1.0));
+    lights.push_back(make_shared<DistantLight>(Transform::RotateX(5 * pi / 3), SpectrasRGB, 1.0));
     cam.render(BvhNode(make_shared<PrimitiveList>(World)), lights);
     return 0;
 }

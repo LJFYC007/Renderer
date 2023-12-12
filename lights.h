@@ -11,7 +11,7 @@ public :
 
 	std::optional<LightLiSample> SampleLi(LightSampleContext sample, vec2 u, SampledWaveLengths lambda, bool allowIncompletePDF = false) const override {
 		vec3 p = renderFromLight(vec3(0.0));
-		vec3 wi = normalize(p - sample.p);
+		vec3 wi = normalize(p - sample.p());
 		SampledSpectrum Li = intensity.Sample(lambda) * scale; // TODO: fix this, need add / (p - sample.p).lengthSquared();
 		return LightLiSample(Li, wi, 1.0, Interaction(p));
 	}
@@ -36,7 +36,7 @@ public:
 
 	std::optional<LightLiSample> SampleLi(LightSampleContext sample, vec2 u, SampledWaveLengths lambda, bool allowIncompletePDF = false) const override {
 		vec3 wi = normalize(renderFromLight(vec3(0, 0, 1)));
-		vec3 pOutside = sample.p + wi * 1000000.0; // TODO: fix this, need to multiply R
+		vec3 pOutside = sample.p() + wi * 1000000.0; // TODO: fix this, need to multiply R
 		SampledSpectrum Li = intensity.Sample(lambda) * scale;
 		return LightLiSample(Li, wi, 1.0, Interaction(pOutside));
 	}
@@ -64,18 +64,18 @@ public:
 	}
 
 	std::optional<LightLiSample> SampleLi(LightSampleContext sample, vec2 u, SampledWaveLengths lambda, bool allowIncompletePDF = false) const override {
-		ShapeSampleContext shapeSample(sample.p, sample.n, sample.ns, 0);
+		ShapeSampleContext shapeSample(sample.p(), sample.n, sample.ns, 0);
 		std::optional<ShapeSample> ss = shape->Sample(shapeSample, u);
-		if(!ss || ss->pdf == 0.0 || (ss->intr.p - sample.p).lengthSquared() == 0.0) return {};
+		if(!ss || ss->pdf == 0.0 || (ss->intr.p() - sample.p()).lengthSquared() == 0.0) return {};
 
-		vec3 wi = normalize(ss->intr.p - sample.p);
-		SampledSpectrum Li = L(ss->intr.p, ss->intr.n, ss->intr.uv, -wi, lambda);
+		vec3 wi = normalize(ss->intr.p() - sample.p());
+		SampledSpectrum Li = L(ss->intr.p(), ss->intr.n, ss->intr.uv, -wi, lambda);
 		if (!Li) return {};
 		return LightLiSample(Li, wi, ss->pdf, ss->intr);
 	}
 
 	double PDF_Li(LightSampleContext sample, vec3 wi, bool allowIncompletePDF = false) const override {
-		ShapeSampleContext shapeSample(sample.p, sample.n, sample.ns, 0);
+		ShapeSampleContext shapeSample(sample.p(), sample.n, sample.ns, 0);
 		return shape->PDF(shapeSample, wi);
 	}
 

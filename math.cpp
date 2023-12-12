@@ -22,6 +22,35 @@ vec3 Transform::operator()(const vec3& p) const
     return vec3(X, Y, Z) / W;
 }
 
+Vector3fi Transform::operator()(const Vector3fi& p) const
+{
+    double x = p.x.Midpoint(), y = p.y.Midpoint(), z = p.z.Midpoint();
+    double X = mat[0][0] * x + mat[0][1] * y + mat[0][2] * z + mat[0][3];
+    double Y = mat[1][0] * x + mat[1][1] * y + mat[1][2] * z + mat[1][3];
+    double Z = mat[2][0] * x + mat[2][1] * y + mat[2][2] * z + mat[2][3];
+    double W = mat[3][0] * x + mat[3][1] * y + mat[3][2] * z + mat[3][3];
+    assert(W != 0);
+
+    vec3 pError;
+    if (p.IsExact()) {
+        pError.a[0] = gamma(3) * (std::abs(mat[0][0] * x) + std::abs(mat[0][1] * y) + std::abs(mat[0][2] * z) + mat[0][3]);
+        pError.a[1] = gamma(3) * (std::abs(mat[1][0] * x) + std::abs(mat[1][1] * y) + std::abs(mat[1][2] * z) + mat[1][3]);
+        pError.a[2] = gamma(3) * (std::abs(mat[2][0] * x) + std::abs(mat[2][1] * y) + std::abs(mat[2][2] * z) + mat[2][3]);
+    }
+    else {
+        vec3 pInError = p.Error();
+        pError.a[0] = (gamma(3) + 1) * (std::abs(mat[0][0]) * pInError.a[0] + std::abs(mat[0][1]) * pInError.a[1] + std::abs(mat[0][2]) * pInError.a[2]) +
+            gamma(3) * (std::abs(mat[0][0] * x) + std::abs(mat[0][1] * y) + std::abs(mat[0][2] * z) + std::abs(mat[0][3]));
+        pError.a[1] = (gamma(3) + 1) * (std::abs(mat[1][0]) * pInError.a[0] + std::abs(mat[1][1]) * pInError.a[1] + std::abs(mat[1][2]) * pInError.a[2]) +
+            gamma(3) * (std::abs(mat[1][0] * x) + std::abs(mat[1][1] * y) + std::abs(mat[1][2] * z) + std::abs(mat[1][3]));
+        pError.a[2] = (gamma(3) + 1) * (std::abs(mat[2][0]) * pInError.a[0] + std::abs(mat[2][1]) * pInError.a[1] + std::abs(mat[2][2]) * pInError.a[2]) +
+            gamma(3) * (std::abs(mat[2][0] * x) + std::abs(mat[2][1] * y) + std::abs(mat[2][2] * z) + std::abs(mat[2][3]));
+    }
+
+    if (W == 1) return Vector3fi(vec3(X, Y, Z), pError);
+    return Vector3fi(vec3(X, Y, Z), pError) / W;
+}
+
 Transform Transform::Translate(const vec3& delta)
 {
     double matData[4][4] = {

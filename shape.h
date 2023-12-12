@@ -25,8 +25,10 @@ struct ShapeSample
 
 struct ShapeSampleContext
 {
-	ShapeSampleContext(vec3 _p, vec3 _n, vec3 _ns, double _t) : p(_p), n(_n), ns(_ns), t(_t) {}
-	vec3 p, n, ns;
+	ShapeSampleContext(Vector3fi _pi, vec3 _n, vec3 _ns, double _t) : pi(_pi), n(_n), ns(_ns), t(_t) {}
+	vec3 p() const { return vec3(pi.x.Midpoint(), pi.y.Midpoint(), pi.z.Midpoint()); }
+	Vector3fi pi;
+	vec3 n, ns;
 	double t;
 };
 
@@ -131,7 +133,11 @@ public:
 		dndu = normalize(dndu);
 		dndv = normalize(dndv);
 
-		SurfaceInteraction intr(p, uv, -r.rd, p1 - p0, p2 - p0, dndu, dndv, ints->t, false);
+		vec3 ti(1 - ints->u - ints->v, ints->u, ints->v);
+		vec3 pAbsSum = Abs(ti.x() * p0) + Abs(ti.y() * p1) + Abs(ti.z() * p2);
+		vec3 pError = gamma(7) * pAbsSum;
+
+		SurfaceInteraction intr(Vector3fi(p, pError), uv, -r.rd, p1 - p0, p2 - p0, dndu, dndv, ints->t, false);
 		return ShapeIntersection{ intr, ints->t };
 	}
 
@@ -170,26 +176,28 @@ public:
 		vec3 ns = b.x() * mesh->vertices[v[0]].n + b.y() * mesh->vertices[v[1]].n + b.z() * mesh->vertices[v[2]].n;
 		n = FaceForward(n, ns);
 		vec2 uvSample = b.x() * mesh->vertices[v[0]].uv + b.y() * mesh->vertices[v[1]].uv + b.z() * mesh->vertices[v[2]].uv;
-		return ShapeSample{Interaction(p, n, uvSample), 1 / Area()};
+		vec3 pAbsSum = Abs(b.x() * p0) + Abs(b.y() * p1) + Abs(b.z() * p2);
+		vec3 pError = gamma(6) * pAbsSum;
+		return ShapeSample{Interaction(Vector3fi(p, pError), n, uvSample), 1 / Area()};
 	}
 
 	std::optional<ShapeSample> Sample(ShapeSampleContext sample, vec2 u) const override {
 		std::optional<ShapeSample> ss = Sample(u);
 		if (!ss) return {};
-		vec3 wi = ss->intr.p - sample.p;
+		vec3 wi = ss->intr.p() - sample.p();
 		if (wi.lengthSquared() == 0.0) return ShapeSample{ ss->intr, 0.0 };
 		wi = normalize(wi);
-		double pdf = ss->pdf * (sample.p - ss->intr.p).lengthSquared() / std::abs(dot(ss->intr.n, -wi));
+		double pdf = ss->pdf * (sample.p() - ss->intr.p()).lengthSquared() / std::abs(dot(ss->intr.n, -wi));
 		if (std::isinf(pdf)) pdf = 0.0;
 		return ShapeSample{ ss->intr, pdf };
 	}
 
 	double PDF(ShapeSampleContext sample, vec3 wi) const override {
-		ray r(sample.p, wi);
-		std::optional<ShapeIntersection> isect = Intersect(r, interval(0.001, infinity));
+		ray r = SpawnRay(sample.pi, sample.n, wi);
+		std::optional<ShapeIntersection> isect = Intersect(r, interval(0, infinity));
 		if (!isect) return 0.0;
 		SurfaceInteraction intr = isect->intr;
-		double pdf = (sample.p - intr.p).lengthSquared() / std::abs(dot(intr.n, -wi)) / Area();
+		double pdf = 1.0 * (sample.p() - intr.p()).lengthSquared() / std::abs(dot(intr.n, -wi)) / Area();
 		if (std::isinf(pdf)) pdf = 0.0;
 		return pdf;
 	}
