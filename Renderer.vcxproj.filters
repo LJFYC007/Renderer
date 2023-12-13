@@ -104,6 +104,9 @@
     <ClInclude Include="lights.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="textures.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="material.h">

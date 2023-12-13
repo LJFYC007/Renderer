@@ -6,7 +6,7 @@
 #include "math.h"
 #include "camera.h"
 #include "material.h"
-#include "texture.h"
+#include "textures.h"
 #include "colorspace.h"
 #include "shape.h"
 #include "model.h"
@@ -90,9 +90,9 @@ int main()
     //Model("resources/cyborg.obj", material2);
     */
 
-    auto red = make_shared<DiffuseMaterial>(vec3(.65, .05, .05));
-    auto white = make_shared<DiffuseMaterial>(vec3(.73, .73, .73));
-    auto green = make_shared<DiffuseMaterial>(vec3(.12, .45, .15));
+    auto red = make_shared<DiffuseMaterial>(make_shared<SpectrumConstantTexture>(vec3(.65, .05, .05)));
+    auto white = make_shared<DiffuseMaterial>(make_shared<SpectrumConstantTexture>(vec3(.73, .73, .73)));
+    auto green = make_shared<DiffuseMaterial>(make_shared<SpectrumConstantTexture>(vec3(.12, .45, .15)));
 
     auto metal = make_shared<ConductorMaterial>(0.1, 0.1, 2.0, 4.0);
     auto dielectric = make_shared<DielectricMaterial>(0.3, 0.2, 1 / 1.5);

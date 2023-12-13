@@ -27,7 +27,7 @@ public:
 	vec3 vup = vec3(0.0, 1.0, 0.0);
 	double defocusAngle = 0.0;
 	double focusDist = 10.0;
-	int samplePixel = 1024;
+	int samplePixel = 64;
 	int maxDepth = 10;
 
 	void render(const BvhNode& World, const std::vector<shared_ptr<Light>>& _lights)
@@ -185,7 +185,7 @@ private:
 
 			SurfaceInteraction intr = isect->intr;
 			if (depth++ == maxDepth) break;
-			BSDF bsdf = intr.material->GetBSDF(intr.n, intr.dpdu, lambda);
+			BSDF bsdf = intr.material->GetBSDF(intr, lambda);
 			if (IsNonSpecular(bsdf.Flags())) {
 				SampledSpectrum Ld = SampleLd(-r.rd, intr, bsdf, lambda, World);
 				L = L + beta * Ld;	

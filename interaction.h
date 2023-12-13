@@ -48,4 +48,5 @@ public:
 	shared_ptr<Light> areaLight;
 	vec3 dpdx, dpdy;
 	double dudx, dvdx, dudy, dvdy;
+	int faceIndex = 0;
 };

@@ -176,6 +176,7 @@
     <ClInclude Include="shape.h" />
     <ClInclude Include="spectrum.h" />
     <ClInclude Include="texture.h" />
+    <ClInclude Include="textures.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="material.h" />

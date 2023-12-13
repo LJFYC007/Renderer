@@ -1,6 +1,7 @@
 #pragma once
 #include "math.h"
-#include "texture.h"
+#include "textures.h"
+#include "interaction.h"
 #include "bsdf.h"
 #include "bxdfs.h"
 
@@ -11,20 +12,19 @@ class Material
 {
 public:
     virtual ~Material() = default;
-    virtual BSDF GetBSDF(vec3 n, vec3 dpduv, const SampledWaveLengths& sample) const = 0;
+    virtual BSDF GetBSDF(SurfaceInteraction intr, const SampledWaveLengths& lambda) const = 0;
 };
 
 class DiffuseMaterial : public Material {
 public:
-    DiffuseMaterial(const vec3& a) : albedo(make_shared<solidColor>(a)) {}
-    DiffuseMaterial(shared_ptr<texture> _albedo) : albedo(_albedo) {}
-    BSDF GetBSDF(vec3 n, vec3 dpduv, const SampledWaveLengths& sample) const override {
-        SampledSpectrum r = albedo->value(0, 0, vec3(0)).Sample(sample);
-        return BSDF(n, dpduv, make_shared<DiffuseBxDF>(r));
+    DiffuseMaterial(shared_ptr<SpectrumTexture> _albedo) : albedo(_albedo) {}
+    BSDF GetBSDF(SurfaceInteraction intr, const SampledWaveLengths& lambda) const override {
+        SampledSpectrum r = albedo->Evaluate(intr, lambda);
+        return BSDF(intr.n, intr.dpdu, make_shared<DiffuseBxDF>(r));
     }
 
 private:
-    shared_ptr<texture> albedo;
+    shared_ptr<SpectrumTexture> albedo;
 };
 
 
@@ -32,8 +32,8 @@ class ConductorMaterial : public Material {
 public:
     ConductorMaterial(double _alphax, double _alphay, double _eta, double _k) : alphax(_alphax), alphay(_alphay), eta(_eta), k(_k) {}
 
-    BSDF GetBSDF(vec3 n, vec3 dpduv, const SampledWaveLengths& sample) const override {
-        return BSDF(n, dpduv, make_shared<ConductorBxDF>(TrowbridgeReitzDistribution(alphax, alphay), SampledSpectrum(eta), SampledSpectrum(k)));
+    BSDF GetBSDF(SurfaceInteraction intr, const SampledWaveLengths& lambda) const override {
+        return BSDF(intr.n, intr.dpdu, make_shared<ConductorBxDF>(TrowbridgeReitzDistribution(alphax, alphay), SampledSpectrum(eta), SampledSpectrum(k)));
     }
 
 private:
@@ -44,8 +44,8 @@ class DielectricMaterial : public Material {
 public:
     DielectricMaterial(double _alphax, double _alphay, double _eta) : alphax(_alphax), alphay(_alphay), eta(_eta) {}
 
-    BSDF GetBSDF(vec3 n, vec3 dpduv, const SampledWaveLengths& sample) const override {
-        return BSDF(n, dpduv, make_shared<DielectricBxDF>(TrowbridgeReitzDistribution(alphax, alphay), eta));
+    BSDF GetBSDF(SurfaceInteraction intr, const SampledWaveLengths& lambda) const override {
+        return BSDF(intr.n, intr.dpdu, make_shared<DielectricBxDF>(TrowbridgeReitzDistribution(alphax, alphay), eta));
     }
 
 private:
