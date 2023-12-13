@@ -20,7 +20,7 @@ public:
     DiffuseMaterial(shared_ptr<SpectrumTexture> _albedo) : albedo(_albedo) {}
     BSDF GetBSDF(SurfaceInteraction intr, const SampledWaveLengths& lambda) const override {
         SampledSpectrum r = albedo->Evaluate(intr, lambda);
-        return BSDF(intr.n, intr.dpdu, make_shared<DiffuseBxDF>(r));
+        return BSDF(intr.n, intr.shading.dpdu, make_shared<DiffuseBxDF>(r));
     }
 
 private:
@@ -33,7 +33,7 @@ public:
     ConductorMaterial(double _alphax, double _alphay, double _eta, double _k) : alphax(_alphax), alphay(_alphay), eta(_eta), k(_k) {}
 
     BSDF GetBSDF(SurfaceInteraction intr, const SampledWaveLengths& lambda) const override {
-        return BSDF(intr.n, intr.dpdu, make_shared<ConductorBxDF>(TrowbridgeReitzDistribution(alphax, alphay), SampledSpectrum(eta), SampledSpectrum(k)));
+        return BSDF(intr.n, intr.shading.dpdu, make_shared<ConductorBxDF>(TrowbridgeReitzDistribution(alphax, alphay), SampledSpectrum(eta), SampledSpectrum(k)));
     }
 
 private:
@@ -45,7 +45,7 @@ public:
     DielectricMaterial(double _alphax, double _alphay, double _eta) : alphax(_alphax), alphay(_alphay), eta(_eta) {}
 
     BSDF GetBSDF(SurfaceInteraction intr, const SampledWaveLengths& lambda) const override {
-        return BSDF(intr.n, intr.dpdu, make_shared<DielectricBxDF>(TrowbridgeReitzDistribution(alphax, alphay), eta));
+        return BSDF(intr.n, intr.shading.dpdu, make_shared<DielectricBxDF>(TrowbridgeReitzDistribution(alphax, alphay), eta));
     }
 
 private:
