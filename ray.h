@@ -30,14 +30,12 @@ inline ray SpawnRay(Vector3fi pi, vec3 n, vec3 d) {
 }
 
 inline ray SpawnRayTo(Vector3fi pFrom, vec3 n, vec3 pTo) {
-	vec3 d = pTo - vec3(pFrom.x.Midpoint(), pFrom.y.Midpoint(), pFrom.z.Midpoint());
+	vec3 d = pTo - vec3(pFrom);
 	return SpawnRay(pFrom, n, d);
 }
 
 inline ray SpawnRayTo(Vector3fi pFrom, vec3 nFrom, Vector3fi pTo, vec3 nTo) {
-	vec3 pto(pTo.x.Midpoint(), pTo.y.Midpoint(), pTo.z.Midpoint());
-	vec3 pfrom(pFrom.x.Midpoint(), pFrom.y.Midpoint(), pFrom.z.Midpoint());
-	vec3 pf = OffsetRayOrigin(pFrom, nFrom, pto - pfrom);
-	vec3 pt = OffsetRayOrigin(pTo, nTo, pf - pto);
+	vec3 pf = OffsetRayOrigin(pFrom, nFrom, vec3(pTo) - vec3(pFrom));
+	vec3 pt = OffsetRayOrigin(pTo, nTo, pf - vec3(pTo));
 	return ray(pf, pt - pf);
 }

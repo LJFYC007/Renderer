@@ -3,6 +3,7 @@
 #include "spectrum.h"
 #include "colorspace.h"
 #include "color.h"
+#include "interaction.h"
 
 #include <memory>
 using std::shared_ptr;
@@ -44,4 +45,25 @@ public:
 		bool isEven = (x + y + z) % 2 == 0;
 		return isEven ? even->value(u, v, p) : odd->value(u, v, p);
 	}
+};
+
+struct TextureEvalContext 
+{
+	TextureEvalContext(const Interaction& intr) : p(intr.pi), uv(intr.uv) {}
+	vec3 p, dpdx, dpdy, n;
+	vec2 uv;
+	double dudx = 0, dudy = 0, dvdx = 0, dvdy = 0;
+	int faceIndex = 0;
+};
+
+class FloatTexture
+{
+public:
+	virtual double Evaluate(TextureEvalContext ctx) const = 0;
+};
+
+class SpectrumTexture
+{
+public:
+	virtual SampledSpectrum Evaluate(TextureEvalContext ctx) const = 0;
 };

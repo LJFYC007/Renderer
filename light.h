@@ -19,7 +19,7 @@ public :
 	vec3 n, ns;
 	LightSampleContext() = default;
 	LightSampleContext(const SurfaceInteraction& intr) : pi(intr.pi), n(intr.n), ns(intr.shading.n) {}
-	vec3 p() const { return vec3(pi.x.Midpoint(), pi.y.Midpoint(), pi.z.Midpoint()); }
+	vec3 p() const { return vec3(pi); }
 };
 
 class LightLiSample {

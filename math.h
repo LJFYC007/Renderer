@@ -18,19 +18,16 @@ inline double PowerHeuristic(int nf, double fPdf, int ng, double gPdf) {
 inline double gamma(int n) {
 	return (n * MachineEpsilon) / (1 - n * MachineEpsilon);
 }
-
 inline uint64_t DoubleToBits(double f) {
 	uint64_t ui;
 	memcpy(&ui, &f, sizeof(double));
 	return ui;
 }
-
 inline double BitsToDouble(uint64_t ui) {
 	double f;
 	memcpy(&f, &ui, sizeof(uint64_t));
 	return f;
 }
-
 inline double NextDoubleUp(double v) {
 	if (std::isinf(v) && v > 0.0) return v;
 	if (v == -0.f) v = 0.f;
@@ -39,7 +36,6 @@ inline double NextDoubleUp(double v) {
 	else --ui;
 	return BitsToDouble(ui);
 }
-
 inline double NextDoubleDown(double v) {
 	if (std::isinf(v) && v < 0.0) return v;
 	if (v == 0.f) v = -0.f;
@@ -314,6 +310,8 @@ public:
 	Vector3fi operator -(const double& f) const { return Vector3fi(x - f, y - f, z - f); }
 	Vector3fi operator *(const double& f) const { return Vector3fi(x * f, y * f, z * f); }
 	Vector3fi operator /(const double& f) const { return Vector3fi(x / f, y / f, z / f); }
+
+	operator vec3() const { return vec3(x.Midpoint(), y.Midpoint(), z.Midpoint()); }
 };
 
 // =========== matrix ============

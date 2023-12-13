@@ -26,7 +26,7 @@ struct ShapeSample
 struct ShapeSampleContext
 {
 	ShapeSampleContext(Vector3fi _pi, vec3 _n, vec3 _ns, double _t) : pi(_pi), n(_n), ns(_ns), t(_t) {}
-	vec3 p() const { return vec3(pi.x.Midpoint(), pi.y.Midpoint(), pi.z.Midpoint()); }
+	vec3 p() const { return vec3(pi); }
 	Vector3fi pi;
 	vec3 n, ns;
 	double t;

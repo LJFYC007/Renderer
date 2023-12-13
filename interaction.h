@@ -15,7 +15,7 @@ public:
 	Interaction(Vector3fi _pi) : pi(_pi) {}
 	Interaction(Vector3fi _pi, vec3 _n, vec2 _uv) : pi(_pi), n(_n), uv(_uv) {}
 	Interaction(Vector3fi _pi, vec3 _n, vec2 _uv, vec3 _wo, double _t) : pi(_pi), n(_n), uv(_uv), wo(_wo), t(_t) {}
-	vec3 p() const { return vec3(pi.x.Midpoint(), pi.y.Midpoint(), pi.z.Midpoint()); }
+	vec3 p() const { return vec3(pi); }
 
 	Vector3fi pi;
 	vec3 wo, n;
