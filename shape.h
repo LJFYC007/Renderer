@@ -78,6 +78,7 @@ public:
 		{
 			vertices[i].p = ObjectToWorld(_vertices[i].p);
 			vertices[i].n = ObjectToWorld(_vertices[i].n);
+			vertices[i].uv = _vertices[i].uv;
 		}
 	}
 };

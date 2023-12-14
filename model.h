@@ -3,6 +3,7 @@
 #include "shape.h"
 #include "material.h"
 #include "light.h"
+#include "textures.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -13,44 +14,64 @@
 
 using std::shared_ptr;
 using std::make_shared;
-using std::string;
 using std::vector;
 
 class Model
 {
 public:
-	bool gammaCorrection;
-
-	Model(string const& path) { loadModel(path); }
-
-private:
-	void loadModel(string const& path)
-	{
+	Model(PrimitiveList& World, std::string const& path) {
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		{
-			exit(-1);
+			assert(-1);
 			return;
 		}
-		processNode(scene->mRootNode, scene);
+		processNode(World, scene->mRootNode, scene);
 	}
 
-	void processNode(aiNode* node, const aiScene* scene)
+private:
+	vector<shared_ptr<ImageTexture>> texturesLoaded;
+
+	void processNode(PrimitiveList& World, aiNode* node, const aiScene* scene)
 	{
 		for (unsigned int i = 0; i < node->mNumMeshes; ++i)
 		{
 			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-			meshes.push_back(processMesh(mesh, scene));
+			processMesh(World, mesh, scene);
 		}
 		for (unsigned int i = 0; i < node->mNumChildren; ++i)
-			processNode(node->mChildren[i], scene);
+			processNode(World, node->mChildren[i], scene);
 	}
 
-	TriangleMesh processMesh(aiMesh* mesh, const aiScene* scene)
+	void processMesh(PrimitiveList& World, aiMesh* mesh, const aiScene* scene)
 	{
 		vector<Vertex> vertices;
 		vector<int> indices;
+		shared_ptr<ImageTexture> texture;
+
+		if (mesh->mMaterialIndex >= 0) {
+			aiMaterial* mat = scene->mMaterials[mesh->mMaterialIndex];
+
+			aiString str;
+			mat->GetTexture(aiTextureType_DIFFUSE, 0, &str);
+			std::string texturePath = "resources/" + (std::string)str.C_Str();
+			bool skip = false;
+
+			for (auto& loadedTexture : texturesLoaded) {
+				if (std::strcmp(texturePath.c_str(), loadedTexture->GetPath().c_str()) == 0) {
+					texture = loadedTexture;
+					skip = true;
+					break;
+				}
+			}
+
+			if (!skip) { 				
+				UVMapping mapping;
+				texture = make_shared<ImageTexture>(mapping, texturePath, 1);
+				texturesLoaded.push_back(texture); 			
+			}
+		}
 
 		for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
 		{
@@ -89,6 +110,11 @@ private:
 		if (mesh->mMaterialIndex >= 0)
 			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-		return TriangleMesh(SquareMatrix<4>(), indices, vertices);
+		shared_ptr<DiffuseMaterial> material = make_shared<DiffuseMaterial>(texture);
+		meshes.push_back(TriangleMesh(Transform::Translate(vec3(0, -100, 278)) * Transform::Scale(4, 4, 4), indices, vertices));
+		for (int i = 0; i < meshes.back().nTriangles; ++i) {
+			shared_ptr<Triangle> triangle = make_shared<Triangle>(meshes.size() - 1, i);
+			World.add(make_shared<SimplePrimitive>(triangle, material));
+		}
 	}
 };

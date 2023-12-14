@@ -485,6 +485,9 @@ public :
 
 	vec3 operator()(const vec3& p) const;
 	Vector3fi operator()(const Vector3fi& p) const;
+	Transform operator *(Transform t2) const {
+		return Transform(mat * t2.mat, t2.inv * inv);
+	}
 	static Transform Translate(const vec3& delta);
 	static Transform Scale(double x, double y, double z);
 	static Transform RotateX(double theta);

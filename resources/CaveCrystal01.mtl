@@ -1,0 +1,11 @@
+# Created with Anim8or 1.00
+# Object "CaveCrystal01":
+
+newmtl CaveCrystal
+Ka 0.114 0.114 0.114
+Kd 0.373 0.373 0.373
+Ks 0.224 0.224 0.224
+Ns 738.6
+map_Kd CaveCrystal1_Base_Diffuse.png
+map_Ks CaveCrystal1_Base_Specular.png
+

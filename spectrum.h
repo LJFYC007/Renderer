@@ -492,10 +492,10 @@ public:
 			values[i - lambdaMin] = _values[i - lambdaMin];
 	}
 
-	double operator()(double lambda) const override {
-		int offset = std::lround(lambda) - lambdaMin;
-		if (offset < 0 || offset >= values.size()) return 0;
-		return values[offset];
+	inline double operator()(double lambda) const override {
+		int offset = std::lround(lambda);
+		if (offset < lambdaMin || offset > lambdaMax) return 0;
+		return values[offset - lambdaMin];
 	}
 
 	double MaxValue() const override { return lambdaMax; }

@@ -54,16 +54,18 @@ int main()
     auto dielectric = make_shared<DielectricMaterial>(0.3, 0.2, 1 / 1.5);
     auto mirror = make_shared<ConductorMaterial>(0.0, 0.0, 2.0, 4.0);
 
-    addBox(vec3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), vec3(-1, 0, 0), green);
-    addBox(vec3(0, 0, 0), vec3(0, 555, 0), vec3(0, 0, 555), vec3(1, 0, 0), red);
-    addBox(vec3(0, 0, 0), vec3(555, 0, 0), vec3(0, 0, 555), vec3(0, 1, 0), white);
-    addBox(vec3(555, 555, 555), vec3(-555, 0, 0), vec3(0, 0, -555), vec3(0, -1, 0), white);
-    addBox(vec3(0, 0, 555), vec3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, -1), white);
+    Model(World, "resources/CaveCrystal01.obj");
 
-    box(vec3(130, 0, 65), vec3(295, 165, 230), mirror, Transform::RotateY(pi / 8));
-    box(vec3(265, 0, 295), vec3(430, 330, 460), metal, Transform::RotateY(-pi / 50));
+    addBox(vec3(277, -278, 0), vec3(0, 555, 0), vec3(0, 0, 555), vec3(-1, 0, 0), green);
+    addBox(vec3(-278, -278, 0), vec3(0, 555, 0), vec3(0, 0, 555), vec3(1, 0, 0), red);
+    addBox(vec3(-278, -278, 0), vec3(555, 0, 0), vec3(0, 0, 555), vec3(0, 1, 0), white);
+    addBox(vec3(277, 277, 555), vec3(-555, 0, 0), vec3(0, 0, -555), vec3(0, -1, 0), white);
+    addBox(vec3(-278, -278, 555), vec3(555, 0, 0), vec3(0, 555, 0), vec3(0, 0, -1), white);
 
-    vec3 a(343, 554, 332), b(-130, 0, 0), c(0, 0, -105);
+    // box(vec3(-148, -278, 65), vec3(17, -113, 230), mirror, Transform::RotateY(pi / 8));
+    // box(vec3(-13, -278, 295), vec3(152, 52, 460), metal, Transform::RotateY(-pi / 50));
+
+    vec3 a(65, 276, 332), b(-130, 0, 0), c(0, 0, -105);
     vec3 n = (0, -1, 0);
 
     std::vector<shared_ptr<Light>> lights;
@@ -97,6 +99,7 @@ int main()
 
     //lights.push_back(make_shared<PointLight>(Transform::Translate(vec3(278, 550, 278)), SpectrasRGB, 1.0));
     lights.push_back(make_shared<DistantLight>(Transform::RotateX(5 * pi / 3), SpectrasRGB, 1.0));
+
     cam.render(BvhNode(make_shared<PrimitiveList>(World)), lights);
     return 0;
 }

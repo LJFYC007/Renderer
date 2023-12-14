@@ -19,11 +19,11 @@ static vec3 ans[3010][2210];
 class camera
 {
 public:
-	const int ImageWidth = 400;
-	const int ImageHeight = 400;
+	const int ImageWidth = 200;
+	const int ImageHeight = 200;
 	double fov = 40.0;
-	vec3 lookfrom = vec3(278.0, 278.0, -800.0);
-	vec3 lookat = vec3(278.0, 278.0, 0.0);
+	vec3 lookfrom = vec3(0.0, 0.0, -800.0);
+	vec3 lookat = vec3(0.0, 0.0, 0.0);
 	vec3 vup = vec3(0.0, 1.0, 0.0);
 	double defocusAngle = 0.0;
 	double focusDist = 10.0;

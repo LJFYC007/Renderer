@@ -95,10 +95,19 @@ public:
 		}
 		else
 		{
-			std::sort(objects.begin() + start, objects.begin() + end, comparator);
 			auto mid = start + n / 2;
-			left = make_shared<BvhNode>(objects, start, mid);
-			right = make_shared<BvhNode>(objects, mid, end);
+			std::nth_element(objects.begin() + start, objects.begin() + mid, objects.begin() + end, comparator);
+#pragma omp parallel sections
+			{
+#pragma omp section
+				{
+					left = make_shared<BvhNode>(objects, start, mid);
+				}
+#pragma omp section
+				{
+					right = make_shared<BvhNode>(objects, mid, end);
+				}
+			}
 		}
 		box = AABB(left->Bounds(), right->Bounds());
 	}
