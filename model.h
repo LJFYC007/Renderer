@@ -19,7 +19,7 @@ using std::vector;
 class Model
 {
 public:
-	Model(PrimitiveList& World, std::string const& path) {
+	Model(std::vector<shared_ptr<Primitive>>& World, std::string const& path) {
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
@@ -33,7 +33,7 @@ public:
 private:
 	vector<shared_ptr<ImageTexture>> texturesLoaded;
 
-	void processNode(PrimitiveList& World, aiNode* node, const aiScene* scene)
+	void processNode(std::vector<shared_ptr<Primitive>>& World, aiNode* node, const aiScene* scene)
 	{
 		for (unsigned int i = 0; i < node->mNumMeshes; ++i)
 		{
@@ -44,7 +44,7 @@ private:
 			processNode(World, node->mChildren[i], scene);
 	}
 
-	void processMesh(PrimitiveList& World, aiMesh* mesh, const aiScene* scene)
+	void processMesh(std::vector<shared_ptr<Primitive>>& World, aiMesh* mesh, const aiScene* scene)
 	{
 		vector<Vertex> vertices;
 		vector<int> indices;
@@ -113,8 +113,7 @@ private:
 		shared_ptr<DiffuseMaterial> material = make_shared<DiffuseMaterial>(texture);
 		meshes.push_back(TriangleMesh(Transform::Translate(vec3(0, -100, 278)) * Transform::Scale(4, 4, 4), indices, vertices));
 		for (int i = 0; i < meshes.back().nTriangles; ++i) {
-			shared_ptr<Triangle> triangle = make_shared<Triangle>(meshes.size() - 1, i);
-			World.add(make_shared<SimplePrimitive>(triangle, material));
+			World.push_back(make_shared<SimplePrimitive>(make_shared<Triangle>(static_cast<int>(meshes.size()) - 1, i), material));
 		}
 	}
 };

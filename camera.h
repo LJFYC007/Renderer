@@ -1,5 +1,5 @@
 #pragma once
-#include "primitive.h"
+#include "bvh.h"
 #include "sample.h"
 #include "math.h"
 #include "interval.h"
@@ -19,18 +19,18 @@ static vec3 ans[3010][2210];
 class camera
 {
 public:
-	const int ImageWidth = 200;
-	const int ImageHeight = 200;
+	const int ImageWidth = 400;
+	const int ImageHeight = 400;
 	double fov = 40.0;
 	vec3 lookfrom = vec3(0.0, 0.0, -800.0);
 	vec3 lookat = vec3(0.0, 0.0, 0.0);
 	vec3 vup = vec3(0.0, 1.0, 0.0);
 	double defocusAngle = 0.0;
 	double focusDist = 10.0;
-	int samplePixel = 64;
+	int samplePixel = 256;
 	int maxDepth = 10;
 
-	void render(const BvhNode& World, const std::vector<shared_ptr<Light>>& _lights)
+	void render(const BVHAggregate& bvh, const std::vector<shared_ptr<Light>>& _lights)
 	{
 		initialize(_lights);
 #pragma omp parallel for schedule(dynamic) 
@@ -50,7 +50,7 @@ public:
 						vec3 ro = (defocusAngle <= 0.0) ? cameraCenter : cameraCenter + defocusDiskSample(defocusDiskU, defocusDiskV);
 						vec3 rd = pixel - ro;
 						SampledWaveLengths sample(randomDouble());
-						RGBColor rgb = sRGB.ToRGB((Li(ray(ro, rd), maxDepth, sample, World)).ToXYZ(sample));
+						RGBColor rgb = sRGB.ToRGB((Li(ray(ro, rd), maxDepth, sample, bvh)).ToXYZ(sample));
 						col = col + vec3(rgb.r, rgb.g, rgb.b) / samplePixel;
 					}
 
@@ -121,13 +121,13 @@ private:
 		defocusDiskV = v * defocusRadius;
 	}
 
-	bool Unoccluded(const BvhNode& World, const Interaction& p0, const Interaction& p1) const {
+	bool Unoccluded(const BVHAggregate& bvh, const Interaction& p0, const Interaction& p1) const {
 		ray r = SpawnRayTo(p0.pi, p0.n, p1.pi, p1.n);
-		std::optional<ShapeIntersection> isect = World.Intersect(r, interval(0, 0.9999999));
+		std::optional<ShapeIntersection> isect = bvh.Intersect(r, interval(0, 0.9999999));
 		return !isect;
 	}
 
-	SampledSpectrum SampleLd(vec3 wo, const SurfaceInteraction& intr, const BSDF& bsdf, SampledWaveLengths& lambda, const BvhNode& World) {
+	SampledSpectrum SampleLd(vec3 wo, const SurfaceInteraction& intr, const BSDF& bsdf, SampledWaveLengths& lambda, const BVHAggregate& bvh) {
 		std::optional<SampledLight> sampledLight = lightSampler->Sample(randomDouble());
 		if (!sampledLight) return {};
 		shared_ptr<Light> light = sampledLight->light;
@@ -137,7 +137,7 @@ private:
 
 		vec3 wi = ls->wi;
 		SampledSpectrum f = bsdf.f(wo, wi) * std::abs(dot(wi, intr.n));
-		if(!f || !Unoccluded(World, intr, ls->pLight)) return SampledSpectrum(0.0);
+		if(!f || !Unoccluded(bvh, intr, ls->pLight)) return SampledSpectrum(0.0);
 
 		double p_l = sampledLight->p * ls -> pdf;
 		double p_b = bsdf.PDF(wo, wi);
@@ -145,7 +145,7 @@ private:
 		return ls->L * w_l * f / p_l;
 	}
 
-	SampledSpectrum Li(ray r, const int maxDepth, SampledWaveLengths& lambda, const BvhNode& World) {
+	SampledSpectrum Li(ray r, const int maxDepth, SampledWaveLengths& lambda, const BVHAggregate& bvh) {
 		SampledSpectrum L(0.0), beta(1.0);
 		int depth = 0;
 		double p_b = 1.0, eta_scale = 1.0;
@@ -154,7 +154,7 @@ private:
 
 		while (beta) {
 			r.rd = normalize(r.rd);
-			std::optional<ShapeIntersection> isect = World.Intersect(r, interval(0, infinity));
+			std::optional<ShapeIntersection> isect = bvh.Intersect(r, interval(0, infinity));
 			if (!isect)
 			{
 				for (const auto &light : infiniteLights)
@@ -187,7 +187,7 @@ private:
 			if (depth++ == maxDepth) break;
 			BSDF bsdf = intr.material->GetBSDF(intr, lambda);
 			if (IsNonSpecular(bsdf.Flags())) {
-				SampledSpectrum Ld = SampleLd(-r.rd, intr, bsdf, lambda, World);
+				SampledSpectrum Ld = SampleLd(-r.rd, intr, bsdf, lambda, bvh);
 				L = L + beta * Ld;	
 			}
 

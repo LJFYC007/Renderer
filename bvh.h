@@ -2,50 +2,108 @@
 #include "math.h"
 #include "interval.h"
 #include "ray.h"
+#include "primitive.h"
 
-class bvh
+#include <vector>
+#include <memory>
+#include <atomic>
+using std::shared_ptr;
+
+enum class SplitMethod { SAH, HLBVH, Middle, EqualCounts };
+
+struct BVHBuildNode;
+struct alignas(32) LinearBVHNode
 {
-public : 
-	interval x, y, z;
+    AABB bounds;
+    union { int primitiveOffset, secondChildOffset; };
+    uint16_t nPrimitives;
+    uint8_t axis;
+};
 
-	bvh() {}
-	bvh(const interval& _x, const interval& _y, const interval& _z) : x(_x), y(_y), z(_z) {}
-	bvh(const vec3& a, const vec3& b) {
-		x = interval(fmin(a[0], b[0]), fmax(a[0], b[0]));
-		y = interval(fmin(a[1], b[1]), fmax(a[1], b[1]));
-		z = interval(fmin(a[2], b[2]), fmax(a[2], b[2]));
+
+struct BVHPrimitive
+{
+	BVHPrimitive() {}
+	BVHPrimitive(int _primitiveNumber, const AABB& _bounds)
+		: primitiveIndex(_primitiveNumber), bounds(_bounds) {}
+	int primitiveIndex;
+	AABB bounds;
+
+	vec3 Centroid() const { return 0.5 * vec3(bounds.x.center(), bounds.y.center(), bounds.z.center()); }
+};
+
+class BVHAggregate : public Primitive
+{
+public:
+	BVHAggregate(std::vector<shared_ptr<Primitive>> _primitives, int _maxPrimsInNode, SplitMethod _splitMethod = SplitMethod::SAH)
+		: primitives(_primitives), maxPrimesInNode(_maxPrimsInNode), splitMethod(_splitMethod) {
+		bvhPrimitives.resize(primitives.size());
+		for (int i = 0; i < primitives.size(); ++i)
+			bvhPrimitives[i] = BVHPrimitive(i, primitives[i]->Bounds());
+
+		std::vector<shared_ptr<Primitive>> orderedPrims(primitives.size());
+		BVHBuildNode* root;
+		std::atomic<int> totalNodes{ 0 };
+		std::atomic<int> orderedPrimOffset{ 0 };
+		root = buildRecursive(0, bvhPrimitives.size(), &totalNodes, &orderedPrimOffset, orderedPrims);
+		primitives.swap(orderedPrims);
+
+		bvhPrimitives.resize(0);
+		nodes = new LinearBVHNode[totalNodes];
+		int offset = 0;
+		flattenBVH(root, &offset);
 	}
-	bvh(const bvh& a, const bvh& b) {
-		x = interval(a.x, b.x);
-		y = interval(a.y, b.y);
-		z = interval(a.z, b.z);
+
+	AABB Bounds() const override {
+		return nodes[0].bounds;
 	}
 
-	const interval& axis(int n) const {
-		if (n == 0) return x;
-		if (n == 1) return y;
-		if (n == 2) return z;
-		return x;
-	}
-
-	bool hit(const ray& r, interval t) const {
-		for (int a = 0; a < 3; ++a) {
-			auto invD = 1 / r.rd[a];
-			auto orig = r.ro[a];
-
-			auto t0 = (axis(a).Min - orig) * invD;
-			auto t1 = (axis(a).Max - orig) * invD;
-
-			if (invD < 0)
-				std::swap(t0, t1);
-
-			if (t0 > t.Min) t.Min = t0;
-			if (t1 < t.Max) t.Max = t1;
-
-			if (t.Max <= t.Min)
-				return false;
+	std::optional<ShapeIntersection> Intersect(const ray& r, interval t) const override {
+		std::optional<ShapeIntersection> si;
+		int dirIsNeg[3] = { r.rd[0] < 0, r.rd[1] < 0, r.rd[2] < 0 };
+		int toVisitOffset = 0, currentNodeIndex = 0;
+		int nodesToVisit[64];
+		while (true) {
+			const LinearBVHNode* node = &nodes[currentNodeIndex];
+			if (node->bounds.Intersect(r, t)) {
+				if (node->nPrimitives > 0) {
+					for (int i = 0; i < node->nPrimitives; ++i) {
+						std::optional<ShapeIntersection> primSi = primitives[node->primitiveOffset + i]->Intersect(r, t);
+						if (primSi) {
+							si = primSi;
+							t.Max = si->tHit;
+						}
+					}
+					if (toVisitOffset == 0) break;
+					currentNodeIndex = nodesToVisit[--toVisitOffset];
+				}
+				else {
+					if (dirIsNeg[node->axis]) {
+						nodesToVisit[toVisitOffset++] = currentNodeIndex + 1;
+						currentNodeIndex = node->secondChildOffset;
+					}
+					else {
+						nodesToVisit[toVisitOffset++] = node->secondChildOffset;
+						currentNodeIndex = currentNodeIndex + 1;
+					}
+				}
+			}
+			else {
+				if (toVisitOffset == 0) break;
+				currentNodeIndex = nodesToVisit[--toVisitOffset];
+			}
 		}
-		return true;
+		return si;
 	}
+
+private:
+	int maxPrimesInNode;
+	std::vector<shared_ptr<Primitive>> primitives;
+	std::vector<BVHPrimitive> bvhPrimitives;
+	SplitMethod splitMethod;
+	LinearBVHNode* nodes = nullptr;
+
+	BVHBuildNode* buildRecursive(size_t begin, size_t end, std::atomic<int>* totalNodes, std::atomic<int>* orderedPrimOffset, std::vector<shared_ptr<Primitive>>& orderedPrims);
+	int flattenBVH(BVHBuildNode* node, int* offset);
 };
 

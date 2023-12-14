@@ -14,6 +14,7 @@ public :
 	double size() const { return Max - Min; }
 	bool contains(const double& x) const { return Min <= x && x <= Max; }
 	bool surrounds(const double& x) const { return Min < x && x < Max; }
+	double center() const { return (Min + Max) / 2; }
 
 	double clamp(const double& x) const {
 		if (x < Min) return Min; 

@@ -26,7 +26,40 @@ public:
 		y = interval(a.y, b.y);
 		z = interval(a.z, b.z);
 	}
+	AABB(const vec3& a) {
+		x = interval(a[0], a[0]);
+		y = interval(a[1], a[1]);
+		z = interval(a[2], a[2]);
+	}
+	
+	interval operator [](int i) const {
+		if (i == 0) return x;
+		if (i == 1) return y;
+		return z;
+	}
 
+	vec3 Diagonal() const { return vec3(x.Max - x.Min, y.Max - y.Min, z.Max - z.Min); }
+
+	vec3 Offset(vec3 p) const {
+		vec3 o = p - vec3(x.Min, y.Min, z.Min);
+		if ( x.Max > x.Min ) o[0] /= x.Max - x.Min;
+		if ( y.Max > y.Min ) o[1] /= y.Max - y.Min;
+		if ( z.Max > z.Min ) o[2] /= z.Max - z.Min;
+		return o;
+	}
+
+	double SurfaceArea() const {
+		vec3 d = Diagonal();
+		return 2 * (d[0] * d[1] + d[0] * d[2] + d[1] * d[2]);
+	}
+
+	int MaxDimension() const {
+		vec3 d = Diagonal();
+		if (d[0] > d[1] && d[0] > d[2]) return 0;
+		if (d[1] > d[2]) return 1;
+		return 2;
+
+	}
 
 	const interval& axis(int n) const {
 		if (n == 0) return x;
@@ -35,7 +68,8 @@ public:
 		return x;
 	}
 
-	bool Intersect(const ray& r, interval t, double& hitt0, double& hitt1) const {
+	bool Intersect(const ray& r, interval t) const {
+		double hitt0, hitt1;
 		for (int a = 0; a < 3; ++a) {
 			auto invD = 1 / r.rd[a];
 			auto orig = r.ro[a];

@@ -125,7 +125,7 @@ public:
 		vec3 edge2 = p2 - p0;
 		vec2 deltaUV1 = uv1 - uv0;
 		vec2 deltaUV2 = uv2 - uv0;
-		float invDet = 1.0f / (deltaUV1.x() * deltaUV2.y() - deltaUV1.y() * deltaUV2.x());
+		double invDet = 1.0 / (deltaUV1.x() * deltaUV2.y() - deltaUV1.y() * deltaUV2.x());
 		vec3 tangent = invDet * (deltaUV2.y() * edge1 - deltaUV1.y() * edge2);
 		vec3 bitangent = invDet * (-deltaUV2.x() * edge1 + deltaUV1.x() * edge2);
 		vec3 interpolatedNormal = normalize((1 - ints->u - ints->v) * n0 + ints->u * n1 + ints->v * n2);

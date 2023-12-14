@@ -28,7 +28,7 @@ public:
 
 	std::optional<SampledLight> Sample(double u) const override {
 		if (lights.empty()) return {};
-		int lightIndex = std::min<int>(u * lights.size(), lights.size() - 1);
+		int lightIndex = std::min(static_cast<int>(u * lights.size()), static_cast<int>(lights.size()) - 1);
 		return SampledLight { lights[lightIndex], 1.0 / lights.size() };
 	}
 

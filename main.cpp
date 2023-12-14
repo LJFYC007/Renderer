@@ -12,7 +12,7 @@
 #include "model.h"
 #include "lights.h"
 
-PrimitiveList World;
+std::vector<shared_ptr<Primitive>> World;
 
 void addBox(vec3 a, vec3 b, vec3 c, vec3 n, shared_ptr<Material> mat, Transform t = Transform())
 {
@@ -25,8 +25,8 @@ void addBox(vec3 a, vec3 b, vec3 c, vec3 n, shared_ptr<Material> mat, Transform 
     vertexIndices.push_back(0); vertexIndices.push_back(1); vertexIndices.push_back(2);
     vertexIndices.push_back(1); vertexIndices.push_back(2); vertexIndices.push_back(3);
     meshes.push_back(TriangleMesh(t, vertexIndices, vertices));
-    World.add(make_shared<SimplePrimitive>(make_shared<Triangle>(meshes.size() - 1, 0), mat));
-    World.add(make_shared<SimplePrimitive>(make_shared<Triangle>(meshes.size() - 1, 1), mat));
+    World.push_back(make_shared<SimplePrimitive>(make_shared<Triangle>(static_cast<int>(meshes.size()) - 1, 0), mat));
+    World.push_back(make_shared<SimplePrimitive>(make_shared<Triangle>(static_cast<int>(meshes.size()) - 1, 1), mat));
 }
 
 void box(vec3 a, vec3 b, shared_ptr<Material> mat, Transform t = Transform())
@@ -78,9 +78,10 @@ int main()
 		vertexIndices.push_back(0); vertexIndices.push_back(1); vertexIndices.push_back(2);
         meshes.push_back(TriangleMesh(Transform(), vertexIndices, vertices));
 
-        DiffuseAreaLight areaLight(Transform(), SpectrasRGB, 10.0, make_shared<Triangle>(meshes.size() - 1, 0));
+        shared_ptr<Triangle> triangle = make_shared<Triangle>(static_cast<int>(meshes.size()) - 1, 0);
+        DiffuseAreaLight areaLight(Transform(), SpectrasRGB, 10.0, triangle);
         lights.push_back(make_shared<DiffuseAreaLight>(areaLight));
-		World.add(make_shared<GeometricPrimitive>(make_shared<Triangle>(meshes.size() - 1, 0), white, make_shared<DiffuseAreaLight>(areaLight)));
+		World.push_back(make_shared<GeometricPrimitive>(triangle, white, make_shared<DiffuseAreaLight>(areaLight)));
     }
 
     {
@@ -92,14 +93,16 @@ int main()
 		vertexIndices.push_back(0); vertexIndices.push_back(1); vertexIndices.push_back(2);
         meshes.push_back(TriangleMesh(Transform(), vertexIndices, vertices));
 
-        DiffuseAreaLight areaLight(Transform(), SpectrasRGB, 10.0, make_shared<Triangle>(meshes.size() - 1, 0));
+        shared_ptr<Triangle> triangle = make_shared<Triangle>(static_cast<int>(meshes.size()) - 1, 0);
+        DiffuseAreaLight areaLight(Transform(), SpectrasRGB, 10.0, triangle);
         lights.push_back(make_shared<DiffuseAreaLight>(areaLight));
-		World.add(make_shared<GeometricPrimitive>(make_shared<Triangle>(meshes.size() - 1, 0), white, make_shared<DiffuseAreaLight>(areaLight)));
+		World.push_back(make_shared<GeometricPrimitive>(triangle, white, make_shared<DiffuseAreaLight>(areaLight)));
     }
 
     //lights.push_back(make_shared<PointLight>(Transform::Translate(vec3(278, 550, 278)), SpectrasRGB, 1.0));
     lights.push_back(make_shared<DistantLight>(Transform::RotateX(5 * pi / 3), SpectrasRGB, 1.0));
 
-    cam.render(BvhNode(make_shared<PrimitiveList>(World)), lights);
+    BVHAggregate bvh(World, 5);
+    cam.render(bvh, lights);
     return 0;
 }
