@@ -34,7 +34,7 @@ struct ShapeSampleContext
 
 class Shape
 {
-public : 
+public:
 	virtual AABB Bounds() const = 0;
 	virtual std::optional<ShapeIntersection> Intersect(const ray& r, interval t) const = 0;
 	// virtual bool IntersectP(const ray& r, interval t) const = 0;
@@ -51,10 +51,10 @@ public :
 	}
 };
 
-class TriangleIntersection 
+class TriangleIntersection
 {
 public:
-	double t, u, v;
+	double t, b0, b1, b2;
 };
 
 struct Vertex {
@@ -70,9 +70,10 @@ public:
 	int nTriangles, nVertices;
 	vector<int> vertexIndices;
 	vector<Vertex> vertices;
+	bool uvExists;
 
-	TriangleMesh(const Transform& ObjectToWorld, vector<int> _vertexIndices, vector<Vertex> _vertices) :
-		nTriangles(static_cast<int>(_vertexIndices.size()) / 3), nVertices(static_cast<int>(_vertices.size())), vertexIndices(_vertexIndices) {
+	TriangleMesh(const Transform& ObjectToWorld, vector<int> _vertexIndices, vector<Vertex> _vertices, bool _uvExists = true) :
+		nTriangles(static_cast<int>(_vertexIndices.size()) / 3), nVertices(static_cast<int>(_vertices.size())), vertexIndices(_vertexIndices), uvExists(_uvExists) {
 		vertices.resize(nVertices);
 		for (int i = 0; i < nVertices; ++i)
 		{
@@ -97,7 +98,7 @@ public:
 		const TriangleMesh* mesh = GetMesh();
 		const int* v = &mesh->vertexIndices[3 * triIndex];
 		vec3 p0 = mesh->vertices[v[0]].p, p1 = mesh->vertices[v[1]].p, p2 = mesh->vertices[v[2]].p;
-		return AABB(p0, p1,p2);
+		return AABB(p0, p1, p2);
 	}
 
 	std::optional<ShapeIntersection> Intersect(const ray& r, interval t) const override {
@@ -108,37 +109,22 @@ public:
 		std::optional<TriangleIntersection> ints = BasicIntersect(r, t, p0, p1, p2);
 		if (!ints) return {};
 
-		vec3 p = p0 + (p1 - p0) * ints->u + (p2 - p0) * ints->v;
-		vec2 uv = mesh->vertices[v[0]].uv * (1 - ints->u - ints->v) +
-			mesh->vertices[v[1]].uv * ints->u +
-			mesh->vertices[v[2]].uv * ints->v;
+		vec3 n0 = mesh->vertices[v[0]].n, n1 = mesh->vertices[v[1]].n, n2 = mesh->vertices[v[2]].n;
+		vec2 uv0 = mesh->vertices[v[0]].uv, uv1 = mesh->vertices[v[1]].uv, uv2 = mesh->vertices[v[2]].uv;
+		if (!mesh->uvExists) { uv0 = vec2(0, 0); uv1 = vec2(1, 0); uv2 = vec2(1, 1); }
+		vec3 p = p0 * ints->b0 + p1 * ints->b1 + p2 * ints->b2;
+		vec2 uv = uv0 * ints->b0 + uv1 * ints->b1 + uv2 * ints->b2;
 
-		vec3 n0 = mesh->vertices[v[0]].n;
-		vec3 n1 = mesh->vertices[v[1]].n;
-		vec3 n2 = mesh->vertices[v[2]].n;
+		vec2 duv02 = uv0 - uv2, duv12 = uv1 - uv2;
+		vec3 dp02 = p0 - p2, dp12 = p1 - p2;
+		double invdet = 1.0 / (duv02[0] * duv12[1] - duv02[1] * duv12[0]);
+		vec3 dpdu = (duv12[1] * dp02 - duv02[1] * dp12) * invdet;
+		vec3 dpdv = (duv02[0] * dp12 - duv12[0] * dp02) * invdet;
 
-		vec2 uv0 = mesh->vertices[v[0]].uv;
-		vec2 uv1 = mesh->vertices[v[1]].uv;
-		vec2 uv2 = mesh->vertices[v[2]].uv;
-
-		vec3 edge1 = p1 - p0;
-		vec3 edge2 = p2 - p0;
-		vec2 deltaUV1 = uv1 - uv0;
-		vec2 deltaUV2 = uv2 - uv0;
-		double invDet = 1.0 / (deltaUV1.x() * deltaUV2.y() - deltaUV1.y() * deltaUV2.x());
-		vec3 tangent = invDet * (deltaUV2.y() * edge1 - deltaUV1.y() * edge2);
-		vec3 bitangent = invDet * (-deltaUV2.x() * edge1 + deltaUV1.x() * edge2);
-		vec3 interpolatedNormal = normalize((1 - ints->u - ints->v) * n0 + ints->u * n1 + ints->v * n2);
-		vec3 dndu = cross(bitangent, interpolatedNormal);
-		vec3 dndv = cross(interpolatedNormal, tangent);
-		dndu = normalize(dndu);
-		dndv = normalize(dndv);
-
-		vec3 ti(1 - ints->u - ints->v, ints->u, ints->v);
-		vec3 pAbsSum = Abs(ti.x() * p0) + Abs(ti.y() * p1) + Abs(ti.z() * p2);
+		vec3 pAbsSum = Abs(ints->b0 * p0) + Abs(ints->b1 * p1) + Abs(ints->b2 * p2);
 		vec3 pError = gamma(7) * pAbsSum;
 
-		SurfaceInteraction intr(Vector3fi(p, pError), uv, -r.rd, p1 - p0, p2 - p0, dndu, dndv, ints->t, false);
+		SurfaceInteraction intr(Vector3fi(p, pError), uv, -r.rd, dpdu, dpdv, vec3(), vec3(), ints->t, false);
 		return ShapeIntersection{ intr, ints->t };
 	}
 
@@ -154,10 +140,10 @@ public:
 		if (!t.surrounds(T)) return {};
 
 		if (T >= 0 && U >= 0 && V >= 0 && (1 - U - V) >= 0)
-			return TriangleIntersection{ T, U, V };
+			return TriangleIntersection{ T, 1 - U - V, U, V };
 		return {};
 	}
-	
+
 	double Area() const override {
 		const TriangleMesh* mesh = GetMesh();
 		const int* v = &mesh->vertexIndices[3 * triIndex];
@@ -165,7 +151,7 @@ public:
 		return 0.5 * cross(p1 - p0, p2 - p0).length();
 	}
 
-	std::optional<ShapeSample> Sample(vec2 uv) const override { 
+	std::optional<ShapeSample> Sample(vec2 uv) const override {
 		const TriangleMesh* mesh = GetMesh();
 		const int* v = &mesh->vertexIndices[3 * triIndex];
 		vec3 p0 = mesh->vertices[v[0]].p, p1 = mesh->vertices[v[1]].p, p2 = mesh->vertices[v[2]].p;
@@ -173,13 +159,13 @@ public:
 		vec3 b = SampleUniformTriangle(uv);
 		vec3 p = b.x() * p0 + b.y() * p1 + b.z() * p2;
 
-		vec3 n = normalize(cross(p1 - p0, p2 - p0)); 
+		vec3 n = normalize(cross(p1 - p0, p2 - p0));
 		vec3 ns = b.x() * mesh->vertices[v[0]].n + b.y() * mesh->vertices[v[1]].n + b.z() * mesh->vertices[v[2]].n;
 		n = FaceForward(n, ns);
 		vec2 uvSample = b.x() * mesh->vertices[v[0]].uv + b.y() * mesh->vertices[v[1]].uv + b.z() * mesh->vertices[v[2]].uv;
 		vec3 pAbsSum = Abs(b.x() * p0) + Abs(b.y() * p1) + Abs(b.z() * p2);
 		vec3 pError = gamma(6) * pAbsSum;
-		return ShapeSample{Interaction(Vector3fi(p, pError), n, uvSample), 1 / Area()};
+		return ShapeSample{ Interaction(Vector3fi(p, pError), n, uvSample), 1 / Area() };
 	}
 
 	std::optional<ShapeSample> Sample(ShapeSampleContext sample, vec2 u) const override {

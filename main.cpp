@@ -16,15 +16,15 @@ std::vector<shared_ptr<Primitive>> World;
 
 void addBox(vec3 a, vec3 b, vec3 c, vec3 n, shared_ptr<Material> mat, Transform t = Transform())
 {
-	vector<Vertex> vertices;
-	vector<int> vertexIndices;
+    vector<Vertex> vertices;
+    vector<int> vertexIndices;
     vertices.push_back(Vertex(a, n));
     vertices.push_back(Vertex(a + b, n));
     vertices.push_back(Vertex(a + c, n));
     vertices.push_back(Vertex(a + b + c, n));
     vertexIndices.push_back(0); vertexIndices.push_back(1); vertexIndices.push_back(2);
     vertexIndices.push_back(1); vertexIndices.push_back(2); vertexIndices.push_back(3);
-    meshes.push_back(TriangleMesh(t, vertexIndices, vertices));
+    meshes.push_back(TriangleMesh(t, vertexIndices, vertices, false));
     World.push_back(make_shared<SimplePrimitive>(make_shared<Triangle>(static_cast<int>(meshes.size()) - 1, 0), mat));
     World.push_back(make_shared<SimplePrimitive>(make_shared<Triangle>(static_cast<int>(meshes.size()) - 1, 1), mat));
 }
@@ -70,33 +70,33 @@ int main()
 
     std::vector<shared_ptr<Light>> lights;
     {
-		vector<Vertex> vertices;
-		vector<int> vertexIndices;
-		vertices.push_back(Vertex(a, n));
-		vertices.push_back(Vertex(a + b, n));
-		vertices.push_back(Vertex(a + c, n));
-		vertexIndices.push_back(0); vertexIndices.push_back(1); vertexIndices.push_back(2);
-        meshes.push_back(TriangleMesh(Transform(), vertexIndices, vertices));
+        vector<Vertex> vertices;
+        vector<int> vertexIndices;
+        vertices.push_back(Vertex(a, n));
+        vertices.push_back(Vertex(a + b, n));
+        vertices.push_back(Vertex(a + c, n));
+        vertexIndices.push_back(0); vertexIndices.push_back(1); vertexIndices.push_back(2);
+        meshes.push_back(TriangleMesh(Transform(), vertexIndices, vertices, false));
 
         shared_ptr<Triangle> triangle = make_shared<Triangle>(static_cast<int>(meshes.size()) - 1, 0);
         DiffuseAreaLight areaLight(Transform(), SpectrasRGB, 10.0, triangle);
         lights.push_back(make_shared<DiffuseAreaLight>(areaLight));
-		World.push_back(make_shared<GeometricPrimitive>(triangle, white, make_shared<DiffuseAreaLight>(areaLight)));
+        World.push_back(make_shared<GeometricPrimitive>(triangle, white, make_shared<DiffuseAreaLight>(areaLight)));
     }
 
     {
-		vector<Vertex> vertices;
-		vector<int> vertexIndices;
-		vertices.push_back(Vertex(a + b, n));
-		vertices.push_back(Vertex(a + c, n));
-		vertices.push_back(Vertex(a + b + c, n));
-		vertexIndices.push_back(0); vertexIndices.push_back(1); vertexIndices.push_back(2);
-        meshes.push_back(TriangleMesh(Transform(), vertexIndices, vertices));
+        vector<Vertex> vertices;
+        vector<int> vertexIndices;
+        vertices.push_back(Vertex(a + b, n));
+        vertices.push_back(Vertex(a + c, n));
+        vertices.push_back(Vertex(a + b + c, n));
+        vertexIndices.push_back(0); vertexIndices.push_back(1); vertexIndices.push_back(2);
+        meshes.push_back(TriangleMesh(Transform(), vertexIndices, vertices, false));
 
         shared_ptr<Triangle> triangle = make_shared<Triangle>(static_cast<int>(meshes.size()) - 1, 0);
         DiffuseAreaLight areaLight(Transform(), SpectrasRGB, 10.0, triangle);
         lights.push_back(make_shared<DiffuseAreaLight>(areaLight));
-		World.push_back(make_shared<GeometricPrimitive>(triangle, white, make_shared<DiffuseAreaLight>(areaLight)));
+        World.push_back(make_shared<GeometricPrimitive>(triangle, white, make_shared<DiffuseAreaLight>(areaLight)));
     }
 
     //lights.push_back(make_shared<PointLight>(Transform::Translate(vec3(278, 550, 278)), SpectrasRGB, 1.0));

@@ -510,7 +510,7 @@ public :
 	vec3 ToLocal(vec3 v) const { return vec3(dot(v, x), dot(v, y), dot(v, z)); }
 	vec3 FromLocal(vec3 v) const { return v.x() * x + v.y() * y + v.z() * z; }
 };
-static Frame FromXZ(vec3 x, vec3 z) { return Frame(x, cross(x, z), z); }
+static Frame FromXZ(vec3 x, vec3 z) { return Frame(x, cross(z, x), z); }
 
 // =========== others ============
 inline vec3 FaceForward(vec3 n, vec3 v) { return (dot(n, v) < 0) ? -n : n; }

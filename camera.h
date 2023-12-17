@@ -19,8 +19,8 @@ static vec3 ans[3010][2210];
 class camera
 {
 public:
-	const int ImageWidth = 200;
-	const int ImageHeight = 200;
+	const int ImageWidth = 1000;
+	const int ImageHeight = 1000;
 	double fov = 40.0;
 	vec3 lookfrom = vec3(0.0, 0.0, -800.0);
 	vec3 lookat = vec3(0.0, 0.0, 0.0);
@@ -136,7 +136,7 @@ private:
 		if (!ls || !ls->L || ls->pdf == 0.0) return SampledSpectrum(0.0);
 
 		vec3 wi = ls->wi;
-		SampledSpectrum f = bsdf.f(wo, wi) * std::abs(dot(wi, intr.n));
+		SampledSpectrum f = bsdf.f(wo, wi) * std::abs(dot(wi, intr.shading.n));
 		if(!f || !Unoccluded(bvh, intr, ls->pLight)) return SampledSpectrum(0.0);
 
 		double p_l = sampledLight->p * ls -> pdf;
@@ -201,7 +201,7 @@ private:
 			if (bs->IsTransmission())
 				eta_scale *= Sqr(bs->eta);
 			prevIntrCtx = intr;
-			r = SpawnRay(intr.pi, intr.n, bs->wi);
+			r = SpawnRay(intr.pi, intr.shading.n, bs->wi);
 
 			SampledSpectrum rrBeta = beta * eta_scale;
 			if (rrBeta.MaxComponentValue() < 1.0 && depth > 1)

@@ -79,7 +79,7 @@ private:
 			normalTexture = loadTexture("NORMALS", mat);
 		}
 		shared_ptr<DiffuseMaterial> material = make_shared<DiffuseMaterial>(texture);
-		//material->SetNormalMap(normalTexture);
+		material->SetNormalMap(normalTexture);
 
 		for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
 		{
