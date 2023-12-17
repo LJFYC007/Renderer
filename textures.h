@@ -50,11 +50,12 @@ class ImageTexture : public SpectrumTexture
 public:
 	ImageTexture(UVMapping _mapping, std::string _filename, double _scale) : mapping(_mapping), filename(_filename), scale(_scale) {
 		data = stbi_load(filename.c_str(), &width, &height, &nrChannels, 0);
+		if (!data) assert(-1);
 	}
 
 	std::string GetPath() const { return filename; }
 
-	SampledSpectrum Evaluate(TextureEvalContext ctx, SampledWaveLengths lambda) const override {
+	vec3 Evaluate(TextureEvalContext ctx) const override {
 		TexCoord2D c = mapping.Map(ctx);
 		int i = static_cast<int>(c.st[0] * (width - 1));
 		int j = static_cast<int>(c.st[1] * (height - 1));
@@ -65,7 +66,11 @@ public:
 		double r = data[pixelIndex] / 255.0f;
 		double g = data[pixelIndex + 1] / 255.0f;
 		double b = data[pixelIndex + 2] / 255.0f;
-		vec3 color = vec3(r, g, b) * scale;
+		return vec3(r, g, b) * scale;
+	}
+
+	SampledSpectrum Evaluate(TextureEvalContext ctx, SampledWaveLengths lambda) const override {
+		vec3 color = Evaluate(ctx);
 		return RGBAlbedoSpectrum(sRGB, RGBColor(color)).Sample(lambda);
 	}
 
@@ -76,4 +81,3 @@ private:
 	int width, height, nrChannels;
 	unsigned char* data;
 };
-

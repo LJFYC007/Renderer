@@ -222,6 +222,7 @@ inline double FrComplex(double cosThetai, complex eta) {
 	complex r_perp = (complex(cosThetai) - eta * cosThetat) / (complex(cosThetai) + eta * cosThetat);
 	return (r_parl.norm() + r_perp.norm()) / 2;
 }
+inline vec3 GramSchmidt(vec3 v, vec3 w) { return v - dot(v, w) * w; }
 
 // ======== interval ==========
 class Interval

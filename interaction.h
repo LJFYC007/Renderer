@@ -38,6 +38,14 @@ public:
 
 	void SetIntersectionProperties(shared_ptr<Material> _material, shared_ptr<Light> _areaLight) { material = _material; areaLight = _areaLight; }
 
+	void SetShadingGeometry(vec3 ns, vec3 dpdus, vec3 dpdvs, vec3 dndus, vec3 dndvs) {
+		shading.n = FaceForward(ns, n);
+		shading.dpdu = dpdus;
+		shading.dpdv = dpdvs;
+		shading.dndu = dndus;
+		shading.dndv = dndvs;
+	}
+
 	SampledSpectrum Le(vec3 w, const SampledWaveLengths& lambda) const;
 
 	vec3 dpdu, dpdv, dndu, dndv;

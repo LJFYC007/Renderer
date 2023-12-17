@@ -21,7 +21,7 @@ class Model
 public:
 	Model(std::vector<shared_ptr<Primitive>>& World, std::string const& path) {
 		Assimp::Importer importer;
-		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs);
+		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		{
 			assert(-1);
@@ -44,34 +44,42 @@ private:
 			processNode(World, node->mChildren[i], scene);
 	}
 
+	aiTextureType getTextureType(const std::string& type) {
+		if (type == "DIFFUSE") {
+			return aiTextureType_DIFFUSE;
+		}
+		else if (type == "NORMALS") {
+			return aiTextureType_NORMALS;
+		}
+	}
+
+	shared_ptr<ImageTexture> loadTexture(std::string type, aiMaterial* mat) {
+		aiString str;
+		mat->GetTexture(getTextureType(type), 0, &str);
+		std::string texturePath = "resources/" + std::string(str.C_Str());
+		for (auto& loadedTexture : texturesLoaded) {
+			if (std::strcmp(texturePath.c_str(), loadedTexture->GetPath().c_str()) == 0) {
+				return loadedTexture;			
+			}
+		}
+		UVMapping mapping;
+		auto texture = make_shared<ImageTexture>(mapping, texturePath, 1);
+		texturesLoaded.push_back(texture);
+		return texture;
+	}
+
 	void processMesh(std::vector<shared_ptr<Primitive>>& World, aiMesh* mesh, const aiScene* scene)
 	{
 		vector<Vertex> vertices;
 		vector<int> indices;
-		shared_ptr<ImageTexture> texture;
-
+		shared_ptr<ImageTexture> texture, normalTexture;
 		if (mesh->mMaterialIndex >= 0) {
 			aiMaterial* mat = scene->mMaterials[mesh->mMaterialIndex];
-
-			aiString str;
-			mat->GetTexture(aiTextureType_DIFFUSE, 0, &str);
-			std::string texturePath = "resources/" + (std::string)str.C_Str();
-			bool skip = false;
-
-			for (auto& loadedTexture : texturesLoaded) {
-				if (std::strcmp(texturePath.c_str(), loadedTexture->GetPath().c_str()) == 0) {
-					texture = loadedTexture;
-					skip = true;
-					break;
-				}
-			}
-
-			if (!skip) { 				
-				UVMapping mapping;
-				texture = make_shared<ImageTexture>(mapping, texturePath, 1);
-				texturesLoaded.push_back(texture); 			
-			}
+			texture = loadTexture("DIFFUSE", mat);
+			normalTexture = loadTexture("NORMALS", mat);
 		}
+		shared_ptr<DiffuseMaterial> material = make_shared<DiffuseMaterial>(texture);
+		//material->SetNormalMap(normalTexture);
 
 		for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
 		{
@@ -110,7 +118,6 @@ private:
 		if (mesh->mMaterialIndex >= 0)
 			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-		shared_ptr<DiffuseMaterial> material = make_shared<DiffuseMaterial>(texture);
 		meshes.push_back(TriangleMesh(Transform::Translate(vec3(0, -100, 278)) * Transform::Scale(4, 4, 4), indices, vertices));
 		for (int i = 0; i < meshes.back().nTriangles; ++i) {
 			World.push_back(make_shared<SimplePrimitive>(make_shared<Triangle>(static_cast<int>(meshes.size()) - 1, i), material));
