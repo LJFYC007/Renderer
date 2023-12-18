@@ -70,10 +70,10 @@ public:
 	int nTriangles, nVertices;
 	vector<int> vertexIndices;
 	vector<Vertex> vertices;
-	bool uvExists;
+	bool uvExists, normalExists;
 
-	TriangleMesh(const Transform& ObjectToWorld, vector<int> _vertexIndices, vector<Vertex> _vertices, bool _uvExists = true) :
-		nTriangles(static_cast<int>(_vertexIndices.size()) / 3), nVertices(static_cast<int>(_vertices.size())), vertexIndices(_vertexIndices), uvExists(_uvExists) {
+	TriangleMesh(const Transform& ObjectToWorld, vector<int> _vertexIndices, vector<Vertex> _vertices, bool _uvExists, bool _normalExists) :
+		nTriangles(static_cast<int>(_vertexIndices.size()) / 3), nVertices(static_cast<int>(_vertices.size())), vertexIndices(_vertexIndices), uvExists(_uvExists), normalExists(_normalExists) {
 		vertices.resize(nVertices);
 		for (int i = 0; i < nVertices; ++i)
 		{
@@ -109,22 +109,46 @@ public:
 		std::optional<TriangleIntersection> ints = BasicIntersect(r, t, p0, p1, p2);
 		if (!ints) return {};
 
-		vec3 n0 = mesh->vertices[v[0]].n, n1 = mesh->vertices[v[1]].n, n2 = mesh->vertices[v[2]].n;
-		vec2 uv0 = mesh->vertices[v[0]].uv, uv1 = mesh->vertices[v[1]].uv, uv2 = mesh->vertices[v[2]].uv;
+		vec2 uv0, uv1, uv2;
 		if (!mesh->uvExists) { uv0 = vec2(0, 0); uv1 = vec2(1, 0); uv2 = vec2(1, 1); }
+		else { uv0 = mesh->vertices[v[0]].uv; uv1 = mesh->vertices[v[1]].uv; uv2 = mesh->vertices[v[2]].uv; }
 		vec3 p = p0 * ints->b0 + p1 * ints->b1 + p2 * ints->b2;
 		vec2 uv = uv0 * ints->b0 + uv1 * ints->b1 + uv2 * ints->b2;
 
 		vec2 duv02 = uv0 - uv2, duv12 = uv1 - uv2;
 		vec3 dp02 = p0 - p2, dp12 = p1 - p2;
-		double invdet = 1.0 / (duv02[0] * duv12[1] - duv02[1] * duv12[0]);
+		double determinant = duv02[0] * duv12[1] - duv02[1] * duv12[0];
+		double invdet = 1.0 / determinant;
 		vec3 dpdu = (duv12[1] * dp02 - duv02[1] * dp12) * invdet;
 		vec3 dpdv = (duv02[0] * dp12 - duv12[0] * dp02) * invdet;
 
 		vec3 pAbsSum = Abs(ints->b0 * p0) + Abs(ints->b1 * p1) + Abs(ints->b2 * p2);
 		vec3 pError = gamma(7) * pAbsSum;
-
 		SurfaceInteraction intr(Vector3fi(p, pError), uv, -r.rd, dpdu, dpdv, vec3(), vec3(), ints->t, false);
+		intr.n = intr.shading.n = normalize(cross(dp02, dp12));
+
+		if (mesh->normalExists) {
+			vec3 ns = ints->b0 * mesh->vertices[v[0]].n + ints->b1 * mesh->vertices[v[1]].n + ints->b2 * mesh->vertices[v[2]].n;
+			ns = ns.lengthSquared() > 0 ? normalize(ns) : intr.n;
+			vec3 ss = intr.dpdu;
+			vec3 ts = cross(ns, ss);
+			if (ts.lengthSquared() > 0) ss = cross(ts, ns);
+			else CoordinateSystem(ns, ss, ts);
+
+			vec3 dn1 = mesh->vertices[v[0]].n - mesh->vertices[v[2]].n, dn2 = mesh->vertices[v[1]].n - mesh->vertices[v[2]].n;
+			vec3 dndu, dndv;
+			if (determinant < 1e-9) {
+				vec3 dn = cross(mesh->vertices[v[2]].n - mesh->vertices[v[0]].n, mesh->vertices[v[1]].n - mesh->vertices[v[0]].n);
+				if (dn.lengthSquared() == 0) dndu = dndv = vec3(0);
+				else CoordinateSystem(dn, dndu, dndv);
+			}
+			else {
+				dndu = (duv12[1] * dn1 - duv02[1] * dn2) * invdet;
+				dndv = (duv02[0] * dn2 - duv12[0] * dn1) * invdet;
+			}
+			intr.SetShadingGeometry(ns, ss, ts, dndu, dndv);
+		}
+
 		return ShapeIntersection{ intr, ints->t };
 	}
 

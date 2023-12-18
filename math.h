@@ -223,6 +223,13 @@ inline double FrComplex(double cosThetai, complex eta) {
 	return (r_parl.norm() + r_perp.norm()) / 2;
 }
 inline vec3 GramSchmidt(vec3 v, vec3 w) { return v - dot(v, w) * w; }
+inline void CoordinateSystem(vec3 v1, vec3& v2, vec3& v3) {
+	double sign = std::copysign(1.0, v1.z());
+	double a = -1.0 / (sign + v1.z());
+	double b = v1.x() * v1.y() * a;
+	v2 = vec3(1.0 + sign * v1.x() * v1.x() * a, sign * b, -sign * v1.x());
+	v3 = vec3(b, sign + v1.y() * v1.y() * a, -v1.y());;
+}
 
 // ======== interval ==========
 class Interval

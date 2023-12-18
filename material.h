@@ -39,6 +39,23 @@ inline void NormalMap(shared_ptr<ImageTexture> normalMap, const NormalBumpEvalCo
     *dpdv = normalize(cross(ns, *dpdu)) * vlen;
 }
 
+inline void BumpMap(shared_ptr<ImageTexture> bumpMap, const NormalBumpEvalContext& ctx, vec3* dpdu, vec3* dpdv) {
+    TextureEvalContext shiftedCtx = ctx;
+    double du = 0.5 * (std::abs(ctx.dudx) + std::abs(ctx.dudy));
+    shiftedCtx.p = ctx.p + du * ctx.shading.dpdu;
+    shiftedCtx.uv = ctx.uv + vec2(du, 0);
+    double uDisplace = bumpMap->DoubleEvaluate(shiftedCtx);
+
+    double dv = 0.5 * (std::abs(ctx.dvdx) + std::abs(ctx.dvdy));
+    shiftedCtx.p = ctx.p + dv * ctx.shading.dpdv;
+    shiftedCtx.uv = ctx.uv + vec2(0, dv);
+    double vDisplace = bumpMap->DoubleEvaluate(shiftedCtx);
+
+    double displace = bumpMap->DoubleEvaluate(ctx);
+    *dpdu = ctx.shading.dpdu + (uDisplace - displace) / du * ctx.shading.n + displace * ctx.shading.dndu;
+    *dpdv = ctx.shading.dpdv + (vDisplace - displace) / dv * ctx.shading.n + displace * ctx.shading.dndv;
+}
+
 class Material
 {
 public:
@@ -57,6 +74,14 @@ public:
             vec3 ns = normalize(cross(dpdu, dpdv));
             intr.SetShadingGeometry(ns, dpdu, dpdv, intr.shading.dndu, intr.shading.dndv);
         }
+        /*
+        if (bumpMap) {
+			vec3 dpdu, dpdv;
+			BumpMap(bumpMap, NormalBumpEvalContext(intr), &dpdu, &dpdv);
+			vec3 ns = normalize(cross(dpdu, dpdv));
+			intr.SetShadingGeometry(ns, dpdu, dpdv, intr.shading.dndu, intr.shading.dndv);
+        }
+        */
         return BSDF(intr.shading.n, intr.shading.dpdu, make_shared<DiffuseBxDF>(r));
     }
 
@@ -64,9 +89,14 @@ public:
         normalMap = _normalMap;
     }
 
+    void SetBumpMap(shared_ptr<ImageTexture> _bumpMap) {
+        bumpMap = _bumpMap;
+    }
+
 private:
     shared_ptr<SpectrumTexture> albedo;
     shared_ptr<ImageTexture> normalMap;
+    shared_ptr<ImageTexture> bumpMap;
 };
 
 

@@ -50,10 +50,21 @@ class ImageTexture : public SpectrumTexture
 public:
 	ImageTexture(UVMapping _mapping, std::string _filename, double _scale) : mapping(_mapping), filename(_filename), scale(_scale) {
 		data = stbi_load(filename.c_str(), &width, &height, &nrChannels, 0);
-		if (!data) assert(-1);
 	}
 
 	std::string GetPath() const { return filename; }
+
+	double DoubleEvaluate(TextureEvalContext ctx) const {
+		TexCoord2D c = mapping.Map(ctx);
+		int i = static_cast<int>(c.st[0] * (width - 1));
+		int j = static_cast<int>(c.st[1] * (height - 1));
+		i = std::max(0, std::min(i, width - 1));
+		j = std::max(0, std::min(j, height - 1));
+		int pixelIndex = (j * width + i) * nrChannels;
+		assert(nrChannels == 1);
+		double x = data[pixelIndex] / 255.0f;
+		return x * scale;
+	}
 
 	vec3 Evaluate(TextureEvalContext ctx) const override {
 		TexCoord2D c = mapping.Map(ctx);

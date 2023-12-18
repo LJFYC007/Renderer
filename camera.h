@@ -19,15 +19,15 @@ static vec3 ans[3010][2210];
 class camera
 {
 public:
-	const int ImageWidth = 1000;
-	const int ImageHeight = 1000;
+	const int ImageWidth = 1200;
+	const int ImageHeight = 1200;
 	double fov = 40.0;
 	vec3 lookfrom = vec3(0.0, 0.0, -800.0);
 	vec3 lookat = vec3(0.0, 0.0, 0.0);
 	vec3 vup = vec3(0.0, 1.0, 0.0);
 	double defocusAngle = 0.0;
 	double focusDist = 10.0;
-	int samplePixel = 256;
+	int samplePixel = 1024;
 	int maxDepth = 10;
 
 	void render(const BVHAggregate& bvh, const std::vector<shared_ptr<Light>>& _lights)

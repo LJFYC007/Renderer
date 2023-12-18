@@ -9,3 +9,4 @@ Ns 738.6
 map_Kd CaveCrystal1_Base_Diffuse.png
 map_Ks CaveCrystal1_Base_Specular.png
 normal CaveCrystal1_Base_Normal.png
+bump CaveCrystal1_Base_Height.png
