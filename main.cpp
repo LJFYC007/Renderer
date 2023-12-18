@@ -67,8 +67,8 @@ int main()
 
     vec3 a(65, 276, 332), b(-130, 0, 0), c(0, 0, -105);
     vec3 n = (0, -1, 0);
-
     std::vector<shared_ptr<Light>> lights;
+
     {
         vector<Vertex> vertices;
         vector<int> vertexIndices;
@@ -100,7 +100,7 @@ int main()
     }
 
     //lights.push_back(make_shared<PointLight>(Transform::Translate(vec3(278, 550, 278)), SpectrasRGB, 1.0));
-    lights.push_back(make_shared<DistantLight>(Transform::RotateX(5 * pi / 3), SpectrasRGB, 1.0));
+    lights.push_back(make_shared<DistantLight>(Transform::RotateX(pi), SpectrasRGB, 0.05));
 
     BVHAggregate bvh(World, 5);
     cam.render(bvh, lights);

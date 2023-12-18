@@ -13,6 +13,10 @@ enum class LightType {
 	Infinite
 };
 
+inline bool IsDeltaLight(LightType type) {
+	return (type == LightType::DeltaPosition) || (type == LightType::DeltaDirection);
+}
+
 class LightSampleContext {
 public :
 	Vector3fi pi;

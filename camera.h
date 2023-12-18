@@ -140,6 +140,8 @@ private:
 		if(!f || !Unoccluded(bvh, intr, ls->pLight)) return SampledSpectrum(0.0);
 
 		double p_l = sampledLight->p * ls -> pdf;
+		if (IsDeltaLight(light->Type()))
+			return ls->L * f / p_l;
 		double p_b = bsdf.PDF(wo, wi);
 		double w_l = PowerHeuristic(1, p_l , 1, p_b);
 		return ls->L * w_l * f / p_l;
