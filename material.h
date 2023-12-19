@@ -7,6 +7,7 @@
 
 #include <memory>
 using std::shared_ptr;
+using std::make_unique;
 
 struct NormalBumpEvalContext {
     NormalBumpEvalContext(const SurfaceInteraction &intr) 
@@ -82,7 +83,7 @@ public:
 			intr.SetShadingGeometry(ns, dpdu, dpdv, intr.shading.dndu, intr.shading.dndv);
         }
         */
-        return BSDF(intr.shading.n, intr.shading.dpdu, make_shared<DiffuseBxDF>(r));
+        return BSDF(intr.shading.n, intr.shading.dpdu, make_unique<DiffuseBxDF>(r));
     }
 
     void SetNormalMap(shared_ptr<ImageTexture> _normalMap) {
@@ -105,7 +106,7 @@ public:
     ConductorMaterial(double _alphax, double _alphay, double _eta, double _k) : alphax(_alphax), alphay(_alphay), eta(_eta), k(_k) {}
 
     BSDF GetBSDF(SurfaceInteraction& intr, const SampledWaveLengths& lambda) const override {
-        return BSDF(intr.shading.n, intr.shading.dpdu, make_shared<ConductorBxDF>(TrowbridgeReitzDistribution(alphax, alphay), SampledSpectrum(eta), SampledSpectrum(k)));
+        return BSDF(intr.shading.n, intr.shading.dpdu, make_unique<ConductorBxDF>(TrowbridgeReitzDistribution(alphax, alphay), SampledSpectrum(eta), SampledSpectrum(k)));
     }
 
 private:
@@ -117,7 +118,7 @@ public:
     DielectricMaterial(double _alphax, double _alphay, double _eta) : alphax(_alphax), alphay(_alphay), eta(_eta) {}
 
     BSDF GetBSDF(SurfaceInteraction& intr, const SampledWaveLengths& lambda) const override {
-        return BSDF(intr.shading.n, intr.shading.dpdu, make_shared<DielectricBxDF>(TrowbridgeReitzDistribution(alphax, alphay), eta));
+        return BSDF(intr.shading.n, intr.shading.dpdu, make_unique<DielectricBxDF>(TrowbridgeReitzDistribution(alphax, alphay), eta));
     }
 
 private:

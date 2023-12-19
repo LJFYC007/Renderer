@@ -50,6 +50,7 @@ struct BSDFSample {
 class BxDF
 {
 public : 
+	virtual ~BxDF() = default;
 	virtual SampledSpectrum f(vec3 wo, vec3 wi) const = 0;
 	virtual std::optional<BSDFSample> Sample_f(vec3 wo, double uc, vec2 u, BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const = 0;
 	virtual double PDF(vec3 wo, vec3 wi, BxDFReflTransFlags sampleFlags = BxDFReflTransFlags::All) const = 0;

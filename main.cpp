@@ -102,7 +102,7 @@ int main()
     //lights.push_back(make_shared<PointLight>(Transform::Translate(vec3(278, 550, 278)), SpectrasRGB, 1.0));
     lights.push_back(make_shared<DistantLight>(Transform::RotateX(pi), SpectrasRGB, 0.05));
 
-    BVHAggregate bvh(World, 5);
+    BVHAggregate bvh(World, 3);
     cam.render(bvh, lights);
     return 0;
 }

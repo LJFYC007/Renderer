@@ -198,9 +198,9 @@ public:
 		vec3 wi = ss->intr.p() - sample.p();
 		if (wi.lengthSquared() == 0.0) return ShapeSample{ ss->intr, 0.0 };
 		wi = normalize(wi);
-		double pdf = ss->pdf * (sample.p() - ss->intr.p()).lengthSquared() / std::abs(dot(ss->intr.n, -wi));
-		if (std::isinf(pdf)) pdf = 0.0;
-		return ShapeSample{ ss->intr, pdf };
+		ss->pdf /= std::abs(dot(ss->intr.n, -wi)) / (sample.p() - ss->intr.p()).lengthSquared();
+		if (std::isinf(ss->pdf)) ss->pdf = 0.0;
+		return ss;
 	}
 
 	double PDF(ShapeSampleContext sample, vec3 wi) const override {
@@ -208,7 +208,7 @@ public:
 		std::optional<ShapeIntersection> isect = Intersect(r, interval(0, infinity));
 		if (!isect) return 0.0;
 		SurfaceInteraction intr = isect->intr;
-		double pdf = 1.0 * (sample.p() - intr.p()).lengthSquared() / std::abs(dot(intr.n, -wi)) / Area();
+		double pdf = (1.0 / Area()) / (std::abs(dot(intr.n, -wi)) / (sample.p() - intr.p()).lengthSquared());
 		if (std::isinf(pdf)) pdf = 0.0;
 		return pdf;
 	}

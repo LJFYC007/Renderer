@@ -137,6 +137,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -155,6 +156,7 @@
     <ClCompile Include="lightsampler.h" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="math.cpp" />
+    <ClCompile Include="sample.cpp" />
     <ClCompile Include="spectra_sRGB.cpp" />
     <ClCompile Include="spectrum.cpp" />
     <ClCompile Include="stb_image.cpp" />

@@ -29,7 +29,7 @@ struct BVHPrimitive
 	int primitiveIndex;
 	AABB bounds;
 
-	vec3 Centroid() const { return 0.5 * vec3(bounds.x.center(), bounds.y.center(), bounds.z.center()); }
+	vec3 Centroid() const {	return 0.5 * (bounds.pMin + bounds.pMax); }
 };
 
 class BVHAggregate : public Primitive
@@ -60,12 +60,13 @@ public:
 
 	std::optional<ShapeIntersection> Intersect(const ray& r, interval t) const override {
 		std::optional<ShapeIntersection> si;
-		int dirIsNeg[3] = { r.rd[0] < 0, r.rd[1] < 0, r.rd[2] < 0 };
+		vec3 invDir(1.0 / r.rd[0], 1.0 / r.rd[1], 1.0 / r.rd[2]);
+		int dirIsNeg[3] = { int(invDir[0] < 0), int(invDir[1] < 0), int(invDir[2] < 0) };
 		int toVisitOffset = 0, currentNodeIndex = 0;
 		int nodesToVisit[64];
 		while (true) {
 			const LinearBVHNode* node = &nodes[currentNodeIndex];
-			if (node->bounds.Intersect(r, t)) {
+			if (node->bounds.Intersect(r.ro, r.rd, t.Max, invDir, dirIsNeg)) {
 				if (node->nPrimitives > 0) {
 					for (int i = 0; i < node->nPrimitives; ++i) {
 						std::optional<ShapeIntersection> primSi = primitives[node->primitiveOffset + i]->Intersect(r, t);

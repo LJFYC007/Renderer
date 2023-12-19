@@ -4,14 +4,12 @@
 
 #include "math.h"
 
+extern thread_local std::uniform_real_distribution<double> distribution;
+extern thread_local std::mt19937 generator;
+
 inline double radians(double x) { return x * pi / 180.0;  }
 inline double fract(double x) { return x - floor(x); }
-inline double randomDouble()
-{
-    static std::uniform_real_distribution<double> distribution(0.0, 1.0);
-    static std::mt19937 generator;
-    return distribution(generator);
-}
+inline double randomDouble() { return distribution(generator); }
 inline double randomDouble(double min, double max) { return min + randomDouble() * (max - min); }
 inline int randomInt(int min, int max) { return static_cast<int>(randomDouble(min, max + 1)); }
 inline vec2 vec2Random() { return vec2(randomDouble(), randomDouble()); }

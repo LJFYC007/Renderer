@@ -49,7 +49,7 @@ BVHBuildNode* BVHAggregate::buildRecursive(size_t begin, size_t end, std::atomic
     AABB centroidBounds = bvhPrimitives[begin].Centroid();
     for (size_t i = begin; i < end; ++i) centroidBounds = AABB(centroidBounds, bvhPrimitives[i].Centroid());
     int dim = centroidBounds.MaxDimension();
-    if (centroidBounds[dim].size() == 0) {
+    if (centroidBounds.pMax[dim] == centroidBounds.pMin[dim]) {
         int firstPrimOffset = orderedPrimOffset->fetch_add(end - begin);
         for (size_t i = begin; i < end; ++i) {
             size_t index = bvhPrimitives[i].primitiveIndex;
