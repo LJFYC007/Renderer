@@ -565,7 +565,7 @@ private:
 class RGBAlbedoSpectrum : public Spectrum
 {
 public:
-	RGBAlbedoSpectrum(const RGBColorSpace& cs, RGBColor rgb);
+	RGBAlbedoSpectrum(const RGBColorSpace& cs, const RGBColor& rgb);
 	double operator ()(double lambda) const override { return rsp(lambda); }
 	double MaxValue() const override { return rsp.MaxValue(); }
 

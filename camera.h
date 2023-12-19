@@ -16,11 +16,12 @@
 
 static vec3 ans[3010][2210];
 
-class camera
+constexpr int ImageWidth = 400;
+constexpr int ImageHeight = 400;
+
+class Camera
 {
 public:
-	const int ImageWidth = 400;
-	const int ImageHeight = 400;
 	double fov = 40.0;
 	vec3 lookfrom = vec3(0.0, 0.0, -800.0);
 	vec3 lookat = vec3(0.0, 0.0, 0.0);
@@ -30,9 +31,10 @@ public:
 	int samplePixel = 64;
 	int maxDepth = 10;
 
-	void render(const BVHAggregate& bvh, const std::vector<shared_ptr<Light>>& _lights)
+	void Render(const BVHAggregate& bvh, const std::vector<shared_ptr<Light>>& wholeLights)
 	{
-		initialize(_lights);
+		lights = wholeLights;
+		Initialize();
 #pragma omp parallel for schedule(dynamic) 
 		for (int j = 0; j < ImageHeight; ++j)
 		{
@@ -41,13 +43,13 @@ public:
 			{
 				XYZ xyz(0.0);
 				SampledSpectrum spec(0.0);
-				vec3 col = vec3(0.0);
-				for (int oi = 0; oi < sqrtSPP; ++oi)
-					for (int oj = 0; oj < sqrtSPP; ++oj)
+				vec3 col(0.0);
+				for (int oi = 0; oi < sqrtSpp; ++oi)
+					for (int oj = 0; oj < sqrtSpp; ++oj)
 					{
 						vec3 pixelCenter = pixel00Location + i * pixelDeltaU + j * pixelDeltaV;
-						vec3 pixel = pixelCenter + (-0.5 + (1.0 / sqrtSPP) * (oi + randomDouble())) * pixelDeltaU + (-0.5 + (1.0 / sqrtSPP) * (oj + randomDouble())) * pixelDeltaV;
-						vec3 ro = (defocusAngle <= 0.0) ? cameraCenter : cameraCenter + defocusDiskSample(defocusDiskU, defocusDiskV);
+						vec3 pixel = pixelCenter + (-0.5 + (1.0 / sqrtSpp) * (oi + randomDouble())) * pixelDeltaU + (-0.5 + (1.0 / sqrtSpp) * (oj + randomDouble())) * pixelDeltaV;
+						vec3 ro = (defocusAngle <= 0.0) ? cameraCenter : cameraCenter + DefocusDiskSample(defocusDiskU, defocusDiskV);
 						vec3 rd = pixel - ro;
 						SampledWaveLengths sample(randomDouble());
 						RGBColor rgb = sRGB.ToRGB((Li(ray(ro, rd), maxDepth, sample, bvh)).ToXYZ(sample));
@@ -76,7 +78,7 @@ public:
 		std::clog << "\rDone.                 \n";
 	}
 private:
-	int sqrtSPP;
+	int sqrtSpp = 0;
 	vec3 defocusDiskU;
 	vec3 defocusDiskV;
 	vec3 pixel00Location;
@@ -88,15 +90,14 @@ private:
 	std::vector<shared_ptr<Light>> infiniteLights;
 	shared_ptr<LightSampler> lightSampler;
 
-	void initialize(const std::vector<shared_ptr<Light>>& _lights)
+	void Initialize()
 	{
-		lights = _lights;
 		for (auto& light : lights)
 			if (light->Type() == LightType::Infinite)
-				infiniteLights.push_back(light);	
+				infiniteLights.emplace_back(light);	
 		lightSampler = std::make_shared<UniformLightSampler>(lights);
 
-		sqrtSPP = static_cast<int>(sqrt(samplePixel));
+		sqrtSpp = static_cast<int>(sqrt(samplePixel));
 		assert(sqrtSPP * sqrtSPP == samplePixel);
 
 		cameraCenter = lookfrom;
@@ -121,23 +122,32 @@ private:
 		defocusDiskV = v * defocusRadius;
 	}
 
-	bool Unoccluded(const BVHAggregate& bvh, const Interaction& p0, const Interaction& p1) const {
+	static vec3 DefocusDiskSample(const vec3& u, const vec3& v)
+	{
+		vec3 p = randInDisk();
+		return p.x() * u + p.y() * v;
+	}
+
+
+	static bool Unoccluded(const BVHAggregate& bvh, const Interaction& p0, const Interaction& p1)
+	{
 		ray r = SpawnRayTo(p0.pi, p0.n, p1.pi, p1.n);
 		std::optional<ShapeIntersection> isect = bvh.Intersect(r, interval(0, 0.9999999));
 		return !isect;
 	}
 
-	SampledSpectrum SampleLd(vec3 wo, const SurfaceInteraction& intr, const BSDF& bsdf, SampledWaveLengths& lambda, const BVHAggregate& bvh) {
+	SampledSpectrum SampleLd(const vec3& wo, const SurfaceInteraction& intr, const BSDF& bsdf, const SampledWaveLengths& lambda, const BVHAggregate& bvh) const
+	{
 		std::optional<SampledLight> sampledLight = lightSampler->Sample(randomDouble());
 		if (!sampledLight) return {};
 		shared_ptr<Light> light = sampledLight->light;
 		vec2 u = vec2Random();
 		std::optional<LightLiSample> ls = light->SampleLi(LightSampleContext(intr), u, lambda);
-		if (!ls || !ls->L || ls->pdf == 0.0) return SampledSpectrum(0.0);
+		if (!ls || !ls->L || ls->pdf == 0.0) return {0.0};
 
 		vec3 wi = ls->wi;
 		SampledSpectrum f = bsdf.f(wo, wi) * std::abs(dot(wi, intr.shading.n));
-		if(!f || !Unoccluded(bvh, intr, ls->pLight)) return SampledSpectrum(0.0);
+		if(!f || !Unoccluded(bvh, intr, ls->pLight)) return {0.0};
 
 		double p_l = sampledLight->p * ls -> pdf;
 		if (IsDeltaLight(light->Type()))
@@ -147,7 +157,8 @@ private:
 		return ls->L * w_l * f / p_l;
 	}
 
-	SampledSpectrum Li(ray r, const int maxDepth, SampledWaveLengths& lambda, const BVHAggregate& bvh) {
+	SampledSpectrum Li(ray r, const int maxDepth, SampledWaveLengths& lambda, const BVHAggregate& bvh) const
+	{
 		SampledSpectrum L(0.0), beta(1.0);
 		int depth = 0;
 		double p_b = 1.0, eta_scale = 1.0;
@@ -235,11 +246,5 @@ private:
 			*/
 		}
 		return L;
-	}
-
-	vec3 defocusDiskSample(vec3 u, vec3 v)
-	{
-		vec3 p = randInDisk();
-		return p.x() * u + p.y() * v;
 	}
 };

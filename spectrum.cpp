@@ -23,19 +23,19 @@ PiecewiseLinearSpectrum::PiecewiseLinearSpectrum(const double* samples, int n, b
 {
 	if (samples[0] >= LambdaMin)
 	{
-		lambdas.push_back(LambdaMin - 1);
-		values.push_back(samples[1]);
+		lambdas.emplace_back(LambdaMin - 1);
+		values.emplace_back(samples[1]);
 	}
 	for (int i = 0; i < n; ++i)
 	{
 		if (i > 0) assert(samples[2 * i] >= lambdas.back());
-		lambdas.push_back(samples[2 * i]);
-		values.push_back(samples[2 * i + 1]);
+		lambdas.emplace_back(samples[2 * i]);
+		values.emplace_back(samples[2 * i + 1]);
 	}
 	if (lambdas.back() <= LambdaMax)
 	{
-		lambdas.push_back(LambdaMax + 1);
-		values.push_back(values.back());
+		lambdas.emplace_back(LambdaMax + 1);
+		values.emplace_back(values.back());
 	}
 
 	if (normalize)
@@ -45,11 +45,11 @@ PiecewiseLinearSpectrum::PiecewiseLinearSpectrum(const double* samples, int n, b
 	}
 }
 
-RGBAlbedoSpectrum::RGBAlbedoSpectrum(const RGBColorSpace& cs, RGBColor rgb) : rsp(cs.ToRGBCoeffs(rgb)) {}
+RGBAlbedoSpectrum::RGBAlbedoSpectrum(const RGBColorSpace& cs, const RGBColor& rgb) : rsp(cs.ToRGBCoeffs(rgb)) {}
 
 RGBIlluminantSpectrum::RGBIlluminantSpectrum(const RGBColorSpace& cs, RGBColor rgb)
 {
 	double m = std::max(std::max(rgb.r, rgb.g), rgb.b);
 	scale = 2 * m;
-	rsp = cs.ToRGBCoeffs(scale ? rgb / scale : RGBColor(0.0, 0.0, 0.0));
+	rsp = cs.ToRGBCoeffs(scale != 0 ? rgb / scale : RGBColor(0.0, 0.0, 0.0));
 }
