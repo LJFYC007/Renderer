@@ -46,14 +46,14 @@ public :
 		return SampledSpectrum(0.0);
 	}
 
-	virtual SampledSpectrum Le(ray r, const SampledWaveLengths& lambda) const {
+	virtual SampledSpectrum Le(Ray r, const SampledWaveLengths& lambda) const {
 		return SampledSpectrum(0.0);
 	}
 
 	virtual	SampledSpectrum Phi(SampledWaveLengths lambda) const = 0;
 	virtual std::optional<LightLiSample> SampleLi(LightSampleContext sample, vec2 u, SampledWaveLengths lambda, bool allowIncompletePDF = false) const = 0;
 	virtual double PDF_Li(LightSampleContext sample, vec3 wi, bool allowIncompletePDF = false) const = 0;
-	// virtual void PDF_Le(ray r, double* pdfPos, double* pdfDir) const = 0;
+	// virtual void PDF_Le(Ray r, double* pdfPos, double* pdfDir) const = 0;
 
 public : 
 	LightType type;

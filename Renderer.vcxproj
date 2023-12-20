@@ -152,6 +152,7 @@
     <ClCompile Include="bxdf.cpp" />
     <ClCompile Include="color.cpp" />
     <ClCompile Include="declaration.h" />
+    <ClCompile Include="integrator.cpp" />
     <ClCompile Include="interaction.cpp" />
     <ClCompile Include="lightsampler.h" />
     <ClCompile Include="main.cpp" />
@@ -169,6 +170,7 @@
     <ClInclude Include="camera.h" />
     <ClInclude Include="color.h" />
     <ClInclude Include="colorspace.h" />
+    <ClInclude Include="integrator.h" />
     <ClInclude Include="interaction.h" />
     <ClInclude Include="interval.h" />
     <ClInclude Include="light.h" />

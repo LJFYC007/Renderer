@@ -38,8 +38,8 @@ public:
 	BVHAggregate(std::vector<shared_ptr<Primitive>> _primitives, int _maxPrimsInNode, SplitMethod _splitMethod = SplitMethod::SAH)
 		: primitives(_primitives), maxPrimesInNode(_maxPrimsInNode), splitMethod(_splitMethod) {
 		bvhPrimitives.resize(primitives.size());
-		for (int i = 0; i < primitives.size(); ++i)
-			bvhPrimitives[i] = BVHPrimitive(i, primitives[i]->Bounds());
+		for (size_t i = 0; i < primitives.size(); ++i)
+			bvhPrimitives[i] = BVHPrimitive(static_cast<int>(i), primitives[i]->Bounds());
 
 		std::vector<shared_ptr<Primitive>> orderedPrims(primitives.size());
 		BVHBuildNode* root;
@@ -58,7 +58,7 @@ public:
 		return nodes[0].bounds;
 	}
 
-	std::optional<ShapeIntersection> Intersect(const ray& r, interval t) const override {
+	std::optional<ShapeIntersection> Intersect(const Ray& r, interval t) const override {
 		std::optional<ShapeIntersection> si;
 		vec3 invDir(1.0 / r.rd[0], 1.0 / r.rd[1], 1.0 / r.rd[2]);
 		int dirIsNeg[3] = { int(invDir[0] < 0), int(invDir[1] < 0), int(invDir[2] < 0) };

@@ -8,18 +8,22 @@ using std::shared_ptr;
 
 class Material;
 class Light;
+class Camera;
+class BSDF;
 
 class Interaction
 {
 public: 
 	Interaction(Vector3fi _pi) : pi(_pi) {}
 	Interaction(Vector3fi _pi, vec3 _n, vec2 _uv) : pi(_pi), n(_n), uv(_uv) {}
-	Interaction(Vector3fi _pi, vec3 _n, vec2 _uv, vec3 _wo, double _t) : pi(_pi), n(_n), uv(_uv), wo(_wo), t(_t) {}
+	Interaction(Vector3fi _pi, vec3 _n, vec2 _uv, vec3 _wo, double _time) : pi(_pi), n(_n), uv(_uv), wo(_wo), time(_time) {}
 	vec3 p() const { return vec3(pi); }
+	vec3 OffsetRayOrigin(vec3 w) const { return ::OffsetRayOrigin(pi, n, w); }
+	RayDifferential SpawnRay(vec3 d) const { return RayDifferential(OffsetRayOrigin(d), d, time); }
 
 	Vector3fi pi;
 	vec3 wo, n;
-	double t;
+	double time;
 	vec2 uv;
 };
 
@@ -46,7 +50,10 @@ public:
 		shading.dndv = dndvs;
 	}
 
+	RayDifferential SpawnRay(const RayDifferential& rayi, const BSDF& bsdf, vec3 wi, int flags, double eta) const;
 	SampledSpectrum Le(vec3 w, const SampledWaveLengths& lambda) const;
+	BSDF GetBSDF(const RayDifferential& ray, const SampledWaveLengths& lambda, Camera* camera);
+	void ComputeDifferentials(const RayDifferential& ray, Camera* camera);
 
 	vec3 dpdu, dpdv, dndu, dndv;
 	struct {
@@ -55,6 +62,6 @@ public:
 	shared_ptr<Material> material;
 	shared_ptr<Light> areaLight;
 	vec3 dpdx, dpdy;
-	double dudx, dvdx, dudy, dvdy;
+	double dudx = 0, dvdx = 0, dudy = 0, dvdy = 0;
 	int faceIndex = 0;
 };

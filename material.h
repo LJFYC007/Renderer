@@ -61,28 +61,16 @@ class Material
 {
 public:
     virtual ~Material() = default;
-    virtual BSDF GetBSDF(SurfaceInteraction& intr, const SampledWaveLengths& lambda) const = 0;
+    virtual BSDF GetBSDF(const SurfaceInteraction& intr, const SampledWaveLengths& lambda) const = 0;
+    virtual shared_ptr<ImageTexture> GetNormalMap() const { return nullptr; }
+    virtual shared_ptr<ImageTexture> GetBumpMap() const { return nullptr; }
 };
 
 class DiffuseMaterial : public Material {
 public:
     DiffuseMaterial(shared_ptr<SpectrumTexture> _albedo) : albedo(_albedo) {}
-    BSDF GetBSDF(SurfaceInteraction& intr, const SampledWaveLengths& lambda) const override {
+    BSDF GetBSDF(const SurfaceInteraction& intr, const SampledWaveLengths& lambda) const override {
         SampledSpectrum r = albedo->Evaluate(intr, lambda);
-        if (normalMap) {
-            vec3 dpdu, dpdv;
-            NormalMap(normalMap, NormalBumpEvalContext(intr), &dpdu, &dpdv);
-            vec3 ns = normalize(cross(dpdu, dpdv));
-            intr.SetShadingGeometry(ns, dpdu, dpdv, intr.shading.dndu, intr.shading.dndv);
-        }
-        /*
-        if (bumpMap) {
-			vec3 dpdu, dpdv;
-			BumpMap(bumpMap, NormalBumpEvalContext(intr), &dpdu, &dpdv);
-			vec3 ns = normalize(cross(dpdu, dpdv));
-			intr.SetShadingGeometry(ns, dpdu, dpdv, intr.shading.dndu, intr.shading.dndv);
-        }
-        */
         return BSDF(intr.shading.n, intr.shading.dpdu, make_unique<DiffuseBxDF>(r));
     }
 
@@ -93,6 +81,9 @@ public:
     void SetBumpMap(shared_ptr<ImageTexture> _bumpMap) {
         bumpMap = _bumpMap;
     }
+
+    shared_ptr<ImageTexture> GetNormalMap() const override { return normalMap; }
+    shared_ptr<ImageTexture> GetBumpMap() const override { return bumpMap; }
 
 private:
     shared_ptr<SpectrumTexture> albedo;
@@ -105,7 +96,7 @@ class ConductorMaterial : public Material {
 public:
     ConductorMaterial(double _alphax, double _alphay, double _eta, double _k) : alphax(_alphax), alphay(_alphay), eta(_eta), k(_k) {}
 
-    BSDF GetBSDF(SurfaceInteraction& intr, const SampledWaveLengths& lambda) const override {
+    BSDF GetBSDF(const SurfaceInteraction& intr, const SampledWaveLengths& lambda) const override {
         return BSDF(intr.shading.n, intr.shading.dpdu, make_unique<ConductorBxDF>(TrowbridgeReitzDistribution(alphax, alphay), SampledSpectrum(eta), SampledSpectrum(k)));
     }
 
@@ -117,7 +108,7 @@ class DielectricMaterial : public Material {
 public:
     DielectricMaterial(double _alphax, double _alphay, double _eta) : alphax(_alphax), alphay(_alphay), eta(_eta) {}
 
-    BSDF GetBSDF(SurfaceInteraction& intr, const SampledWaveLengths& lambda) const override {
+    BSDF GetBSDF(const SurfaceInteraction& intr, const SampledWaveLengths& lambda) const override {
         return BSDF(intr.shading.n, intr.shading.dpdu, make_unique<DielectricBxDF>(TrowbridgeReitzDistribution(alphax, alphay), eta));
     }
 

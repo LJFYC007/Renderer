@@ -61,7 +61,6 @@ public:
 		i = std::max(0, std::min(i, width - 1));
 		j = std::max(0, std::min(j, height - 1));
 		int pixelIndex = (j * width + i) * nrChannels;
-		assert(nrChannels == 1);
 		double x = data[pixelIndex] / 255.0f;
 		return x * scale;
 	}

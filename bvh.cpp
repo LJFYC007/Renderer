@@ -37,12 +37,12 @@ BVHBuildNode* BVHAggregate::buildRecursive(size_t begin, size_t end, std::atomic
     for (size_t i = begin; i < end; ++i) bounds = AABB(bounds, bvhPrimitives[i].bounds);
 
     if (bounds.SurfaceArea() == 0 || begin + 1 == end) {
-        int firstPrimOffset = orderedPrimOffset->fetch_add(end - begin);
+        int firstPrimOffset = orderedPrimOffset->fetch_add(static_cast<int>(end - begin));
         for (size_t i = begin; i < end; ++i) {
             size_t index = bvhPrimitives[i].primitiveIndex;
             orderedPrims[firstPrimOffset + i - begin] = primitives[index];
         }
-        node->InitLeaf(firstPrimOffset, end - begin, bounds);
+        node->InitLeaf(firstPrimOffset, static_cast<int>(end - begin), bounds);
         return node;
     }
 
@@ -50,12 +50,12 @@ BVHBuildNode* BVHAggregate::buildRecursive(size_t begin, size_t end, std::atomic
     for (size_t i = begin; i < end; ++i) centroidBounds = AABB(centroidBounds, bvhPrimitives[i].Centroid());
     int dim = centroidBounds.MaxDimension();
     if (centroidBounds.pMax[dim] == centroidBounds.pMin[dim]) {
-        int firstPrimOffset = orderedPrimOffset->fetch_add(end - begin);
+        int firstPrimOffset = orderedPrimOffset->fetch_add(static_cast<int>(end - begin));
         for (size_t i = begin; i < end; ++i) {
             size_t index = bvhPrimitives[i].primitiveIndex;
             orderedPrims[firstPrimOffset + i - begin] = primitives[index];
         }
-        node->InitLeaf(firstPrimOffset, end - begin, bounds);
+        node->InitLeaf(firstPrimOffset, static_cast<int>(end - begin), bounds);
         return node;
     }
 
@@ -79,7 +79,7 @@ BVHBuildNode* BVHAggregate::buildRecursive(size_t begin, size_t end, std::atomic
         const int nBuckets = 12;
         BVHSplitBucket buckets[nBuckets];
         for (size_t i = begin; i < end; ++i) {
-            int b = nBuckets * centroidBounds.Offset(bvhPrimitives[i].Centroid())[dim];
+            int b = static_cast<int>(nBuckets * centroidBounds.Offset(bvhPrimitives[i].Centroid())[dim]);
             if (b == nBuckets) b = nBuckets - 1;
             buckets[b].count++;
             buckets[b].bounds = AABB(buckets[b].bounds, bvhPrimitives[i].bounds);
@@ -105,24 +105,24 @@ BVHBuildNode* BVHAggregate::buildRecursive(size_t begin, size_t end, std::atomic
             minCost = costs[i];
             minCostSplitBucket = i;
         }
-        double leafCost = end - begin;
+        double leafCost = static_cast<double>(end - begin);
         minCost = 0.5 + minCost / bounds.SurfaceArea();
 
         if (end - begin > maxPrimesInNode || minCost < leafCost) {
             auto midIter = std::partition(bvhPrimitives.begin() + begin, bvhPrimitives.begin() + end, [dim, minCostSplitBucket, nBuckets, centroidBounds](const BVHPrimitive& a) {
-                int b = nBuckets * centroidBounds.Offset(a.Centroid())[dim];
+                int b = static_cast<int>(nBuckets * centroidBounds.Offset(a.Centroid())[dim]);
                 if (b == nBuckets) b = nBuckets - 1;
                 return b <= minCostSplitBucket;
                 });
             mid = midIter - bvhPrimitives.begin();
         }
         else {
-            int firstPrimOffset = orderedPrimOffset->fetch_add(end - begin);
+            int firstPrimOffset = orderedPrimOffset->fetch_add(static_cast<int>(end - begin));
             for (size_t i = begin; i < end; ++i) {
                 size_t index = bvhPrimitives[i].primitiveIndex;
                 orderedPrims[firstPrimOffset + i - begin] = primitives[index];
             }
-            node->InitLeaf(firstPrimOffset, end - begin, bounds);
+			node->InitLeaf(firstPrimOffset, static_cast<int>(end - begin), bounds);
             return node;
         }
         break;

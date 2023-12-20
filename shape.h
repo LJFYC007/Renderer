@@ -36,8 +36,8 @@ class Shape
 {
 public:
 	virtual AABB Bounds() const = 0;
-	virtual std::optional<ShapeIntersection> Intersect(const ray& r, interval t) const = 0;
-	// virtual bool IntersectP(const ray& r, interval t) const = 0;
+	virtual std::optional<ShapeIntersection> Intersect(const Ray& r, interval t) const = 0;
+	// virtual bool IntersectP(const Ray& r, interval t) const = 0;
 	virtual double Area() const = 0;
 	virtual std::optional<ShapeSample> Sample(vec2 u) const = 0;
 	virtual double PDF(ShapeSampleContext sample) const {
@@ -101,7 +101,7 @@ public:
 		return AABB(p0, p1, p2);
 	}
 
-	std::optional<ShapeIntersection> Intersect(const ray& r, interval t) const override {
+	std::optional<ShapeIntersection> Intersect(const Ray& r, interval t) const override {
 		const TriangleMesh* mesh = GetMesh();
 		const int* v = &mesh->vertexIndices[3 * triIndex];
 		vec3 p0 = mesh->vertices[v[0]].p, p1 = mesh->vertices[v[1]].p, p2 = mesh->vertices[v[2]].p;
@@ -152,20 +152,25 @@ public:
 		return ShapeIntersection{ intr, ints->t };
 	}
 
-	std::optional<TriangleIntersection> BasicIntersect(const ray& r, interval t, vec3 p0, vec3 p1, vec3 p2) const {
-		vec3 e1 = p1 - p0, e2 = p2 - p0, s = r.ro - p0;
-		vec3 s1 = cross(r.rd, e2), s2 = cross(s, e1);
+	std::optional<TriangleIntersection> BasicIntersect(const Ray& r, interval t, vec3 p0, vec3 p1, vec3 p2) const {
+		vec3 edge1 = p1 - p0, edge2 = p2 - p0, originToP0 = r.ro - p0;
+		vec3 pvec = cross(r.rd, edge2);
+		double det = dot(pvec, edge1);
+		if (std::abs(det) < std::numeric_limits<double>::epsilon()) return {};
 
-		double coeff = 1.0 / dot(s1, e1);
-		double T = coeff * dot(s2, e2);
-		double U = coeff * dot(s1, s);
-		double V = coeff * dot(s2, r.rd);
+		double invDet = 1.0 / det;
+		vec3 tvec = originToP0;
+		double u = dot(tvec, pvec) * invDet;
+		if (u < 0 || u > 1) return {};
 
-		if (!t.surrounds(T)) return {};
+		vec3 qvec = cross(tvec, edge1);
+		double v = dot(r.rd, qvec) * invDet;
+		if (v < 0 || u + v > 1) return {};
 
-		if (T >= 0 && U >= 0 && V >= 0 && (1 - U - V) >= 0)
-			return TriangleIntersection{ T, 1 - U - V, U, V };
-		return {};
+		double t_hit = dot(edge2, qvec) * invDet;
+		if (!t.surrounds(t_hit)) return {};
+
+		return TriangleIntersection{ t_hit, 1 - u - v, u, v };
 	}
 
 	double Area() const override {
@@ -204,7 +209,7 @@ public:
 	}
 
 	double PDF(ShapeSampleContext sample, vec3 wi) const override {
-		ray r = SpawnRay(sample.pi, sample.n, wi);
+		Ray r = SpawnRay(sample.pi, sample.n, sample.t,wi);
 		std::optional<ShapeIntersection> isect = Intersect(r, interval(0, infinity));
 		if (!isect) return 0.0;
 		SurfaceInteraction intr = isect->intr;

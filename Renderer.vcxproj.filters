@@ -51,6 +51,9 @@
     <ClCompile Include="sample.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="integrator.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="primitive.h">
@@ -114,6 +117,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="textures.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="integrator.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
