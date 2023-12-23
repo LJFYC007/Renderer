@@ -7,10 +7,16 @@
 
 #include <memory>
 using std::shared_ptr;
-using std::make_unique;
+using std::make_shared;
+
+struct MaterialEvalContext : public TextureEvalContext
+{
+    MaterialEvalContext(const SurfaceInteraction& intr) : TextureEvalContext(intr), wo(intr.wo), ns(intr.shading.n), dpdus(intr.shading.dpdu) {}
+    vec3 wo, ns, dpdus;
+};
 
 struct NormalBumpEvalContext {
-    NormalBumpEvalContext(const SurfaceInteraction &intr) 
+    NormalBumpEvalContext(const SurfaceInteraction& intr)
         : p(intr.p()), uv(intr.uv), n(intr.n), dudx(intr.dudx), dudy(intr.dudy), dvdx(intr.dvdx), dvdy(intr.dvdy), dpdx(intr.dpdx), dpdy(intr.dpdy) {
         shading.n = intr.shading.n;
         shading.dpdu = intr.shading.dpdu;
@@ -60,35 +66,35 @@ inline void BumpMap(shared_ptr<ImageTexture> bumpMap, const NormalBumpEvalContex
 class Material
 {
 public:
-    virtual ~Material() = default;
-    virtual BSDF GetBSDF(const SurfaceInteraction& intr, const SampledWaveLengths& lambda) const = 0;
-    virtual shared_ptr<ImageTexture> GetNormalMap() const { return nullptr; }
-    virtual shared_ptr<ImageTexture> GetBumpMap() const { return nullptr; }
+    Material() { normalMap = bumpMap = nullptr; }
+    void SetNormalMap(shared_ptr<ImageTexture> _normalMap) { normalMap = _normalMap; }
+    void SetBumpMap(shared_ptr<ImageTexture> _bumpMap) { bumpMap = _bumpMap; }
+    shared_ptr<ImageTexture> GetNormalMap() const { return normalMap; }
+    shared_ptr<ImageTexture> GetBumpMap() const { return bumpMap; }
+
+    virtual shared_ptr<BxDF> GetBxDF(const MaterialEvalContext& ctx, const SampledWaveLengths& lambda) const = 0;
+
+    BSDF GetBSDF(MaterialEvalContext ctx, const SampledWaveLengths& lambda) const {
+        shared_ptr<BxDF> bxdf = GetBxDF(ctx, lambda);
+        return BSDF(ctx.ns, ctx.dpdus, bxdf);
+    }
+
+private:
+    shared_ptr<ImageTexture> normalMap = nullptr;
+    shared_ptr<ImageTexture> bumpMap = nullptr;
 };
 
 class DiffuseMaterial : public Material {
 public:
     DiffuseMaterial(shared_ptr<SpectrumTexture> _albedo) : albedo(_albedo) {}
-    BSDF GetBSDF(const SurfaceInteraction& intr, const SampledWaveLengths& lambda) const override {
-        SampledSpectrum r = albedo->Evaluate(intr, lambda);
-        return BSDF(intr.shading.n, intr.shading.dpdu, make_unique<DiffuseBxDF>(r));
-    }
 
-    void SetNormalMap(shared_ptr<ImageTexture> _normalMap) {
-        normalMap = _normalMap;
+    shared_ptr<BxDF> GetBxDF(const MaterialEvalContext& ctx, const SampledWaveLengths& lambda) const override {
+        SampledSpectrum r = albedo->Evaluate(ctx, lambda);
+        return make_shared<DiffuseBxDF>(r);
     }
-
-    void SetBumpMap(shared_ptr<ImageTexture> _bumpMap) {
-        bumpMap = _bumpMap;
-    }
-
-    shared_ptr<ImageTexture> GetNormalMap() const override { return normalMap; }
-    shared_ptr<ImageTexture> GetBumpMap() const override { return bumpMap; }
 
 private:
     shared_ptr<SpectrumTexture> albedo;
-    shared_ptr<ImageTexture> normalMap;
-    shared_ptr<ImageTexture> bumpMap;
 };
 
 
@@ -96,8 +102,8 @@ class ConductorMaterial : public Material {
 public:
     ConductorMaterial(double _alphax, double _alphay, double _eta, double _k) : alphax(_alphax), alphay(_alphay), eta(_eta), k(_k) {}
 
-    BSDF GetBSDF(const SurfaceInteraction& intr, const SampledWaveLengths& lambda) const override {
-        return BSDF(intr.shading.n, intr.shading.dpdu, make_unique<ConductorBxDF>(TrowbridgeReitzDistribution(alphax, alphay), SampledSpectrum(eta), SampledSpectrum(k)));
+    shared_ptr<BxDF> GetBxDF(const MaterialEvalContext& ctx, const SampledWaveLengths& lambda) const override {
+        return make_shared<ConductorBxDF>(TrowbridgeReitzDistribution(alphax, alphay), SampledSpectrum(eta), SampledSpectrum(k));
     }
 
 private:
@@ -108,8 +114,8 @@ class DielectricMaterial : public Material {
 public:
     DielectricMaterial(double _alphax, double _alphay, double _eta) : alphax(_alphax), alphay(_alphay), eta(_eta) {}
 
-    BSDF GetBSDF(const SurfaceInteraction& intr, const SampledWaveLengths& lambda) const override {
-        return BSDF(intr.shading.n, intr.shading.dpdu, make_unique<DielectricBxDF>(TrowbridgeReitzDistribution(alphax, alphay), eta));
+    shared_ptr<BxDF> GetBxDF(const MaterialEvalContext& ctx, const SampledWaveLengths& lambda) const override {
+        return make_shared<DielectricBxDF>(TrowbridgeReitzDistribution(alphax, alphay), eta);
     }
 
 private:

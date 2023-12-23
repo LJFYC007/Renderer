@@ -45,7 +45,9 @@ void box(vec3 a, vec3 b, const shared_ptr<Material>& mat, const Transform& t = T
 int main()
 {
     Camera cam;
+    Model model(World, "resources/OBJ_1802.obj");
 
+    /*
     auto red = make_shared<DiffuseMaterial>(make_shared<SpectrumConstantTexture>(vec3(.65, .05, .05)));
     auto white = make_shared<DiffuseMaterial>(make_shared<SpectrumConstantTexture>(vec3(.73, .73, .73)));
     auto green = make_shared<DiffuseMaterial>(make_shared<SpectrumConstantTexture>(vec3(.12, .45, .15)));
@@ -98,9 +100,12 @@ int main()
         lights.emplace_back(make_shared<DiffuseAreaLight>(areaLight));
         World.emplace_back(make_shared<GeometricPrimitive>(triangle, white, make_shared<DiffuseAreaLight>(areaLight)));
     }
+    */
 
+    std::vector<shared_ptr<Light>> lights;
     //lights.emplace_back(make_shared<PointLight>(Transform::Translate(vec3(278, 550, 278)), SpectrasRGB, 1.0));
-    lights.emplace_back(make_shared<DistantLight>(Transform::RotateX(pi), SpectrasRGB, 0.05));
+    lights.emplace_back(make_shared<DistantLight>(Transform::RotateX(pi * 3 / 2), SpectrasRGB, 1));
+    lights.emplace_back(make_shared<DistantLight>(Transform::RotateY(pi / 2), SpectrasRGB, 1));
 
     BVHAggregate bvh(World, 1);
     cam.Render(bvh, lights);

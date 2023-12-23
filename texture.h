@@ -25,13 +25,17 @@ struct TextureEvalContext
 class DoubleTexture
 {
 public:
-	virtual double Evaluate(TextureEvalContext ctx) const = 0;
+	virtual double Evaluate(TextureEvalContext ctx) const {
+		return 0.0;
+	}
 };
 
 class SpectrumTexture
 {
 public:
-	virtual SampledSpectrum Evaluate(TextureEvalContext ctx, SampledWaveLengths lambda) const = 0;
+	virtual SampledSpectrum Evaluate(TextureEvalContext ctx, SampledWaveLengths lambda) const {
+		return SampledSpectrum(0.0);
+	}
 	virtual vec3 Evaluate(TextureEvalContext ctx) const {
 		return vec3(0.0);
 	}

@@ -3,12 +3,12 @@
 #include "math.h"
 
 #include <memory>
-using std::unique_ptr;
+using std::shared_ptr;
 
 class BSDF {
 public:
 	BSDF() = default;
-	BSDF(vec3 ns, vec3 dpdus, unique_ptr<BxDF> _bxdf) : bxdf(std::move(_bxdf)), shadingFrame(FromXZ(normalize(dpdus), ns)) {}
+	BSDF(vec3 ns, vec3 dpdus, shared_ptr<BxDF> _bxdf) : bxdf(_bxdf), shadingFrame(FromXZ(normalize(dpdus), ns)) {}
 
 	vec3 RenderToLocal(vec3 v) const { return shadingFrame.ToLocal(v); }
 	vec3 LocalToRender(vec3 v) const { return shadingFrame.FromLocal(v); }
@@ -46,6 +46,6 @@ public:
 	BxDFFlags Flags() const { return bxdf->Flags(); }
 
 private:
-	unique_ptr<BxDF> bxdf;
+	shared_ptr<BxDF> bxdf;
 	Frame shadingFrame;
 };

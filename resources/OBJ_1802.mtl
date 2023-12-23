@@ -1,0 +1,1401 @@
+# Blender MTL File: 'Blend_0000.blend'
+# Material Count: 101
+
+newmtl MAT_Assets1.089
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.090
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.091
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.092
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.093
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.094
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.095
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.096
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.097
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.098
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.099
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.100
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.101
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.102
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.103
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.104
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.105
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.106
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.107
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.108
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.109
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.110
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.111
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.112
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.113
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.114
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.115
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.116
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.117
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.118
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.119
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.120
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.121
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.122
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.123
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.124
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.125
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.126
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.127
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.128
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.129
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.130
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.131
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.132
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.133
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.134
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.135
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.136
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.137
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.138
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.139
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.140
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.141
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.142
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.143
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.144
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.145
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.146
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.147
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.148
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.149
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.150
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.151
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.152
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.153
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.154
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.155
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.156
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.157
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.158
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.159
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.160
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.161
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.162
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.163
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.164
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.165
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.166
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.167
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.168
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.169
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.170
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.171
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.172
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.173
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.174
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.175
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.176
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_Assets1.177
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/assets_1_Normal_DirectX.png
+map_Kd textures/assets_1_Base_Color.png
+map_Ns textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+
+newmtl MAT_BarTiling.001
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/Pub_BarTiling_normal.png
+map_Kd textures/Pub_BarTiling_basecolor.png
+map_Ns textures/Pub_BarTiling_roughness.png
+
+newmtl MAT_FloorTiling.002
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/Pub_Floor_normal.png
+map_Kd textures/Pub_Floor_basecolor.png
+map_Ns textures/Pub_Floor_roughness.png
+
+newmtl MAT_FloorTiling.003
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/Pub_Floor_normal.png
+map_Kd textures/Pub_Floor_basecolor.png
+map_Ns textures/Pub_Floor_roughness.png
+
+newmtl MAT_TransparentEmissive.003
+Ns 275.390515
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/MAT_TransparentEmissive_normal.png
+map_Kd textures/MAT_TransparentEmissive_albedo.jpg
+
+newmtl MAT_TransparentEmissive.004
+Ns 275.390515
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/MAT_TransparentEmissive_normal.png
+map_Kd textures/MAT_TransparentEmissive_albedo.jpg
+
+newmtl MAT_TransparentEmissive.005
+Ns 275.390515
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/MAT_TransparentEmissive_normal.png
+map_Kd textures/MAT_TransparentEmissive_albedo.jpg
+
+newmtl MAT_TrimSheet01.006
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/Pub_Trim01_normal.png
+map_Kd textures/Pub_Trim01_basecolor.png
+map_Ns textures/Pub_Trim01_roughness.png
+
+newmtl MAT_TrimSheet01.007
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/Pub_Trim01_normal.png
+map_Kd textures/Pub_Trim01_basecolor.png
+map_Ns textures/Pub_Trim01_roughness.png
+
+newmtl MAT_TrimSheet01.008
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/Pub_Trim01_normal.png
+map_Kd textures/Pub_Trim01_basecolor.png
+map_Ns textures/Pub_Trim01_roughness.png
+
+newmtl MAT_TrimSheet01.009
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/Pub_Trim01_normal.png
+map_Kd textures/Pub_Trim01_basecolor.png
+map_Ns textures/Pub_Trim01_roughness.png
+
+newmtl MAT_TrimSheet01.010
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/Pub_Trim01_normal.png
+map_Kd textures/Pub_Trim01_basecolor.png
+map_Ns textures/Pub_Trim01_roughness.png
+
+newmtl MAT_TrimSheet01.011
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump -bm 0.140017 textures/Pub_Trim01_normal.png
+map_Kd textures/Pub_Trim01_basecolor.png
+map_Ns textures/Pub_Trim01_roughness.png

@@ -8,19 +8,35 @@
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
+#include <assimp/DefaultLogger.hpp>
 #include <vector>
 #include <string>
 #include <memory>
+#include <iostream>
 
 using std::shared_ptr;
 using std::make_shared;
 using std::vector;
+
+class MyErrorStream : public Assimp::LogStream {
+public:
+	void write(const char* message) override {
+		std::cerr << message << std::endl;
+	}
+};
 
 class Model
 {
 public:
 	Model(std::vector<shared_ptr<Primitive>>& _world, std::string const& path): world(_world)
 	{
+		/*
+		Assimp::DefaultLogger::create("", Assimp::Logger::VERBOSE);
+		Assimp::Logger* pLogger = Assimp::DefaultLogger::get();
+		MyErrorStream myErrStream;
+		pLogger->attachStream(&myErrStream, Assimp::Logger::Err | Assimp::Logger::Warn);
+		*/
+
 		Assimp::Importer importer;
 		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
 		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
@@ -29,6 +45,8 @@ public:
 			return;
 		}
 		processNode(scene->mRootNode, scene);
+
+		//Assimp::DefaultLogger::kill();
 	}
 
 private:
@@ -60,11 +78,20 @@ private:
 
 	shared_ptr<ImageTexture> loadTexture(const std::string& type, const aiMaterial* mat) {
 		aiString str;
-		mat->GetTexture(getTextureType(type), 0, &str);
-		std::string texturePath = "resources/" + std::string(str.C_Str());
+		if (mat->GetTexture(getTextureType(type), 0, &str) != AI_SUCCESS)
+			return nullptr;
+		std::string texturePath(str.C_Str());
+		std::string::size_type n = 0;
+		while ((n = texturePath.find("\\\\", n)) != std::string::npos)
+		{
+			texturePath.replace(n, 2, "/");
+			n += 1;
+		}
+		texturePath = "resources/" + texturePath;
+
 		for (auto& loadedTexture : texturesLoaded) {
 			if (std::strcmp(texturePath.c_str(), loadedTexture->GetPath().c_str()) == 0) {
-				return loadedTexture;			
+				return loadedTexture;
 			}
 		}
 		UVMapping mapping;
@@ -76,12 +103,15 @@ private:
 	void processMesh(const aiMesh* mesh, const aiScene* scene)
 	{
 		aiMaterial* mat = scene->mMaterials[mesh->mMaterialIndex];
+		// auto material = make_shared<DiffuseMaterial>(make_shared<SpectrumConstantTexture>(vec3(.73, .73, .73)));
 		shared_ptr<ImageTexture> texture = loadTexture("DIFFUSE", mat);
-		shared_ptr<ImageTexture> normalTexture = loadTexture("NORMALS", mat);
-		shared_ptr<ImageTexture> heightTexture = loadTexture("HEIGHT", mat);
 		shared_ptr<DiffuseMaterial> material = make_shared<DiffuseMaterial>(texture);
+		shared_ptr<ImageTexture> heightTexture = loadTexture("HEIGHT", mat);
+		// material->SetBumpMap(heightTexture);
+		/*
+		shared_ptr<ImageTexture> normalTexture = loadTexture("NORMALS", mat);
 		material->SetNormalMap(normalTexture);
-		material->SetBumpMap(heightTexture);
+		*/
 
 		vector<Vertex> vertices;
 		vector<int> indices;
@@ -119,7 +149,7 @@ private:
 				indices.emplace_back(face.mIndices[j]);
 		}
 
-		meshes.emplace_back(Transform::Translate(vec3(0, -100, 278)) * Transform::Scale(4, 4, 4), indices, vertices, true, true);
+		meshes.emplace_back(Transform::RotateY(pi), indices, vertices, true, true);
 		for (int i = 0; i < meshes.back().nTriangles; ++i) {
 			world.emplace_back(make_shared<SimplePrimitive>(make_shared<Triangle>(static_cast<int>(meshes.size()) - 1, i), material));
 		}
