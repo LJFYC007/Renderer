@@ -89,8 +89,8 @@ public:
     DiffuseMaterial(shared_ptr<SpectrumTexture> _albedo) : albedo(_albedo) {}
 
     shared_ptr<BxDF> GetBxDF(const MaterialEvalContext& ctx, const SampledWaveLengths& lambda) const override {
-        SampledSpectrum r = albedo->Evaluate(ctx, lambda);
-        return make_shared<DiffuseBxDF>(r);
+        SampledSpectrum reflectance = albedo->Evaluate(ctx, lambda);
+        return make_shared<DiffuseBxDF>(reflectance);
     }
 
 private:
@@ -100,14 +100,20 @@ private:
 
 class ConductorMaterial : public Material {
 public:
-    ConductorMaterial(double _alphax, double _alphay, double _eta, double _k) : alphax(_alphax), alphay(_alphay), eta(_eta), k(_k) {}
+    ConductorMaterial(shared_ptr<ImageTexture> _reflectance, shared_ptr<ImageTexture> _metallicRoughness) : reflectance(_reflectance), metallicRoughness(_metallicRoughness) {}
 
     shared_ptr<BxDF> GetBxDF(const MaterialEvalContext& ctx, const SampledWaveLengths& lambda) const override {
-        return make_shared<ConductorBxDF>(TrowbridgeReitzDistribution(alphax, alphay), SampledSpectrum(eta), SampledSpectrum(k));
+        vec3 x = metallicRoughness->Evaluate(ctx);
+        double alpha = RoughnessToAlpha(x[1]), metallic = x[2];
+        SampledSpectrum r = reflectance->Evaluate(ctx, lambda);
+        SampledSpectrum eta(1.0);
+        SampledSpectrum ks = Sqrt(r) / Sqrt(ClampZero(SampledSpectrum(1.0) - r)) * 2;
+        return make_shared<ConductorBxDF>(TrowbridgeReitzDistribution(alpha, alpha), eta, ks);
     }
 
 private:
-    double alphax, alphay, eta, k;
+    shared_ptr<ImageTexture> reflectance;
+    shared_ptr<ImageTexture> metallicRoughness;
 };
 
 class DielectricMaterial : public Material {

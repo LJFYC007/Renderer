@@ -90,6 +90,8 @@ private:
 	double alphax, alphay;
 };
 
+inline double RoughnessToAlpha(double roughness) { return sqrt(roughness); }
+
 class ConductorBxDF : public BxDF
 {
 public:

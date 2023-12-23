@@ -370,6 +370,13 @@ public:
 		return SampledSpectrum(v);
 	}
 
+	SampledSpectrum operator -(const SampledSpectrum& y) {
+		double v[NSpectrumSamples];
+		for (int i = 0; i < NSpectrumSamples; ++i)
+			v[i] = values[i] - y[i];
+		return SampledSpectrum(v);
+	}
+
 	SampledSpectrum operator *(const SampledSpectrum& y) {
 		double v[NSpectrumSamples];
 		for (int i = 0; i < NSpectrumSamples; ++i)
@@ -424,6 +431,18 @@ public:
 private:
 	double values[NSpectrumSamples];
 };
+inline SampledSpectrum Sqrt(const SampledSpectrum& s) {
+	double v[NSpectrumSamples];
+	for (int i = 0; i < NSpectrumSamples; ++i)
+		v[i] = std::sqrt(s[i]);
+	return SampledSpectrum(v);
+}
+inline SampledSpectrum ClampZero(const SampledSpectrum& s) {
+	double v[NSpectrumSamples];
+	for (int i = 0; i < NSpectrumSamples; ++i)
+		v[i] = std::fmax(0, s[i]);
+	return SampledSpectrum(v);
+}
 
 class SampledWaveLengths {
 public:

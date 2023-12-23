@@ -64,15 +64,14 @@ private:
 	}
 
 	aiTextureType getTextureType(const std::string& type) {
-		if (type == "DIFFUSE") {
+		if (type == "DIFFUSE")
 			return aiTextureType_DIFFUSE;
-		}
-		else if (type == "NORMALS") {
+		else if (type == "NORMALS")
 			return aiTextureType_NORMALS;
-		}
-		else if (type == "HEIGHT") {
+		else if (type == "HEIGHT")
 			return aiTextureType_HEIGHT;
-		}
+		else if (type == "ROUGHNESS")
+			return aiTextureType_DIFFUSE_ROUGHNESS;
 	}
 
 	shared_ptr<ImageTexture> loadTexture(const std::string& type, const aiMaterial* mat) {
@@ -97,8 +96,13 @@ private:
 	{
 		aiMaterial* mat = scene->mMaterials[mesh->mMaterialIndex];
 		shared_ptr<ImageTexture> texture = loadTexture("DIFFUSE", mat);
-		shared_ptr<DiffuseMaterial> material = make_shared<DiffuseMaterial>(texture);
-		shared_ptr<ImageTexture> normalTexture = loadTexture("NORMAL", mat);
+		shared_ptr<ImageTexture> roughnessTexture = loadTexture("ROUGHNESS", mat);
+		if (roughnessTexture == nullptr)
+		{ 
+			roughnessTexture = make_shared<ImageTexture>(UVMapping(), "resources/Pub_BarTiling_roughness.png", 1);
+		}
+		shared_ptr<ConductorMaterial> material = make_shared<ConductorMaterial>(texture, roughnessTexture);
+		shared_ptr<ImageTexture> normalTexture = loadTexture("NORMALS", mat);
 		material->SetNormalMap(normalTexture);
 		/*
 		shared_ptr<ImageTexture> heightTexture = loadTexture("HEIGHT", mat);

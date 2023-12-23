@@ -69,7 +69,6 @@ SampledSpectrum Li(RayDifferential r, Camera* camera, SampledWaveLengths& lambda
 			L = L + beta * Ld;
 		}
 
-		vec3 wo = -r.rd;
 		std::optional<BSDFSample> bs = bsdf.Sample_f(-r.rd, randomDouble(), vec2Random());
 		if (!bs) break;
 		beta = beta * bs->f * std::abs(dot(bs->wi, intr.shading.n)) / bs->pdf;
