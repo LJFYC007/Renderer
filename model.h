@@ -44,24 +44,23 @@ public:
 			assert(-1);
 			return;
 		}
-		processNode(scene->mRootNode, scene);
-
-		//Assimp::DefaultLogger::kill();
+		processNode(scene->mRootNode, scene, Transform::RotateY(pi));
 	}
 
 private:
 	vector<shared_ptr<ImageTexture>> texturesLoaded;
 	std::vector<shared_ptr<Primitive>>& world;
 
-	void processNode(const aiNode* node, const aiScene* scene)
+	void processNode(const aiNode* node, const aiScene* scene, const Transform& parentTransform = Transform())
 	{
+		Transform currentTransform = parentTransform * Transform(node->mTransformation);
 		for (unsigned int i = 0; i < node->mNumMeshes; ++i)
 		{
 			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-			processMesh(mesh, scene);
+			processMesh(mesh, scene, currentTransform);
 		}
 		for (unsigned int i = 0; i < node->mNumChildren; ++i)
-			processNode(node->mChildren[i], scene);
+			processNode(node->mChildren[i], scene, currentTransform);
 	}
 
 	aiTextureType getTextureType(const std::string& type) {
@@ -81,12 +80,6 @@ private:
 		if (mat->GetTexture(getTextureType(type), 0, &str) != AI_SUCCESS)
 			return nullptr;
 		std::string texturePath(str.C_Str());
-		std::string::size_type n = 0;
-		while ((n = texturePath.find("\\\\", n)) != std::string::npos)
-		{
-			texturePath.replace(n, 2, "/");
-			n += 1;
-		}
 		texturePath = "resources/" + texturePath;
 
 		for (auto& loadedTexture : texturesLoaded) {
@@ -100,17 +93,16 @@ private:
 		return texture;
 	}
 
-	void processMesh(const aiMesh* mesh, const aiScene* scene)
+	void processMesh(const aiMesh* mesh, const aiScene* scene, const Transform& transform)
 	{
 		aiMaterial* mat = scene->mMaterials[mesh->mMaterialIndex];
-		// auto material = make_shared<DiffuseMaterial>(make_shared<SpectrumConstantTexture>(vec3(.73, .73, .73)));
 		shared_ptr<ImageTexture> texture = loadTexture("DIFFUSE", mat);
 		shared_ptr<DiffuseMaterial> material = make_shared<DiffuseMaterial>(texture);
-		shared_ptr<ImageTexture> heightTexture = loadTexture("HEIGHT", mat);
-		// material->SetBumpMap(heightTexture);
-		/*
-		shared_ptr<ImageTexture> normalTexture = loadTexture("NORMALS", mat);
+		shared_ptr<ImageTexture> normalTexture = loadTexture("NORMAL", mat);
 		material->SetNormalMap(normalTexture);
+		/*
+		shared_ptr<ImageTexture> heightTexture = loadTexture("HEIGHT", mat);
+		material->SetBumpMap(heightTexture);
 		*/
 
 		vector<Vertex> vertices;
@@ -149,7 +141,7 @@ private:
 				indices.emplace_back(face.mIndices[j]);
 		}
 
-		meshes.emplace_back(Transform::RotateY(pi), indices, vertices, true, true);
+		meshes.emplace_back(transform, indices, vertices, true, true);
 		for (int i = 0; i < meshes.back().nTriangles; ++i) {
 			world.emplace_back(make_shared<SimplePrimitive>(make_shared<Triangle>(static_cast<int>(meshes.size()) - 1, i), material));
 		}

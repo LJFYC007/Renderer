@@ -119,14 +119,24 @@ public:
 		vec3 dp02 = p0 - p2, dp12 = p1 - p2;
 		double determinant = duv02[0] * duv12[1] - duv02[1] * duv12[0];
 		double invdet = 1.0 / determinant;
-		vec3 dpdu = (duv12[1] * dp02 - duv02[1] * dp12) * invdet;
-		vec3 dpdv = (duv02[0] * dp12 - duv12[0] * dp02) * invdet;
+		bool degenerateUV = std::abs(determinant) < 1e-9;
+		vec3 dpdu, dpdv;
+		if (!degenerateUV) {
+			dpdu = (duv12[1] * dp02 - duv02[1] * dp12) * invdet;
+			dpdv = (duv02[0] * dp12 - duv12[0] * dp02) * invdet;
+		}
+		if (degenerateUV || cross(dpdu, dpdv).lengthSquared() == 0) {
+			vec3 ng = cross(p2 - p0, p1 - p0);
+			if (ng.lengthSquared() == 0) ng = cross(p2 - p0, p1 - p0);
+			CoordinateSystem(normalize(ng), dpdu, dpdv);	
+		}
 
 		vec3 pAbsSum = Abs(ints->b0 * p0) + Abs(ints->b1 * p1) + Abs(ints->b2 * p2);
 		vec3 pError = gamma(7) * pAbsSum;
-		SurfaceInteraction intr(Vector3fi(p, pError), uv, -r.rd, dpdu, dpdv, vec3(), vec3(), ints->t, false);
+		SurfaceInteraction intr(Vector3fi(p, pError), uv, -r.rd, dpdu, dpdv, vec3(), vec3(), r.time, false);
 		intr.n = intr.shading.n = normalize(cross(dp02, dp12));
 
+		/*
 		if (mesh->normalExists) {
 			vec3 ns = ints->b0 * mesh->vertices[v[0]].n + ints->b1 * mesh->vertices[v[1]].n + ints->b2 * mesh->vertices[v[2]].n;
 			ns = ns.lengthSquared() > 0 ? normalize(ns) : intr.n;
@@ -137,7 +147,7 @@ public:
 
 			vec3 dn1 = mesh->vertices[v[0]].n - mesh->vertices[v[2]].n, dn2 = mesh->vertices[v[1]].n - mesh->vertices[v[2]].n;
 			vec3 dndu, dndv;
-			if (determinant < 1e-9) {
+			if (degenerateUV) {
 				vec3 dn = cross(mesh->vertices[v[2]].n - mesh->vertices[v[0]].n, mesh->vertices[v[1]].n - mesh->vertices[v[0]].n);
 				if (dn.lengthSquared() == 0) dndu = dndv = vec3(0);
 				else CoordinateSystem(dn, dndu, dndv);
@@ -148,6 +158,7 @@ public:
 			}
 			intr.SetShadingGeometry(ns, ss, ts, dndu, dndv);
 		}
+		*/
 
 		return ShapeIntersection{ intr, ints->t };
 	}

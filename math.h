@@ -1,4 +1,8 @@
 #pragma once
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+
 #include <assert.h>
 #include <cmath>
 #include <cstdint>
@@ -482,10 +486,17 @@ template<int N> SquareMatrix<N> operator *(const SquareMatrix<N>& m1, const Squa
 class Transform
 {
 public : 
+	Transform() : Transform(SquareMatrix<4>()) {}
+	Transform(const aiMatrix4x4& _mat) {
+		mat[0][0] = _mat.a1; mat[0][1] = _mat.a2; mat[0][2] = _mat.a3; mat[0][3] = _mat.a4;
+		mat[1][0] = _mat.b1; mat[1][1] = _mat.b2; mat[1][2] = _mat.b3; mat[1][3] = _mat.b4;
+		mat[2][0] = _mat.c1; mat[2][1] = _mat.c2; mat[2][2] = _mat.c3; mat[2][3] = _mat.c4;
+		mat[3][0] = _mat.d1; mat[3][1] = _mat.d2; mat[3][2] = _mat.d3; mat[3][3] = _mat.d4;
+		inv = mat.Invert();
+	}
 	Transform(const SquareMatrix<4> _mat) : mat(_mat) { inv = _mat.Invert(); }
 	Transform(const SquareMatrix<4> _mat, const SquareMatrix<4> _inv) : mat(_mat), inv(_inv) {}
 	Transform(const double mat[4][4]) : Transform(SquareMatrix<4>(mat)) {}
-	Transform() : Transform(SquareMatrix<4>()) {}
 
 	Transform Inverse() {
 		return Transform(inv, mat);

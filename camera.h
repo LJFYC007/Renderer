@@ -20,16 +20,16 @@ static vec3 ans[3010][2210];
 class Camera
 {
 public:
-	int ImageWidth = 1200;
-	int ImageHeight = 1200;
+	int ImageWidth = 800;
+	int ImageHeight = 800;
 	double fov = 40.0;
 	vec3 lookfrom = vec3(100.0, 0.0, -100.0);
 	vec3 lookat = vec3(0.0, 0.0, 0.0);
 	vec3 vup = vec3(0.0, 1.0, 0.0);
 	double defocusAngle = 0.0;
 	double focusDist = 10.0;
-	int samplePixel = 256;
-	int maxDepth = 20;
+	int samplePixel = 64;
+	int maxDepth = 10;
 	std::vector<shared_ptr<Light>> lights;
 	std::vector<shared_ptr<Light>> infiniteLights;
 	shared_ptr<LightSampler> lightSampler;
@@ -58,9 +58,12 @@ public:
 
 						RayDifferential ray(ro, rd, 0.0);
 						ray.hasDifferentials = true;
+						double scale = focusDist / rd.z(); 
+						vec3 dPdx = normalize((pixelCenter + pixelDeltaU) - ro) * scale;
+						vec3 dPdy = normalize((pixelCenter + pixelDeltaV) - ro) * scale; 
 						ray.rxOrigin = ray.ryOrigin = ro;
-						ray.rxDirection = rd + pixelDeltaU;
-						ray.ryDirection = rd + pixelDeltaV;
+						ray.rxDirection = rd + (dPdx - rd);
+						ray.ryDirection = rd + (dPdy - rd);
 
 						RGBColor rgb = sRGB.ToRGB((::Li(ray, this, sample, bvh)).ToXYZ(sample));
 						col = col + vec3(rgb.r, rgb.g, rgb.b) / samplePixel;

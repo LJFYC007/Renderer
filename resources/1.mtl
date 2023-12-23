@@ -1,0 +1,82 @@
+# Blender 4.0.2 MTL File: 'None'
+# www.blender.org
+
+newmtl MAT_Assets1
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+illum 3
+Pm 1.000000
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
+map_Kd textures/assets_1_Base_Color.png
+map_Pr textures/assets_1_Roughness.png
+map_d textures/assets_1_Base_Color.png
+map_Bump -bm 1.000000 textures/assets_1_Normal_DirectX.png
+
+newmtl MAT_BarTiling
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+Pm 1.000000
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
+map_Kd textures/Pub_BarTiling_basecolor.png
+map_Pr textures/Pub_BarTiling_roughness.png
+map_Bump -bm 1.000000 textures/Pub_BarTiling_normal.png
+
+newmtl MAT_FloorTiling
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+Pm 1.000000
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
+map_Kd textures/Pub_Floor_basecolor.png
+map_Pr textures/Pub_Floor_roughness.png
+map_Bump -bm 1.000000 textures/Pub_Floor_normal.png
+
+newmtl MAT_TransparentEmissive
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+Pr 0.446837
+Pm 1.000000
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
+map_Kd textures/MAT_TransparentEmissive_albedo.jpg
+map_Bump -bm 1.000000 textures/MAT_TransparentEmissive_normal.png
+
+newmtl MAT_TrimSheet01
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 3
+Pm 1.000000
+Ps 0.000000
+Pc 0.000000
+Pcr 0.030000
+aniso 0.000000
+anisor 0.000000
+map_Kd textures/Pub_Trim01_basecolor.png
+map_Pr textures/Pub_Trim01_roughness.png
+map_Bump -bm 1.000000 textures/Pub_Trim01_normal.png

@@ -36,7 +36,7 @@ public:
 
 	std::optional<LightLiSample> SampleLi(LightSampleContext sample, vec2 u, SampledWaveLengths lambda, bool allowIncompletePDF = false) const override {
 		vec3 wi = normalize(renderFromLight(vec3(0, 0, 1)));
-		vec3 pOutside = sample.p() + wi * 1000000.0; // TODO: fix this, need to multiply R
+		vec3 pOutside = sample.p() + wi * 1000.0; // TODO: fix this, need to multiply R
 		SampledSpectrum Li = intensity.Sample(lambda) * scale;
 		return LightLiSample(Li, wi, 1.0, Interaction(pOutside));
 	}

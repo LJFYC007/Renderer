@@ -1,7 +1,7 @@
 #include "integrator.h"
 #include "camera.h"
 
-SampledSpectrum SampleLd(const vec3& wo, const SurfaceInteraction& intr, const BSDF& bsdf, Camera* camera, const SampledWaveLengths& lambda, const BVHAggregate& bvh)
+SampledSpectrum SampleLd(const SurfaceInteraction& intr, const BSDF& bsdf, Camera* camera, const SampledWaveLengths& lambda, const BVHAggregate& bvh)
 {
 	std::optional<SampledLight> sampledLight = camera->lightSampler->Sample(randomDouble());
 	if (!sampledLight) return {};
@@ -10,7 +10,7 @@ SampledSpectrum SampleLd(const vec3& wo, const SurfaceInteraction& intr, const B
 	std::optional<LightLiSample> ls = light->SampleLi(LightSampleContext(intr), u, lambda);
 	if (!ls || !ls->L || ls->pdf == 0.0) return { 0.0 };
 
-	vec3 wi = ls->wi;
+	vec3 wo = intr.wo, wi = ls->wi;
 	SampledSpectrum f = bsdf.f(wo, wi) * std::abs(dot(wi, intr.shading.n));
 	if (!f || !Unoccluded(bvh, intr, ls->pLight)) return { 0.0 };
 
@@ -65,7 +65,7 @@ SampledSpectrum Li(RayDifferential r, Camera* camera, SampledWaveLengths& lambda
 		if (depth++ == camera->maxDepth) break;
 		BSDF bsdf = intr.GetBSDF(r, lambda, camera);
 		if (IsNonSpecular(bsdf.Flags())) {
-			SampledSpectrum Ld = SampleLd(-r.rd, intr, bsdf, camera, lambda, bvh);
+			SampledSpectrum Ld = SampleLd(intr, bsdf, camera, lambda, bvh);
 			L = L + beta * Ld;
 		}
 
