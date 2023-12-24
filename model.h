@@ -17,8 +17,7 @@ class Model {
 public:
 	Model() = default;
 
-	Model(std::vector<shared_ptr<Primitive>>& _world, std::string const& filename) : world(_world)
-	{
+	Model(std::vector<shared_ptr<Primitive>>& _world, std::string const& filename) : world(_world) {
 		tinygltf::Model gltfModel;
 		tinygltf::TinyGLTF loader;
 		std::string err;
@@ -32,10 +31,49 @@ public:
 		model = std::move(gltfModel);
 		std::cerr << "Loaded glTF file: " << filename << std::endl;
 
+		LoadTextures();
+		LoadMaterials();
 		if (model.defaultScene >= 0) {
 			tinygltf::Scene& scene = model.scenes[model.defaultScene];
 			for (size_t i = 0; i < scene.nodes.size(); ++i)
 				ProcessNode(model.nodes[scene.nodes[i]], Transform());
+		}
+	}
+
+	void LoadTextures() {
+		textures.resize(model.textures.size());
+		for (size_t i = 0; i < model.textures.size(); ++i) {
+			const auto& texture = model.textures[i];
+			int imageIndex = texture.source;
+			assert(imageIndex > -1);
+			const auto& image = model.images[imageIndex];
+			const unsigned char* data = reinterpret_cast<const unsigned char*>(image.image.data());
+			UVMapping mapping;
+			textures[i] = make_shared<ImageTexture>(mapping, 1.0, image.width, image.height, image.component, data);
+		}
+	}
+
+	void LoadMaterials() {
+		materials.resize(model.materials.size());
+		for (size_t i = 0; i < model.materials.size(); ++i) {
+			const auto& material = model.materials[i];
+			shared_ptr<SpectrumTexture> baseColor;
+
+			auto baseColorTexture = material.values.find("baseColorTexture");
+			if (baseColorTexture != material.values.end()) {
+				const auto& textureIndex = baseColorTexture->second.TextureIndex();
+				assert(textureIndex > -1);
+				baseColor = textures[textureIndex];
+			}
+			else {
+				auto baseColorFactor = material.values.find("baseColorFactor");
+				if (baseColorFactor != material.values.end()) {
+					const auto& factor = baseColorFactor->second.ColorFactor();
+					baseColor = make_shared<SpectrumConstantTexture>(vec3(factor[0], factor[1], factor[2]));
+				}
+				else  baseColor = make_shared<SpectrumConstantTexture>(vec3(1.0));
+			}
+			materials[i] = make_shared<DiffuseMaterial>(baseColor);
 		}
 	}
 
@@ -46,10 +84,9 @@ public:
 		return translate * rotation * scale;
 	}
 
-	void ProcessNode(tinygltf::Node& node, const Transform& transform)
-	{
+	void ProcessNode(tinygltf::Node& node, const Transform& transform) {
 		Transform currentTransform = transform * GetNodeLocalTransform(node);
-		if (node.mesh >= 0) 
+		if (node.mesh >= 0)
 			ProcessMesh(model.meshes[node.mesh], currentTransform);
 		for (int i = 0; i < node.children.size(); ++i)
 			ProcessNode(model.nodes[node.children[i]], currentTransform);
@@ -66,7 +103,7 @@ public:
 
 			std::vector<int> vertexIndices(indexAccessor.count);
 			const void* dataPtr = &(buffer.data[bufferView.byteOffset + indexAccessor.byteOffset]);
-			for (size_t i = 0; i < indexAccessor.count; i ++) {
+			for (size_t i = 0; i < indexAccessor.count; i++) {
 				unsigned int a;
 				switch (indexAccessor.componentType) {
 				case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:
@@ -84,7 +121,7 @@ public:
 				}
 				vertexIndices[i] = a;
 			}
-		
+
 			const int nVertices = model.accessors[primitive.attributes.find("POSITION")->second].count;
 			std::vector<Vertex> vertices(nVertices);
 
@@ -105,8 +142,14 @@ public:
 			}
 
 			TriangleMesh triangleMesh(transform, vertexIndices, vertices, uvExists, normalExists);
-			meshes.push_back(triangleMesh);		
-			shared_ptr<Material> material = make_shared<DiffuseMaterial>(make_shared<SpectrumConstantTexture>(vec3(1)));
+			meshes.push_back(triangleMesh);
+
+			shared_ptr<Material> material;
+			if (primitive.material == -1) {
+				shared_ptr<SpectrumTexture> baseColor = make_shared<SpectrumConstantTexture>(vec3(1.0));
+				material = make_shared<DiffuseMaterial>(baseColor);
+			}
+			else material = materials[primitive.material];
 			for (int i = 0; i < meshes.back().nTriangles; ++i)
 				world.emplace_back(make_shared<SimplePrimitive>(make_shared<Triangle>(static_cast<int>(meshes.size()) - 1, i), material));
 		}
@@ -115,155 +158,6 @@ public:
 private:
 	tinygltf::Model model;
 	std::vector<shared_ptr<Primitive>>& world;
+	std::vector<shared_ptr<SpectrumTexture>> textures;
+	std::vector<shared_ptr<Material>> materials;
 };
-
-
-/*
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
-#include <assimp/DefaultLogger.hpp>
-#include <vector>
-#include <string>
-#include <memory>
-#include <iostream>
-
-using std::shared_ptr;
-using std::make_shared;
-using std::vector;
-
-class MyErrorStream : public Assimp::LogStream {
-public:
-	void write(const char* message) override {
-		std::cerr << message << std::endl;
-	}
-};
-
-class Model
-{
-public:
-	Model(std::vector<shared_ptr<Primitive>>& _world, std::string const& path): world(_world)
-	{
-		/*
-		Assimp::DefaultLogger::create("", Assimp::Logger::VERBOSE);
-		Assimp::Logger* pLogger = Assimp::DefaultLogger::get();
-		MyErrorStream myErrStream;
-		pLogger->attachStream(&myErrStream, Assimp::Logger::Err | Assimp::Logger::Warn);
-
-		Assimp::Importer importer;
-		const aiScene* scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
-		if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
-		{
-			assert(-1);
-			return;
-		}
-		processNode(scene->mRootNode, scene, Transform::RotateY(pi));
-	}
-
-private:
-	vector<shared_ptr<ImageTexture>> texturesLoaded;
-	std::vector<shared_ptr<Primitive>>& world;
-
-	void processNode(const aiNode* node, const aiScene* scene, const Transform& parentTransform = Transform())
-	{
-		Transform currentTransform = parentTransform * Transform(node->mTransformation);
-		for (unsigned int i = 0; i < node->mNumMeshes; ++i)
-		{
-			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-			processMesh(mesh, scene, currentTransform);
-		}
-		for (unsigned int i = 0; i < node->mNumChildren; ++i)
-			processNode(node->mChildren[i], scene, currentTransform);
-	}
-
-	aiTextureType getTextureType(const std::string& type) {
-		if (type == "DIFFUSE")
-			return aiTextureType_DIFFUSE;
-		else if (type == "NORMALS")
-			return aiTextureType_NORMALS;
-		else if (type == "HEIGHT")
-			return aiTextureType_HEIGHT;
-		else if (type == "ROUGHNESS")
-			return aiTextureType_DIFFUSE_ROUGHNESS;
-	}
-
-	shared_ptr<SpectrumTexture> loadTexture(const std::string& type, const aiMaterial* mat) {
-		aiString str;
-		if (mat->GetTexture(getTextureType(type), 0, &str) != AI_SUCCESS)
-		{
-			aiColor3D color(0.0, 0.0, 0.0);
-			if (type == "DIFFUSE") mat->Get(AI_MATKEY_COLOR_DIFFUSE, color);
-			else if (type == "NORMALS") mat->Get(AI_MATKEY_COLOR_DIFFUSE, color);
-			else if (type == "ROUGHNESS") mat->Get(AI_MATKEY_COLOR_DIFFUSE_ROUGHNESS, color);
-			return make_shared<SpectrumConstantTexture>(UVMapping(), vec3(color.r, color.g, color.b), 1);
-		}
-		std::string texturePath(str.C_Str());
-		texturePath = "resources/" + texturePath;
-
-		for (auto& loadedTexture : texturesLoaded) {
-			if (std::strcmp(texturePath.c_str(), loadedTexture->GetPath().c_str()) == 0) {
-				return loadedTexture;
-			}
-		}
-		UVMapping mapping;
-		auto texture = make_shared<ImageTexture>(mapping, texturePath, 1);
-		texturesLoaded.emplace_back(texture);
-		return texture;
-	}
-
-	void processMesh(const aiMesh* mesh, const aiScene* scene, const Transform& transform)
-	{
-		aiMaterial* mat = scene->mMaterials[mesh->mMaterialIndex];
-		shared_ptr<SpectrumTexture> texture = loadTexture("DIFFUSE", mat);
-		shared_ptr<SpectrumTexture> roughnessTexture = loadTexture("ROUGHNESS", mat);
-		shared_ptr<SpectrumTexture> normalTexture = loadTexture("NORMALS", mat);
-
-		shared_ptr<ConductorMaterial> material = make_shared<ConductorMaterial>(texture, roughnessTexture);
-		material->SetNormalMap(normalTexture);
-		/*
-		shared_ptr<ImageTexture> heightTexture = loadTexture("HEIGHT", mat);
-		material->SetBumpMap(heightTexture);
-
-		vector<Vertex> vertices;
-		vector<int> indices;
-		for (unsigned int i = 0; i < mesh->mNumVertices; ++i)
-		{
-			Vertex vertex;
-
-			vec3 vec;
-			vec.a[0] = mesh->mVertices[i].x;
-			vec.a[1] = mesh->mVertices[i].y;
-			vec.a[2] = mesh->mVertices[i].z;
-			vertex.p = vec;
-
-			vec.a[0] = mesh->mNormals[i].x;
-			vec.a[1] = mesh->mNormals[i].y;
-			vec.a[2] = mesh->mNormals[i].z;
-			vertex.n = vec;
-
-			if (mesh->mTextureCoords[0])
-			{
-				vec2 Vec;
-				Vec.a[0] = mesh->mTextureCoords[0][i].x;
-				Vec.a[1] = mesh->mTextureCoords[0][i].y;
-				vertex.uv = Vec;
-			}
-			else vertex.uv = vec2(0.0f);
-
-			vertices.emplace_back(vertex);
-		}
-
-		for (unsigned int i = 0; i < mesh->mNumFaces; ++i)
-		{
-			aiFace face = mesh->mFaces[i];
-			for (unsigned int j = 0; j < face.mNumIndices; ++j)
-				indices.emplace_back(face.mIndices[j]);
-		}
-
-		meshes.emplace_back(transform, indices, vertices, true, true);
-		for (int i = 0; i < meshes.back().nTriangles; ++i) {
-			world.emplace_back(make_shared<SimplePrimitive>(make_shared<Triangle>(static_cast<int>(meshes.size()) - 1, i), material));
-		}
-	}
-};
-*/

@@ -54,6 +54,8 @@ public:
 		data = stbi_load(filename.c_str(), &width, &height, &nrChannels, 0);
 	}
 
+	ImageTexture(UVMapping _mapping, double _scale, int width, int height, int nrChannels, const unsigned char* _data) : mapping(_mapping), scale(_scale), width(width), height(height), nrChannels(nrChannels), data(_data) {}
+
 	std::string GetPath() const { return filename; }
 
 	vec3 Evaluate(TextureEvalContext ctx) const override {
@@ -81,5 +83,5 @@ private:
 	std::string filename;
 	double scale;
 	int width, height, nrChannels = -1;
-	unsigned char* data = nullptr;
+	const unsigned char* data;
 };
