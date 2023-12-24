@@ -6,6 +6,7 @@
 
 #include <string>
 #include <iostream>
+#include <tiny_gltf.h>
 
 class DoubleConstantTexture : public DoubleTexture
 {
@@ -50,27 +51,19 @@ private:
 class ImageTexture : public SpectrumTexture
 {
 public:
-	ImageTexture(UVMapping _mapping, std::string _filename, double _scale) : mapping(_mapping), filename(_filename), scale(_scale) {
-		data = stbi_load(filename.c_str(), &width, &height, &nrChannels, 0);
-	}
-
-	ImageTexture(UVMapping _mapping, double _scale, int width, int height, int nrChannels, const unsigned char* _data) : mapping(_mapping), scale(_scale), width(width), height(height), nrChannels(nrChannels), data(_data) {}
-
-	std::string GetPath() const { return filename; }
+	ImageTexture(UVMapping _mapping, shared_ptr<tinygltf::Image> _image) : mapping(_mapping), image(_image) {}
 
 	vec3 Evaluate(TextureEvalContext ctx) const override {
-		if ( data == nullptr )
-			return vec3(.73);
 		TexCoord2D c = mapping.Map(ctx);
-		int i = static_cast<int>(c.st[0] * (width - 1));
-		int j = static_cast<int>(c.st[1] * (height - 1));
-		i = std::max(0, std::min(i, width - 1));
-		j = std::max(0, std::min(j, height - 1));
-		int pixelIndex = (j * width + i) * nrChannels;
-		double r = data[pixelIndex] / 255.0f;
-		double g = data[pixelIndex + 1] / 255.0f;
-		double b = data[pixelIndex + 2] / 255.0f;
-		return vec3(r, g, b) * scale;
+		int i = static_cast<int>(c.st[0] * (image->width - 1));
+		int j = static_cast<int>(c.st[1] * (image->height - 1));
+		i = std::max(0, std::min(i, image->width - 1));
+		j = std::max(0, std::min(j, image->height - 1));
+		int pixelIndex = (j * image->width + i) * image->component;
+		double r = image->image.data()[pixelIndex] / 255.0f;
+		double g = image->image.data()[pixelIndex + 1] / 255.0f;
+		double b = image->image.data()[pixelIndex + 2] / 255.0f;
+		return vec3(r, g, b);
 	}
 
 	SampledSpectrum Evaluate(TextureEvalContext ctx, SampledWaveLengths lambda) const override {
@@ -80,8 +73,5 @@ public:
 
 private:
 	UVMapping mapping;
-	std::string filename;
-	double scale;
-	int width, height, nrChannels = -1;
-	const unsigned char* data;
+	shared_ptr<tinygltf::Image> image;
 };

@@ -41,16 +41,30 @@ public:
 	}
 
 	void LoadTextures() {
-		textures.resize(model.textures.size());
+		images.resize(model.textures.size());
 		for (size_t i = 0; i < model.textures.size(); ++i) {
 			const auto& texture = model.textures[i];
 			int imageIndex = texture.source;
 			assert(imageIndex > -1);
-			const auto& image = model.images[imageIndex];
-			const unsigned char* data = reinterpret_cast<const unsigned char*>(image.image.data());
-			UVMapping mapping;
-			textures[i] = make_shared<ImageTexture>(mapping, 1.0, image.width, image.height, image.component, data);
+			images[i] = make_shared<tinygltf::Image>(model.images[imageIndex]);
 		}
+	}
+
+	UVMapping GetUVMapping(tinygltf::ExtensionMap extensionMap) {
+		const auto& extension = extensionMap.find("KHR_texture_transform");
+		if (extension == extensionMap.end()) return UVMapping();
+		double su = 1, sv = 1, du = 0, dv = 0;
+		if (extension->second.Has("offset")) {
+			const auto& offset = extension->second.Get("offset");
+			double du = offset.Get(0).Get<double>();
+			double dv = offset.Get(1).Get<double>();
+		}
+		if (extension->second.Has("scale")) {
+			const auto& scale = extension->second.Get("scale");
+			double su = scale.Get(0).Get<double>();
+			double sv = scale.Get(1).Get<double>();
+		}
+		return UVMapping(su, sv, du, dv);
 	}
 
 	void LoadMaterials() {
@@ -59,21 +73,23 @@ public:
 			const auto& material = model.materials[i];
 			shared_ptr<SpectrumTexture> baseColor;
 
-			auto baseColorTexture = material.values.find("baseColorTexture");
-			if (baseColorTexture != material.values.end()) {
-				const auto& textureIndex = baseColorTexture->second.TextureIndex();
-				assert(textureIndex > -1);
-				baseColor = textures[textureIndex];
+			const auto& pbrTexture = material.pbrMetallicRoughness;
+			if (pbrTexture.baseColorTexture.index != -1 ) {
+				const auto& textureIndex = pbrTexture.baseColorTexture.index;
+				const auto& extension = pbrTexture.baseColorTexture.extensions;
+				baseColor = make_shared<ImageTexture>(GetUVMapping(extension), images[textureIndex]);
 			}
 			else {
-				auto baseColorFactor = material.values.find("baseColorFactor");
-				if (baseColorFactor != material.values.end()) {
-					const auto& factor = baseColorFactor->second.ColorFactor();
-					baseColor = make_shared<SpectrumConstantTexture>(vec3(factor[0], factor[1], factor[2]));
-				}
-				else  baseColor = make_shared<SpectrumConstantTexture>(vec3(1.0));
+				const auto& baseColorFactor = pbrTexture.baseColorFactor;
+				baseColor = make_shared<SpectrumConstantTexture>(vec3(baseColorFactor[0], baseColorFactor[1], baseColorFactor[2]));
 			}
 			materials[i] = make_shared<DiffuseMaterial>(baseColor);
+
+			if (material.normalTexture.index > -1) {
+				const auto& textureIndex = material.normalTexture.index;
+				const auto& extension = material.normalTexture.extensions;			
+				materials[i]->SetNormalMap(make_shared<ImageTexture>(GetUVMapping(extension), images[textureIndex]));
+			}
 		}
 	}
 
@@ -158,6 +174,6 @@ public:
 private:
 	tinygltf::Model model;
 	std::vector<shared_ptr<Primitive>>& world;
-	std::vector<shared_ptr<SpectrumTexture>> textures;
+	std::vector<shared_ptr<tinygltf::Image>> images;
 	std::vector<shared_ptr<Material>> materials;
 };
