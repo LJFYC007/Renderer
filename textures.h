@@ -19,10 +19,12 @@ private:
 class SpectrumConstantTexture : public SpectrumTexture
 {
 public:
-	SpectrumConstantTexture(vec3 color) : value(make_shared<RGBAlbedoSpectrum>(sRGB, RGBColor(color))) {}
+	SpectrumConstantTexture(vec3 _color) : color(_color), value(make_shared<RGBAlbedoSpectrum>(sRGB, RGBColor(color))) {}
 	SpectrumConstantTexture(shared_ptr<Spectrum> _value) : value(_value) {}
+	vec3 Evaluate(TextureEvalContext ctx) const override { return color; }
 	SampledSpectrum Evaluate(TextureEvalContext ctx, SampledWaveLengths lambda) const override { return value->Sample(lambda); }
 private:
+	vec3 color;
 	shared_ptr<Spectrum> value;
 };
 
@@ -53,19 +55,6 @@ public:
 	}
 
 	std::string GetPath() const { return filename; }
-
-	double DoubleEvaluate(TextureEvalContext ctx) const {
-		if (data == nullptr)
-			return 0.0;
-		TexCoord2D c = mapping.Map(ctx);
-		int i = static_cast<int>(c.st[0] * (width - 1));
-		int j = static_cast<int>(c.st[1] * (height - 1));
-		i = std::max(0, std::min(i, width - 1));
-		j = std::max(0, std::min(j, height - 1));
-		int pixelIndex = (j * width + i) * nrChannels;
-		double x = data[pixelIndex] / 255.0f;
-		return x * scale;
-	}
 
 	vec3 Evaluate(TextureEvalContext ctx) const override {
 		if ( data == nullptr )

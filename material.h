@@ -36,7 +36,7 @@ struct NormalBumpEvalContext {
     vec3 dpdx, dpdy;
 };
 
-inline void NormalMap(shared_ptr<ImageTexture> normalMap, const NormalBumpEvalContext& ctx, vec3* dpdu, vec3* dpdv) {
+inline void NormalMap(shared_ptr<SpectrumTexture> normalMap, const NormalBumpEvalContext& ctx, vec3* dpdu, vec3* dpdv) {
     vec3 ns = 2 * normalMap->Evaluate(ctx) - vec3(1.0);
     ns = normalize(ns);
     Frame frame = FromXZ(normalize(ctx.shading.dpdu), ctx.shading.n);
@@ -46,19 +46,19 @@ inline void NormalMap(shared_ptr<ImageTexture> normalMap, const NormalBumpEvalCo
     *dpdv = normalize(cross(ns, *dpdu)) * vlen;
 }
 
-inline void BumpMap(shared_ptr<ImageTexture> bumpMap, const NormalBumpEvalContext& ctx, vec3* dpdu, vec3* dpdv) {
+inline void BumpMap(shared_ptr<SpectrumTexture> bumpMap, const NormalBumpEvalContext& ctx, vec3* dpdu, vec3* dpdv) {
     TextureEvalContext shiftedCtx = ctx;
     double du = 0.5 * (std::abs(ctx.dudx) + std::abs(ctx.dudy));
     shiftedCtx.p = ctx.p + du * ctx.shading.dpdu;
     shiftedCtx.uv = ctx.uv + vec2(du, 0);
-    double uDisplace = bumpMap->DoubleEvaluate(shiftedCtx);
+    double uDisplace = bumpMap->Evaluate(shiftedCtx)[0];
 
     double dv = 0.5 * (std::abs(ctx.dvdx) + std::abs(ctx.dvdy));
     shiftedCtx.p = ctx.p + dv * ctx.shading.dpdv;
     shiftedCtx.uv = ctx.uv + vec2(0, dv);
-    double vDisplace = bumpMap->DoubleEvaluate(shiftedCtx);
+    double vDisplace = bumpMap->Evaluate(shiftedCtx)[0];
 
-    double displace = bumpMap->DoubleEvaluate(ctx);
+    double displace = bumpMap->Evaluate(ctx)[0];
     *dpdu = ctx.shading.dpdu + (uDisplace - displace) / du * ctx.shading.n + displace * ctx.shading.dndu;
     *dpdv = ctx.shading.dpdv + (vDisplace - displace) / dv * ctx.shading.n + displace * ctx.shading.dndv;
 }
@@ -67,10 +67,10 @@ class Material
 {
 public:
     Material() { normalMap = bumpMap = nullptr; }
-    void SetNormalMap(shared_ptr<ImageTexture> _normalMap) { normalMap = _normalMap; }
-    void SetBumpMap(shared_ptr<ImageTexture> _bumpMap) { bumpMap = _bumpMap; }
-    shared_ptr<ImageTexture> GetNormalMap() const { return normalMap; }
-    shared_ptr<ImageTexture> GetBumpMap() const { return bumpMap; }
+    void SetNormalMap(shared_ptr<SpectrumTexture> _normalMap) { normalMap = _normalMap; }
+    void SetBumpMap(shared_ptr<SpectrumTexture> _bumpMap) { bumpMap = _bumpMap; }
+    shared_ptr<SpectrumTexture> GetNormalMap() const { return normalMap; }
+    shared_ptr<SpectrumTexture> GetBumpMap() const { return bumpMap; }
 
     virtual shared_ptr<BxDF> GetBxDF(const MaterialEvalContext& ctx, const SampledWaveLengths& lambda) const = 0;
 
@@ -80,8 +80,8 @@ public:
     }
 
 private:
-    shared_ptr<ImageTexture> normalMap = nullptr;
-    shared_ptr<ImageTexture> bumpMap = nullptr;
+    shared_ptr<SpectrumTexture> normalMap = nullptr;
+    shared_ptr<SpectrumTexture> bumpMap = nullptr;
 };
 
 class DiffuseMaterial : public Material {
@@ -100,7 +100,7 @@ private:
 
 class ConductorMaterial : public Material {
 public:
-    ConductorMaterial(shared_ptr<ImageTexture> _reflectance, shared_ptr<ImageTexture> _metallicRoughness) : reflectance(_reflectance), metallicRoughness(_metallicRoughness) {}
+    ConductorMaterial(shared_ptr<SpectrumTexture> _reflectance, shared_ptr<SpectrumTexture> _metallicRoughness) : reflectance(_reflectance), metallicRoughness(_metallicRoughness) {}
 
     shared_ptr<BxDF> GetBxDF(const MaterialEvalContext& ctx, const SampledWaveLengths& lambda) const override {
         vec3 x = metallicRoughness->Evaluate(ctx);
@@ -112,8 +112,8 @@ public:
     }
 
 private:
-    shared_ptr<ImageTexture> reflectance;
-    shared_ptr<ImageTexture> metallicRoughness;
+    shared_ptr<SpectrumTexture> reflectance;
+    shared_ptr<SpectrumTexture> metallicRoughness;
 };
 
 class DielectricMaterial : public Material {

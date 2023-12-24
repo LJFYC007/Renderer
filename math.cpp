@@ -137,3 +137,28 @@ Transform Transform::Rotate(double theta, const vec3& axis)
     };
     return Transform(matData);
 }
+
+Transform Transform::Rotate(double x, double y, double z, double w)
+{
+    Transform t;
+    t.mat[0][0] = 1.0 - 2.0 * (y * y + z * z);
+    t.mat[0][1] = 2.0 * (x * y - w * z);
+    t.mat[0][2] = 2.0 * (x * z + w * y);
+    t.mat[0][3] = 0.0;
+
+    t.mat[1][0] = 2.0 * (x * y + w * z);
+    t.mat[1][1] = 1.0 - 2.0 * (x * x + z * z);
+    t.mat[1][2] = 2.0 * (y * z - w * x);
+    t.mat[1][3] = 0.0;
+
+    t.mat[2][0] = 2.0 * (x * z - w * y);
+    t.mat[2][1] = 2.0 * (y * z + w * x);
+    t.mat[2][2] = 1.0 - 2.0 * (x * x + y * y);
+    t.mat[2][3] = 0.0;
+
+    t.mat[3][0] = 0.0;
+    t.mat[3][1] = 0.0;
+    t.mat[3][2] = 0.0;
+    t.mat[3][3] = 1.0;
+    return t;
+}

@@ -342,6 +342,11 @@ public:
 			for (int j = 0; j < N; ++j)
 				a[i][j] = _a[i][j];
 	}
+	SquareMatrix(const double* _a) {
+		for (int i = 0; i < N; ++i)
+			for (int j = 0; j < N; j++)
+				a[i][j] = _a[i * N + j];
+	}
 	template <typename... Args> SquareMatrix(double x, Args... args) {
 		static_assert(1 + sizeof...(Args) == N * N,
 			"Incorrect number of values provided to SquareMatrix constructor");
@@ -497,6 +502,7 @@ public :
 	Transform(const SquareMatrix<4> _mat) : mat(_mat) { inv = _mat.Invert(); }
 	Transform(const SquareMatrix<4> _mat, const SquareMatrix<4> _inv) : mat(_mat), inv(_inv) {}
 	Transform(const double mat[4][4]) : Transform(SquareMatrix<4>(mat)) {}
+	Transform(const double* mat) : Transform(SquareMatrix<4>(mat)) {}
 
 	Transform Inverse() {
 		return Transform(inv, mat);
@@ -513,6 +519,7 @@ public :
 	static Transform RotateY(double theta);
 	static Transform RotateZ(double theta);
 	static Transform Rotate(double theta, const vec3& axis);
+	static Transform Rotate(double a, double b, double c, double d);
 
 private : 
 	SquareMatrix<4> mat;
