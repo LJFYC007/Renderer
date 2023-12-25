@@ -73,11 +73,12 @@ BSDF SurfaceInteraction::GetBSDF(const RayDifferential &ray, const SampledWaveLe
 	ComputeDifferentials(ray, camera);
 	shared_ptr<SpectrumTexture> normalMap = material->GetNormalMap();
 	if (normalMap) {
-		vec3 dpdu, dpdv;
-		NormalMap(normalMap, NormalBumpEvalContext(*this), &dpdu, &dpdv);
+		vec3 dpdu, dpdv, dpdU, dpdV;
+		NormalMap(normalMap, NormalBumpEvalContext(*this), &dpdu, &dpdv, &dpdU, &dpdV);
 		vec3 ns = normalize(cross(dpdu, dpdv));
-		SetShadingGeometry(ns, dpdu, dpdv, shading.dndu, shading.dndv);
+		SetShadingGeometry(ns, dpdu, dpdv, dpdU, dpdV, shading.dndu, shading.dndv);
 	}
+	/*
 	shared_ptr<SpectrumTexture> bumpMap = material->GetBumpMap();
 	if (bumpMap) {
 		vec3 dpdu, dpdv;
@@ -85,6 +86,7 @@ BSDF SurfaceInteraction::GetBSDF(const RayDifferential &ray, const SampledWaveLe
 		vec3 ns = normalize(cross(dpdu, dpdv));
 		SetShadingGeometry(ns, dpdu, dpdv, shading.dndu, shading.dndv);
 	}
+	*/
 	BSDF bsdf = material->GetBSDF(*this, lambda);
 	return bsdf;
 }

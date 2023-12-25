@@ -58,10 +58,10 @@ public:
 };
 
 struct Vertex {
-	vec3 p, n; vec2 uv;
+	vec3 p, n; vec2 uv, UV;
 	Vertex() {}
 	Vertex(vec3 _p, vec3 _n) : p(_p), n(_n) {}
-	Vertex(vec3 _p, vec3 _n, vec2 _uv) : p(_p), n(_n), uv(_uv) {}
+	Vertex(vec3 _p, vec3 _n, vec2 _uv, vec2 _UV) : p(_p), n(_n), uv(_uv), UV(_UV) {}
 };
 
 class TriangleMesh
@@ -70,16 +70,17 @@ public:
 	int nTriangles, nVertices;
 	vector<int> vertexIndices;
 	vector<Vertex> vertices;
-	bool uvExists, normalExists;
+	bool uvExists, UVExists, normalExists;
 
-	TriangleMesh(const Transform& ObjectToWorld, vector<int> _vertexIndices, vector<Vertex> _vertices, bool _uvExists, bool _normalExists) :
-		nTriangles(static_cast<int>(_vertexIndices.size()) / 3), nVertices(static_cast<int>(_vertices.size())), vertexIndices(_vertexIndices), uvExists(_uvExists), normalExists(_normalExists) {
+	TriangleMesh(const Transform& ObjectToWorld, vector<int> _vertexIndices, vector<Vertex> _vertices, bool _uvExists, bool _UVExists, bool _normalExists) :
+		nTriangles(static_cast<int>(_vertexIndices.size()) / 3), nVertices(static_cast<int>(_vertices.size())), vertexIndices(_vertexIndices), uvExists(_uvExists), UVExists(_UVExists), normalExists(_normalExists) {
 		vertices.resize(nVertices);
 		for (int i = 0; i < nVertices; ++i)
 		{
 			vertices[i].p = ObjectToWorld(_vertices[i].p);
 			vertices[i].n = ObjectToWorld(_vertices[i].n);
 			vertices[i].uv = _vertices[i].uv;
+			vertices[i].UV = _vertices[i].UV;
 		}
 	}
 };
@@ -112,8 +113,12 @@ public:
 		vec2 uv0, uv1, uv2;
 		if (!mesh->uvExists) { uv0 = vec2(0, 0); uv1 = vec2(1, 0); uv2 = vec2(1, 1); }
 		else { uv0 = mesh->vertices[v[0]].uv; uv1 = mesh->vertices[v[1]].uv; uv2 = mesh->vertices[v[2]].uv; }
+		vec2 UV0, UV1, UV2;
+		if (!mesh->UVExists) { UV0 = vec2(0, 0); UV1 = vec2(1, 0); UV2 = vec2(1, 1); }
+		else { UV0 = mesh->vertices[v[0]].UV; UV1 = mesh->vertices[v[1]].UV; UV2 = mesh->vertices[v[2]].UV; }
 		vec3 p = p0 * ints->b0 + p1 * ints->b1 + p2 * ints->b2;
 		vec2 uv = uv0 * ints->b0 + uv1 * ints->b1 + uv2 * ints->b2;
+		vec2 UV = UV0 * ints->b0 + UV1 * ints->b1 + UV2 * ints->b2;
 
 		vec2 duv02 = uv0 - uv2, duv12 = uv1 - uv2;
 		vec3 dp02 = p0 - p2, dp12 = p1 - p2;
@@ -131,9 +136,24 @@ public:
 			CoordinateSystem(normalize(ng), dpdu, dpdv);	
 		}
 
+		vec2 dUV02 = UV0 - UV2, dUV12 = UV1 - UV2;
+		double Determinant = dUV02[0] * dUV12[1] - dUV02[1] * dUV12[0];
+		double invDet = 1.0 / Determinant;
+		bool DegenerateUV = std::abs(Determinant) < 1e-9;
+		vec3 dpdU, dpdV;
+		if ( !DegenerateUV ) {
+			dpdU = (dUV12[1] * dp02 - dUV02[1] * dp12) * invDet;
+			dpdV = (dUV02[0] * dp12 - dUV12[0] * dp02) * invDet;
+		}
+		if ( DegenerateUV || cross(dpdU, dpdV).lengthSquared() == 0 ) {
+			vec3 ng = cross(p2 - p0, p1 - p0);
+			if ( ng.lengthSquared() == 0 ) ng = cross(p2 - p0, p1 - p0);
+			CoordinateSystem(normalize(ng), dpdU, dpdV);
+		}
+
 		vec3 pAbsSum = Abs(ints->b0 * p0) + Abs(ints->b1 * p1) + Abs(ints->b2 * p2);
 		vec3 pError = gamma(7) * pAbsSum;
-		SurfaceInteraction intr(Vector3fi(p, pError), uv, -r.rd, dpdu, dpdv, vec3(), vec3(), r.time, false);
+		SurfaceInteraction intr(Vector3fi(p, pError), uv, UV, -r.rd, dpdu, dpdv, dpdU, dpdV, vec3(), vec3(), r.time, false);
 		intr.n = intr.shading.n = normalize(cross(dp02, dp12));
 
 		/*
@@ -203,9 +223,10 @@ public:
 		vec3 ns = b.x() * mesh->vertices[v[0]].n + b.y() * mesh->vertices[v[1]].n + b.z() * mesh->vertices[v[2]].n;
 		n = FaceForward(n, ns);
 		vec2 uvSample = b.x() * mesh->vertices[v[0]].uv + b.y() * mesh->vertices[v[1]].uv + b.z() * mesh->vertices[v[2]].uv;
+		vec2 UVSample = b.x() * mesh->vertices[v[0]].UV + b.y() * mesh->vertices[v[1]].UV + b.z() * mesh->vertices[v[2]].UV;
 		vec3 pAbsSum = Abs(b.x() * p0) + Abs(b.y() * p1) + Abs(b.z() * p2);
 		vec3 pError = gamma(6) * pAbsSum;
-		return ShapeSample{ Interaction(Vector3fi(p, pError), n, uvSample), 1 / Area() };
+		return ShapeSample{ Interaction(Vector3fi(p, pError), n, uvSample, UVSample), 1 / Area() };
 	}
 
 	std::optional<ShapeSample> Sample(ShapeSampleContext sample, vec2 u) const override {

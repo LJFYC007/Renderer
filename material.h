@@ -17,26 +17,28 @@ struct MaterialEvalContext : public TextureEvalContext
 
 struct NormalBumpEvalContext {
     NormalBumpEvalContext(const SurfaceInteraction& intr)
-        : p(intr.p()), uv(intr.uv), n(intr.n), dudx(intr.dudx), dudy(intr.dudy), dvdx(intr.dvdx), dvdy(intr.dvdy), dpdx(intr.dpdx), dpdy(intr.dpdy) {
+        : p(intr.p()), uv(intr.uv), UV(intr.UV), n(intr.n), dudx(intr.dudx), dudy(intr.dudy), dvdx(intr.dvdx), dvdy(intr.dvdy), dpdx(intr.dpdx), dpdy(intr.dpdy) {
         shading.n = intr.shading.n;
         shading.dpdu = intr.shading.dpdu;
         shading.dpdv = intr.shading.dpdv;
+        shading.dpdU = intr.shading.dpdU;
+        shading.dpdV = intr.shading.dpdV;
         shading.dndu = intr.shading.dndu;
         shading.dndv = intr.shading.dndv;
     }
     operator TextureEvalContext() const {
-        return TextureEvalContext(p, dpdx, dpdy, n, uv, dudx, dudy, dvdx, dvdy);
+        return TextureEvalContext(p, dpdx, dpdy, n, uv, UV, dudx, dudy, dvdx, dvdy);
     }
 
-    vec3 p, n; vec2 uv;
+    vec3 p, n; vec2 uv, UV;
     struct {
-        vec3 n, dpdu, dpdv, dndu, dndv;
+        vec3 n, dpdu, dpdv, dpdU, dpdV, dndu, dndv;
     } shading;
     double dudx = 0, dudy = 0, dvdx = 0, dvdy = 0;
     vec3 dpdx, dpdy;
 };
 
-inline void NormalMap(shared_ptr<SpectrumTexture> normalMap, const NormalBumpEvalContext& ctx, vec3* dpdu, vec3* dpdv) {
+inline void NormalMap(shared_ptr<SpectrumTexture> normalMap, const NormalBumpEvalContext& ctx, vec3* dpdu, vec3* dpdv, vec3* dpdU, vec3* dpdV) {
     vec3 ns = 2 * normalMap->Evaluate(ctx) - vec3(1.0);
     ns = normalize(ns);
     Frame frame = FromXZ(normalize(ctx.shading.dpdu), ctx.shading.n);
@@ -44,6 +46,12 @@ inline void NormalMap(shared_ptr<SpectrumTexture> normalMap, const NormalBumpEva
     double ulen = ctx.shading.dpdu.length(), vlen = ctx.shading.dpdv.length();
     *dpdu = normalize(GramSchmidt(ctx.shading.dpdu, ns)) * ulen;
     *dpdv = normalize(cross(ns, *dpdu)) * vlen;
+
+    frame = FromXZ(normalize(ctx.shading.dpdU), ctx.shading.n);
+    ns = frame.FromLocal(ns);
+    ulen = ctx.shading.dpdU.length(), vlen = ctx.shading.dpdV.length();
+    *dpdU = normalize(GramSchmidt(ctx.shading.dpdU, ns)) * ulen;
+    *dpdV = normalize(cross(ns, *dpdU)) * vlen;
 }
 
 inline void BumpMap(shared_ptr<SpectrumTexture> bumpMap, const NormalBumpEvalContext& ctx, vec3* dpdu, vec3* dpdv) {

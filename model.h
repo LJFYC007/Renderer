@@ -23,7 +23,7 @@ public:
 		std::string err;
 		std::string warn;
 
-		bool ret = loader.LoadASCIIFromFile(&gltfModel, &err, &warn, filename);
+		bool ret = loader.LoadBinaryFromFile(&gltfModel, &err, &warn, filename);
 		if (!warn.empty()) std::cout << "Warn: " << warn << std::endl;
 		if (!err.empty()) std::cerr << "Err: " << err << std::endl;
 		if (!ret) std::cerr << "Failed to load glTF: " << filename << std::endl;
@@ -56,13 +56,13 @@ public:
 		double su = 1, sv = 1, du = 0, dv = 0;
 		if (extension->second.Has("offset")) {
 			const auto& offset = extension->second.Get("offset");
-			double du = offset.Get(0).Get<double>();
-			double dv = offset.Get(1).Get<double>();
+			du = offset.Get(0).Get<double>();
+			dv = offset.Get(1).Get<double>();
 		}
 		if (extension->second.Has("scale")) {
 			const auto& scale = extension->second.Get("scale");
-			double su = scale.Get(0).Get<double>();
-			double sv = scale.Get(1).Get<double>();
+			su = scale.Get(0).Get<double>();
+			sv = scale.Get(1).Get<double>();
 		}
 		return UVMapping(su, sv, du, dv);
 	}
@@ -77,7 +77,7 @@ public:
 			if (pbrTexture.baseColorTexture.index != -1 ) {
 				const auto& textureIndex = pbrTexture.baseColorTexture.index;
 				const auto& extension = pbrTexture.baseColorTexture.extensions;
-				baseColor = make_shared<ImageTexture>(GetUVMapping(extension), images[textureIndex]);
+				baseColor = make_shared<ImageTexture>(pbrTexture.baseColorTexture.texCoord, GetUVMapping(extension), images[textureIndex]);
 			}
 			else {
 				const auto& baseColorFactor = pbrTexture.baseColorFactor;
@@ -88,7 +88,7 @@ public:
 			if (material.normalTexture.index > -1) {
 				const auto& textureIndex = material.normalTexture.index;
 				const auto& extension = material.normalTexture.extensions;			
-				materials[i]->SetNormalMap(make_shared<ImageTexture>(GetUVMapping(extension), images[textureIndex]));
+				materials[i]->SetNormalMap(make_shared<ImageTexture>(material.normalTexture.texCoord, GetUVMapping(extension), images[textureIndex]));
 			}
 		}
 	}
@@ -108,9 +108,36 @@ public:
 			ProcessNode(model.nodes[node.children[i]], currentTransform);
 	}
 
+	size_t GetComponentSize(int componentType) {
+		switch (componentType) {
+		case TINYGLTF_COMPONENT_TYPE_BYTE:           return sizeof(int8_t);
+		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_BYTE:  return sizeof(uint8_t);
+		case TINYGLTF_COMPONENT_TYPE_SHORT:          return sizeof(int16_t);
+		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT: return sizeof(uint16_t);
+		case TINYGLTF_COMPONENT_TYPE_INT:            return sizeof(int32_t);
+		case TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT:   return sizeof(uint32_t);
+		case TINYGLTF_COMPONENT_TYPE_FLOAT:          return sizeof(float);
+		default:                                     return 0;
+		}
+	}
+
+	size_t GetTypeCount(int type) {
+		switch (type) {
+		case TINYGLTF_TYPE_SCALAR: return 1;
+		case TINYGLTF_TYPE_VEC2:   return 2;
+		case TINYGLTF_TYPE_VEC3:   return 3;
+		case TINYGLTF_TYPE_VEC4:   return 4;
+		case TINYGLTF_TYPE_MAT2:   return 4;
+		case TINYGLTF_TYPE_MAT3:   return 9;
+		case TINYGLTF_TYPE_MAT4:   return 16;
+		default:                   return 0;
+		}
+	}
+
 	void ProcessMesh(const tinygltf::Mesh& mesh, const Transform& transform) {
 		for (const auto& primitive : mesh.primitives) {
 			bool uvExists = primitive.attributes.find("TEXCOORD_0") != primitive.attributes.end();
+			bool UVExists = primitive.attributes.find("TEXCOORD_1") != primitive.attributes.end();
 			bool normalExists = primitive.attributes.find("NORMAL") != primitive.attributes.end();
 
 			const tinygltf::Accessor& indexAccessor = model.accessors[primitive.indices];
@@ -147,17 +174,23 @@ public:
 				const tinygltf::Accessor& accessor = model.accessors[accessorIndex];
 				const tinygltf::BufferView& bufferView = model.bufferViews[accessor.bufferView];
 				const tinygltf::Buffer& buffer = model.buffers[bufferView.buffer];
-				const float* dataPtr = reinterpret_cast<const float*>(&(buffer.data[bufferView.byteOffset + accessor.byteOffset]));
+
+				size_t componentSize = GetComponentSize(accessor.componentType);
+				size_t typeCount = GetTypeCount(accessor.type);
+				size_t stride = bufferView.byteStride ? bufferView.byteStride : componentSize * typeCount;
+
+				const unsigned char* basePtr = &(buffer.data[bufferView.byteOffset + accessor.byteOffset]);
 				for (size_t i = 0; i < accessor.count; i++) {
-					if (attrName == "POSITION") vertices[i].p = vec3(dataPtr[i * accessor.type], dataPtr[i * accessor.type + 1], dataPtr[i * accessor.type + 2]);
-					else if (attrName == "NORMAL") vertices[i].n = vec3(dataPtr[i * accessor.type], dataPtr[i * accessor.type + 1], dataPtr[i * accessor.type + 2]);
-					else if (attrName == "TEXCOORD_0") vertices[i].uv = vec2(dataPtr[i * accessor.type], dataPtr[i * accessor.type + 1]);
-					else if (attrName == "TEXCOORD_1");
+					const float* dataPtr = reinterpret_cast<const float*>(basePtr + i * stride);
+					if (attrName == "POSITION") vertices[i].p = vec3(dataPtr[0], dataPtr[1], dataPtr[2]);
+					else if (attrName == "NORMAL") vertices[i].n = vec3(dataPtr[0], dataPtr[1], dataPtr[2]);
+					else if (attrName == "TEXCOORD_0") vertices[i].uv = vec2(dataPtr[0], dataPtr[1]);
+					else if (attrName == "TEXCOORD_1") vertices[i].UV = vec2(dataPtr[0], dataPtr[1]);
 					else std::cerr << "Unknown attribute: " << attrName << std::endl;
 				}
 			}
 
-			TriangleMesh triangleMesh(transform, vertexIndices, vertices, uvExists, normalExists);
+			TriangleMesh triangleMesh(transform, vertexIndices, vertices, uvExists, UVExists, normalExists);
 			meshes.push_back(triangleMesh);
 
 			shared_ptr<Material> material;

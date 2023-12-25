@@ -24,7 +24,7 @@ void addBox(vec3 a, vec3 b, vec3 c, vec3 n, const shared_ptr<Material>& mat, Tra
     vertices.emplace_back(a + b + c, n);
     vertexIndices.emplace_back(0); vertexIndices.emplace_back(1); vertexIndices.emplace_back(2);
     vertexIndices.emplace_back(1); vertexIndices.emplace_back(2); vertexIndices.emplace_back(3);
-    meshes.emplace_back(t, vertexIndices, vertices, false, true);
+    meshes.emplace_back(t, vertexIndices, vertices, false, false, true);
     World.emplace_back(make_shared<SimplePrimitive>(make_shared<Triangle>(static_cast<int>(meshes.size()) - 1, 0), mat));
     World.emplace_back(make_shared<SimplePrimitive>(make_shared<Triangle>(static_cast<int>(meshes.size()) - 1, 1), mat));
 }
@@ -45,7 +45,7 @@ void box(vec3 a, vec3 b, const shared_ptr<Material>& mat, const Transform& t = T
 int main()
 {
     Camera cam;
-    Model model(World, "resources/start.gltf");
+    Model model(World, "resources/start.glb");
 
     /*
     auto red = make_shared<DiffuseMaterial>(make_shared<SpectrumConstantTexture>(vec3(.65, .05, .05)));
