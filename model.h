@@ -69,20 +69,25 @@ public:
 
 	void LoadMaterials() {
 		materials.resize(model.materials.size());
+		alphas.resize(model.materials.size());
 		for (size_t i = 0; i < model.materials.size(); ++i) {
 			const auto& material = model.materials[i];
 
 			const auto& pbrTexture = material.pbrMetallicRoughness;
 			shared_ptr<SpectrumTexture> baseColor;
+			shared_ptr<DoubleTexture> alpha;
 			if (pbrTexture.baseColorTexture.index != -1) {
 				const auto& textureIndex = pbrTexture.baseColorTexture.index;
 				const auto& extension = pbrTexture.baseColorTexture.extensions;
 				baseColor = make_shared<ImageTexture>(pbrTexture.baseColorTexture.texCoord, GetUVMapping(extension), images[textureIndex]);
+				alpha = make_shared<AlphaImageTexture>(pbrTexture.baseColorTexture.texCoord, GetUVMapping(extension), images[textureIndex]);
 			}
 			else {
 				const auto& baseColorFactor = pbrTexture.baseColorFactor;
 				baseColor = make_shared<SpectrumConstantTexture>(vec3(baseColorFactor[0], baseColorFactor[1], baseColorFactor[2]));
+				alpha = make_shared<DoubleConstantTexture>(baseColorFactor[3]);
 			}
+			alphas[i] = alpha;
 			auto baseMaterial = make_shared<DiffuseMaterial>(baseColor);
 
 			shared_ptr<SpectrumTexture> metallicRoughness;
@@ -97,7 +102,7 @@ public:
 				metallicRoughness = make_shared<SpectrumConstantTexture>(vec3(0, roughnessFactor, metallicFactor));
 			}
 			auto layerMaterial = make_shared<DielectricMaterial>(metallicRoughness);
-			auto fresnelMixMaterial = make_shared<MixMaterial>(baseMaterial, layerMaterial);
+			auto fresnelMixMaterial = make_shared<MixMaterial>(baseMaterial, layerMaterial, nullptr);
 			auto metallicMaterial = make_shared<ConductorMaterial>(baseColor, metallicRoughness);
 			materials[i] = make_shared<MixMaterial>(metallicMaterial, fresnelMixMaterial, metallicRoughness);
 
@@ -215,8 +220,16 @@ public:
 				material = make_shared<DiffuseMaterial>(baseColor);
 			}
 			else material = materials[primitive.material];
-			for (int i = 0; i < meshes.back().nTriangles; ++i)
-				world.emplace_back(make_shared<SimplePrimitive>(make_shared<Triangle>(static_cast<int>(meshes.size()) - 1, i), material));
+
+			if (primitive.material == -1 || model.materials[primitive.material].alphaMode == "OPAQUE")
+				for (int i = 0; i < meshes.back().nTriangles; ++i)
+					world.emplace_back(make_shared<SimplePrimitive>(make_shared<Triangle>(static_cast<int>(meshes.size()) - 1, i), material));
+			else if ( model.materials[primitive.material].alphaMode == "MASK")
+				for (int i = 0; i < meshes.back().nTriangles; ++i)
+					world.emplace_back(make_shared<GeometricPrimitive>(make_shared<Triangle>(static_cast<int>(meshes.size()) - 1, i), material, nullptr, alphas[primitive.material], model.materials[primitive.material].alphaCutoff));
+			else if ( model.materials[primitive.material].alphaMode == "BLEND")
+				for (int i = 0; i < meshes.back().nTriangles; ++i)
+					world.emplace_back(make_shared<GeometricPrimitive>(make_shared<Triangle>(static_cast<int>(meshes.size()) - 1, i), material, nullptr, alphas[primitive.material]));
 		}
 	}
 
@@ -225,4 +238,5 @@ private:
 	std::vector<shared_ptr<Primitive>>& world;
 	std::vector<shared_ptr<tinygltf::Image>> images;
 	std::vector<shared_ptr<Material>> materials;
+	std::vector<shared_ptr<DoubleTexture>> alphas;
 };

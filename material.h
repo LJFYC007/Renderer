@@ -87,7 +87,7 @@ public:
 
     virtual shared_ptr<BxDF> GetBxDF(const MaterialEvalContext& ctx, const SampledWaveLengths& lambda) const = 0;
 
-    BSDF GetBSDF(MaterialEvalContext ctx, const SampledWaveLengths& lambda) const {
+    virtual BSDF GetBSDF(MaterialEvalContext ctx, const SampledWaveLengths& lambda) const {
         shared_ptr<BxDF> bxdf = GetBxDF(ctx, lambda);
         return BSDF(ctx.ns, ctx.dpdus, bxdf);
     }
@@ -147,23 +147,22 @@ private:
 
 class MixMaterial : public Material {
 public:
-    MixMaterial(shared_ptr<Material> _m1, shared_ptr<Material> _m2, shared_ptr<SpectrumTexture> _metallicRoughness = nullptr)
+    MixMaterial(shared_ptr<Material> _m1, shared_ptr<Material> _m2, shared_ptr<SpectrumTexture> _metallicRoughness) 
         : materials{ _m1, _m2 }, metallicRoughness(_metallicRoughness) {}
-    bool IsMixMaterial() override { return true; }
+	bool IsMixMaterial() override { return true; }
 
     shared_ptr<Material> GetMaterial(MaterialEvalContext ctx, double u) override {
-        if (metallicRoughness == nullptr) {
-            double cosTheta = std::abs(dot(ctx.ns, ctx.wo));
-            double f0 = 0.04;
-            double fr = f0 + (1 - f0) * pow(1 - cosTheta, 5);
-            if (u < 1 - fr) return materials[0];
-            else return materials[1];
+        if (metallicRoughness != nullptr) {
+			vec3 x = metallicRoughness->Evaluate(ctx);
+            double metallic = x[2];
+			if (u < metallic ) return materials[0];
+			else return materials[1];
         }
-		return materials[1];
-        vec3 x = metallicRoughness->Evaluate(ctx);
-        double metallic = x[2];
-        if (u < metallic) return materials[0];
-        else return  materials[1];
+		double cosTheta = std::abs(dot(ctx.ns, ctx.wo));
+		double f0 = 0.04;
+		double fr = f0 + (1 - f0) * pow(1 - cosTheta, 5);
+		if (u < 1 - fr) return materials[0];
+		else return materials[1];
     }
 
     shared_ptr<BxDF> GetBxDF(const MaterialEvalContext& ctx, const SampledWaveLengths& lambda) const override {

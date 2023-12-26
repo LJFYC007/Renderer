@@ -57,6 +57,28 @@ private:
 	double su, sv, du, dv;
 };
 
+class AlphaImageTexture : public DoubleTexture 
+{
+public:
+	AlphaImageTexture(int _texCoord, UVMapping _mapping, shared_ptr<tinygltf::Image> _image) :
+		texCoord(_texCoord), mapping(_mapping), image(_image) {}
+
+	double Evaluate(TextureEvalContext ctx) const override {
+		TexCoord2D c = mapping.Map(texCoord, ctx);
+		int i = static_cast<int>(c.st[0] * (image->width - 1));
+		int j = static_cast<int>(c.st[1] * (image->height - 1));
+		i = std::max(0, std::min(i, image->width - 1));
+		j = std::max(0, std::min(j, image->height - 1));
+		int pixelIndex = (j * image->width + i) * image->component;
+		return image->image.data()[pixelIndex + 3] / 255.0f;
+	}
+
+private:
+	int texCoord;
+	UVMapping mapping;
+	shared_ptr<tinygltf::Image> image;
+};
+
 class ImageTexture : public SpectrumTexture
 {
 public:

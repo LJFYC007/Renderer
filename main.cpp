@@ -14,6 +14,7 @@
 
 std::vector<shared_ptr<Primitive>> World;
 
+/*
 void addBox(vec3 a, vec3 b, vec3 c, vec3 n, const shared_ptr<Material>& mat, Transform t = Transform())
 {
     vector<Vertex> vertices;
@@ -41,11 +42,12 @@ void box(vec3 a, vec3 b, const shared_ptr<Material>& mat, const Transform& t = T
     addBox(vec3(a[0], b[1], b[2]), dx, -dz, vec3(0, 1, 0), mat, t);
     addBox(vec3(a[0], a[1], a[2]), dx, dz, vec3(0, -1, 0), mat, t);
 }
+*/
 
 int main()
 {
     Camera cam;
-    Model model(World, "resources/start.glb");
+    Model model(World, "resources/glb.glb");
 
     /*
     auto red = make_shared<DiffuseMaterial>(make_shared<SpectrumConstantTexture>(vec3(.65, .05, .05)));
