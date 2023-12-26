@@ -117,7 +117,7 @@ public:
 
     shared_ptr<BxDF> GetBxDF(const MaterialEvalContext& ctx, const SampledWaveLengths& lambda) const override {
         vec3 x = metallicRoughness->Evaluate(ctx);
-        double alpha = RoughnessToAlpha(x[1]), metallic = x[2];
+        double alpha = RoughnessToAlpha(x[1]);
         SampledSpectrum r = reflectance->Evaluate(ctx, lambda);
         SampledSpectrum eta(1.0);
         SampledSpectrum ks = Sqrt(r) / Sqrt(ClampZero(SampledSpectrum(1.0) - r)) * 2;
@@ -136,7 +136,7 @@ public:
 
     shared_ptr<BxDF> GetBxDF(const MaterialEvalContext& ctx, const SampledWaveLengths& lambda) const override {
         vec3 x = metallicRoughness->Evaluate(ctx);
-        double alpha = RoughnessToAlpha(x[1]), metallic = x[2];
+        double alpha = RoughnessToAlpha(x[1]);
         return make_shared<DielectricBxDF>(TrowbridgeReitzDistribution(alpha, alpha), eta);
     }
 
@@ -147,16 +147,22 @@ private:
 
 class MixMaterial : public Material {
 public:
-    MixMaterial(shared_ptr<Material> _m1, shared_ptr<Material> _m2)
-        : materials{ _m1, _m2 } {}
+    MixMaterial(shared_ptr<Material> _m1, shared_ptr<Material> _m2, shared_ptr<SpectrumTexture> _metallicRoughness = nullptr)
+        : materials{ _m1, _m2 }, metallicRoughness(_metallicRoughness) {}
     bool IsMixMaterial() override { return true; }
 
     shared_ptr<Material> GetMaterial(MaterialEvalContext ctx, double u) override {
-        double cosTheta = std::abs(dot(ctx.ns, ctx.wo));
-        double f0 = 0.04;
-        double fr = f0 + (1 - f0) * pow(1 - cosTheta, 5);
-        if (u < fr) return materials[0];
-        else return materials[1];
+        if (metallicRoughness == nullptr) {
+            double cosTheta = std::abs(dot(ctx.ns, ctx.wo));
+            double f0 = 0.04;
+            double fr = f0 + (1 - f0) * pow(1 - cosTheta, 5);
+            if (u < 1 - fr) return materials[0];
+            else return materials[1];
+        }
+        vec3 x = metallicRoughness->Evaluate(ctx);
+        double metallic = x[2];
+        if (u < metallic) return materials[0];
+        else return  materials[1];
     }
 
     shared_ptr<BxDF> GetBxDF(const MaterialEvalContext& ctx, const SampledWaveLengths& lambda) const override {
@@ -166,4 +172,5 @@ public:
 
 private:
     shared_ptr<Material> materials[2];
+    shared_ptr<SpectrumTexture> metallicRoughness;
 };

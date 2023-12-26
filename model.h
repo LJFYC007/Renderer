@@ -97,8 +97,9 @@ public:
 				metallicRoughness = make_shared<SpectrumConstantTexture>(vec3(0, roughnessFactor, metallicFactor));
 			}
 			auto layerMaterial = make_shared<DielectricMaterial>(metallicRoughness);
-
-			materials[i] = make_shared<MixMaterial>(baseMaterial, layerMaterial);
+			auto fresnelMixMaterial = make_shared<MixMaterial>(baseMaterial, layerMaterial);
+			auto metallicMaterial = make_shared<ConductorMaterial>(baseColor, metallicRoughness);
+			materials[i] = make_shared<MixMaterial>(metallicMaterial, fresnelMixMaterial, metallicRoughness);
 
 			if (material.normalTexture.index > -1) {
 				const auto& textureIndex = material.normalTexture.index;
