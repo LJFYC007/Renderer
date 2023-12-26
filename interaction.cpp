@@ -71,6 +71,7 @@ SampledSpectrum SurfaceInteraction::Le(vec3 w, const SampledWaveLengths& lambda)
 
 BSDF SurfaceInteraction::GetBSDF(const RayDifferential &ray, const SampledWaveLengths& lambda, Camera* camera) {
 	ComputeDifferentials(ray, camera);
+
 	shared_ptr<SpectrumTexture> normalMap = material->GetNormalMap();
 	if (normalMap) {
 		vec3 dpdu, dpdv, dpdU, dpdV;
@@ -87,6 +88,9 @@ BSDF SurfaceInteraction::GetBSDF(const RayDifferential &ray, const SampledWaveLe
 		SetShadingGeometry(ns, dpdu, dpdv, shading.dndu, shading.dndv);
 	}
 	*/
+
+	while ( material->IsMixMaterial() == true )
+		material = material->GetMaterial(*this, randomDouble());
 	BSDF bsdf = material->GetBSDF(*this, lambda);
 	return bsdf;
 }

@@ -7,8 +7,8 @@
 #include <optional>
 #include <vector>
 #include <memory>
-using std::shared_ptr;
 using std::make_shared;
+using std::shared_ptr;
 using std::vector;
 
 struct ShapeIntersection

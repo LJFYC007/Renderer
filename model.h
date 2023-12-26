@@ -71,10 +71,10 @@ public:
 		materials.resize(model.materials.size());
 		for (size_t i = 0; i < model.materials.size(); ++i) {
 			const auto& material = model.materials[i];
-			shared_ptr<SpectrumTexture> baseColor;
 
 			const auto& pbrTexture = material.pbrMetallicRoughness;
-			if (pbrTexture.baseColorTexture.index != -1 ) {
+			shared_ptr<SpectrumTexture> baseColor;
+			if (pbrTexture.baseColorTexture.index != -1) {
 				const auto& textureIndex = pbrTexture.baseColorTexture.index;
 				const auto& extension = pbrTexture.baseColorTexture.extensions;
 				baseColor = make_shared<ImageTexture>(pbrTexture.baseColorTexture.texCoord, GetUVMapping(extension), images[textureIndex]);
@@ -83,11 +83,26 @@ public:
 				const auto& baseColorFactor = pbrTexture.baseColorFactor;
 				baseColor = make_shared<SpectrumConstantTexture>(vec3(baseColorFactor[0], baseColorFactor[1], baseColorFactor[2]));
 			}
-			materials[i] = make_shared<DiffuseMaterial>(baseColor);
+			auto baseMaterial = make_shared<DiffuseMaterial>(baseColor);
+
+			shared_ptr<SpectrumTexture> metallicRoughness;
+			if (pbrTexture.metallicRoughnessTexture.index != -1) {
+				const auto& textureIndex = pbrTexture.metallicRoughnessTexture.index;
+				const auto& extension = pbrTexture.metallicRoughnessTexture.extensions;
+				metallicRoughness = make_shared<ImageTexture>(pbrTexture.metallicRoughnessTexture.texCoord, GetUVMapping(extension), images[textureIndex]);
+			}
+			else {
+				const auto& metallicFactor = pbrTexture.metallicFactor;
+				const auto& roughnessFactor = pbrTexture.roughnessFactor;
+				metallicRoughness = make_shared<SpectrumConstantTexture>(vec3(0, roughnessFactor, metallicFactor));
+			}
+			auto layerMaterial = make_shared<DielectricMaterial>(metallicRoughness);
+
+			materials[i] = make_shared<MixMaterial>(baseMaterial, layerMaterial);
 
 			if (material.normalTexture.index > -1) {
 				const auto& textureIndex = material.normalTexture.index;
-				const auto& extension = material.normalTexture.extensions;			
+				const auto& extension = material.normalTexture.extensions;
 				materials[i]->SetNormalMap(make_shared<ImageTexture>(material.normalTexture.texCoord, GetUVMapping(extension), images[textureIndex]));
 			}
 		}

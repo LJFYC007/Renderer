@@ -75,6 +75,11 @@ class Material
 {
 public:
     Material() { normalMap = bumpMap = nullptr; }
+    virtual bool IsMixMaterial() { return false; }
+    virtual shared_ptr<Material> GetMaterial(MaterialEvalContext ctx, double u) {
+        std::cerr << "Should not call GetMaterial on non-mix material";
+        return nullptr;
+    }
     void SetNormalMap(shared_ptr<SpectrumTexture> _normalMap) { normalMap = _normalMap; }
     void SetBumpMap(shared_ptr<SpectrumTexture> _bumpMap) { bumpMap = _bumpMap; }
     shared_ptr<SpectrumTexture> GetNormalMap() const { return normalMap; }
@@ -126,12 +131,39 @@ private:
 
 class DielectricMaterial : public Material {
 public:
-    DielectricMaterial(double _alphax, double _alphay, double _eta) : alphax(_alphax), alphay(_alphay), eta(_eta) {}
+    DielectricMaterial(shared_ptr<SpectrumTexture> _metallicRoughness, double _eta = 1.5) 
+        : metallicRoughness(_metallicRoughness), eta(_eta) {}
 
     shared_ptr<BxDF> GetBxDF(const MaterialEvalContext& ctx, const SampledWaveLengths& lambda) const override {
-        return make_shared<DielectricBxDF>(TrowbridgeReitzDistribution(alphax, alphay), eta);
+        vec3 x = metallicRoughness->Evaluate(ctx);
+        double alpha = RoughnessToAlpha(x[1]), metallic = x[2];
+        return make_shared<DielectricBxDF>(TrowbridgeReitzDistribution(alpha, alpha), eta);
     }
 
 private:
-    double alphax, alphay, eta;
+    shared_ptr<SpectrumTexture> metallicRoughness;
+    double eta;
+};
+
+class MixMaterial : public Material {
+public:
+    MixMaterial(shared_ptr<Material> _m1, shared_ptr<Material> _m2)
+        : materials{ _m1, _m2 } {}
+    bool IsMixMaterial() override { return true; }
+
+    shared_ptr<Material> GetMaterial(MaterialEvalContext ctx, double u) override {
+        double cosTheta = std::abs(dot(ctx.ns, ctx.wo));
+        double f0 = 0.04;
+        double fr = f0 + (1 - f0) * pow(1 - cosTheta, 5);
+        if (u < fr) return materials[0];
+        else return materials[1];
+    }
+
+    shared_ptr<BxDF> GetBxDF(const MaterialEvalContext& ctx, const SampledWaveLengths& lambda) const override {
+        std::cerr << "Should not call GetBxDF on MixMaterial";
+        return nullptr;
+    }
+
+private:
+    shared_ptr<Material> materials[2];
 };
