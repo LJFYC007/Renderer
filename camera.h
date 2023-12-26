@@ -23,8 +23,8 @@ public:
 	int ImageWidth = 1500;
 	int ImageHeight = 1500;
 	double fov = 20.0;
-	vec3 lookfrom = vec3(0.5, 2.0, 20.0);
-	vec3 lookat = vec3(0.5, 2.0, 0.0);
+	vec3 lookfrom = vec3(-3.5, 1.2, 7.0);
+	vec3 lookat = vec3(0.5, 1.2, 0.0);
 	vec3 vup = vec3(0.0, 1.0, 0.0);
 	double defocusAngle = 0.0;
 	double focusDist = 10.0;

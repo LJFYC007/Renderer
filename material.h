@@ -159,6 +159,7 @@ public:
             if (u < 1 - fr) return materials[0];
             else return materials[1];
         }
+		return materials[1];
         vec3 x = metallicRoughness->Evaluate(ctx);
         double metallic = x[2];
         if (u < metallic) return materials[0];
