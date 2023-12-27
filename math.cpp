@@ -9,6 +9,19 @@ vec3 operator *(const SquareMatrix<3>& m, const vec3& v)
 	);
 }
 
+vec3 Transform::ApplyInverse(const vec3& p) const
+{
+    double x = p[0], y = p[1], z = p[2];
+    double X = inv[0][0] * x + inv[0][1] * y + inv[0][2] * z + inv[0][3];
+    double Y = inv[1][0] * x + inv[1][1] * y + inv[1][2] * z + inv[1][3];
+    double Z = inv[2][0] * x + inv[2][1] * y + inv[2][2] * z + inv[2][3];
+    double W = inv[3][0] * x + inv[3][1] * y + inv[3][2] * z + inv[3][3];
+
+    assert(W != 0);
+    if (W == 1) return vec3(X, Y, Z);
+    return vec3(X, Y, Z) / W;
+}
+
 vec3 Transform::operator()(const vec3& p) const
 {
     double x = p[0], y = p[1], z = p[2];

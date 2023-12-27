@@ -114,6 +114,7 @@ int main()
         0.6428548693656921,
         0.29644736647605896,
         0.6413864493370056), SpectrasRGB, 2.0));
+    lights.emplace_back(make_shared<ImageInfiniteLight>(Transform::RotateX(pi / 2), 0.1, "1.hdr"));
 
     BVHAggregate bvh(World, 3);
     cam.Render(bvh, lights);

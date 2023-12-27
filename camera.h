@@ -20,8 +20,8 @@ static vec3 ans[3010][2210];
 class Camera
 {
 public:
-	int ImageWidth = 1800;
-	int ImageHeight = 1800;
+	int ImageWidth = 1500;
+	int ImageHeight = 1500;
 	double fov = 20.0;
 	vec3 lookfrom = vec3(-5.5, 1.2, 9.0);
 	vec3 lookat = vec3(0.5, 1.2, 0.0);
@@ -29,7 +29,7 @@ public:
 	double defocusAngle = 0.0;
 	double focusDist = 10.0;
 	int samplePixel = 1024;
-	int maxDepth = 20;
+	int maxDepth = 10;
 	std::vector<shared_ptr<Light>> lights;
 	std::vector<shared_ptr<Light>> infiniteLights;
 	shared_ptr<LightSampler> lightSampler;

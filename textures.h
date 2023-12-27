@@ -65,12 +65,12 @@ public:
 
 	double Evaluate(TextureEvalContext ctx) const override {
 		TexCoord2D c = mapping.Map(texCoord, ctx);
-		int i = static_cast<int>(c.st[0] * (image->width - 1));
-		int j = static_cast<int>(c.st[1] * (image->height - 1));
+		int i = static_cast<int>(c.st[0] * image->width);
+		int j = static_cast<int>(c.st[1] * image->height);
 		i = std::max(0, std::min(i, image->width - 1));
 		j = std::max(0, std::min(j, image->height - 1));
 		int pixelIndex = (j * image->width + i) * image->component;
-		return image->image.data()[pixelIndex + 3] / 255.0f;
+		return image->image.data()[pixelIndex + 3] / 255.0;
 	}
 
 private:
@@ -87,14 +87,14 @@ public:
 
 	vec3 Evaluate(TextureEvalContext ctx) const override {
 		TexCoord2D c = mapping.Map(texCoord, ctx);
-		int i = static_cast<int>(c.st[0] * (image->width - 1));
-		int j = static_cast<int>(c.st[1] * (image->height - 1));
+		int i = static_cast<int>(c.st[0] * image->width);
+		int j = static_cast<int>(c.st[1] * image->height);
 		i = std::max(0, std::min(i, image->width - 1));
 		j = std::max(0, std::min(j, image->height - 1));
 		int pixelIndex = (j * image->width + i) * image->component;
-		double r = image->image.data()[pixelIndex] / 255.0f;
-		double g = image->image.data()[pixelIndex + 1] / 255.0f;
-		double b = image->image.data()[pixelIndex + 2] / 255.0f;
+		double r = image->image.data()[pixelIndex] / 255.0;
+		double g = image->image.data()[pixelIndex + 1] / 255.0;
+		double b = image->image.data()[pixelIndex + 2] / 255.0;
 		return vec3(r, g, b);
 	}
 

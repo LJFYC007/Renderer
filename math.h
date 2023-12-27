@@ -235,6 +235,53 @@ inline void CoordinateSystem(vec3 v1, vec3& v2, vec3& v3) {
 	v3 = vec3(b, sign + v1.y() * v1.y() * a, -v1.y());;
 }
 
+inline double EvaluatePolynomial(double t, double c) { return c; }
+template<typename ... Args> inline double EvaluatePolynomial(double t, double c, Args... args) {
+	return c + t * EvaluatePolynomial(t, args...);
+}
+static vec3 EqualAreaSquareToSphere(vec2 p) {
+	double u = 2 * p[0] - 1, v = 2 * p[1] - 1;
+	double up = std::abs(u), vp = std::abs(v);
+	double signedDistance = 1 - (up + vp);
+	double d = std::abs(signedDistance), r = 1 - d;
+
+	double phi = (r == 0 ? 1 : (vp - up) / r + 1) * pi / 4;
+	double z = std::copysign(1 - Sqr(r), signedDistance);
+	double cosPhi = std::copysign(std::cos(phi), u);
+	double sinPhi = std::copysign(std::sin(phi), v);
+	return vec3(cosPhi * r * std::sqrt(2 - Sqr(r)), sinPhi * r * std::sqrt(2 - Sqr(r)), z);
+}
+static vec2 EqualAreaSphereToSquare(vec3 d) {
+	double x = std::abs(d[0]), y = std::abs(d[1]), z = std::abs(d[2]);
+	double r = std::sqrt(1 - z);
+	double a = std::max(x, y), b = std::min(x, y);
+	b = a == 0 ? 0 : b / a;
+
+	const double t1 = 0.406758566246788489601959989e-5;
+	const double t2 = 0.636226545274016134946890922156;
+	const double t3 = 0.61572017898280213493197203466e-2;
+	const double t4 = -0.247333733281268944196501420480;
+	const double t5 = 0.881770664775316294736387951347e-1;
+	const double t6 = 0.419038818029165735901852432784e-1;
+	const double t7 = -0.251390972343483509333252996350e-1;
+	double phi = EvaluatePolynomial(b, t1, t2, t3, t4, t5, t6, t7);
+
+	if (x < y) phi = 1 - phi;
+	double v = phi * r, u = r - v;
+	if (d[2] < 0) { std::swap(u, v); u = 1 - u; v = 1 - v; }
+	u = std::copysign(u, d[0]);
+	v = std::copysign(v, d[1]);
+	return vec2(0.5 * (u + 1), 0.5 * (v + 1));
+}
+inline double SphericalTheta(vec3 v) { return std::acos(Clamp(v.z(), -1, 1)); }
+inline double SphericalPhi(vec3 v) { 	
+	double p = std::atan2(v.y(), v.x());
+	return (p < 0) ? p + 2 * pi : p;
+}
+inline vec3 SphericalDirection(double sinTheta, double cosTheta, double phi) {
+	return vec3(sinTheta * std::cos(phi), sinTheta * std::sin(phi), cosTheta);
+}
+
 // ======== interval ==========
 class Interval
 {
@@ -507,7 +554,7 @@ public :
 	Transform Inverse() {
 		return Transform(inv, mat);
 	}
-
+	vec3 ApplyInverse(const vec3& p) const;
 	vec3 operator()(const vec3& p) const;
 	Vector3fi operator()(const Vector3fi& p) const;
 	Transform operator *(Transform t2) const {

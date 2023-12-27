@@ -3,11 +3,16 @@
 
 SampledSpectrum SampleLd(const SurfaceInteraction& intr, const BSDF& bsdf, Camera* camera, const SampledWaveLengths& lambda, const BVHAggregate& bvh)
 {
+	LightSampleContext ctx(intr);
+	BxDFFlags flags = bsdf.Flags();
+	if (IsReflective(flags) && !IsTransmissive(flags)) ctx.pi = intr.OffsetRayOrigin(intr.wo);
+	else if (IsTransmissive(flags) && !IsReflective(flags)) ctx.pi = intr.OffsetRayOrigin(-intr.wo);
+
 	std::optional<SampledLight> sampledLight = camera->lightSampler->Sample(randomDouble());
 	if (!sampledLight) return {};
 	shared_ptr<Light> light = sampledLight->light;
 	vec2 u = vec2Random();
-	std::optional<LightLiSample> ls = light->SampleLi(LightSampleContext(intr), u, lambda);
+	std::optional<LightLiSample> ls = light->SampleLi(ctx, u, lambda, true);
 	if (!ls || !ls->L || ls->pdf == 0.0) return { 0.0 };
 
 	vec3 wo = intr.wo, wi = ls->wi;
