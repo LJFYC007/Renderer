@@ -106,17 +106,15 @@ int main()
 
     std::vector<shared_ptr<Light>> lights;
     // lights.emplace_back(make_shared<PointLight>(Transform::Translate(vec3(278, 550, 278)), SpectrasRGB, 1.0));
-    /*
     lights.emplace_back(make_shared<DistantLight>(Transform::Rotate(-0.20693400502204895,
         0.3364157974720001,
         0.08685380965471268,
-        0.9145814180374146), SpectrasRGB, 3.3));
+        0.9145814180374146), SpectrasRGB, 3.33));
     lights.emplace_back(make_shared<DistantLight>(Transform::Rotate(-0.2957703173160553,
         0.6428548693656921,
         0.29644736647605896,
         0.6413864493370056), SpectrasRGB, 2.0));
-    */
-    lights.emplace_back(make_shared<ImageInfiniteLight>(Transform::RotateY(2.1) * Transform::RotateX(pi / 2), 1.0, "1.hdr"));
+    lights.emplace_back(make_shared<ImageInfiniteLight>(Transform::RotateY(2.1) * Transform::RotateX(pi / 2), 0.5, "1.hdr"));
 
     BVHAggregate bvh(World, 3);
     cam.Render(bvh, lights);

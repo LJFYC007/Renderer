@@ -12,16 +12,16 @@ using std::shared_ptr;
 class Image
 {
 public:
-	float* data;
+	unsigned char* data;
 	int width, height, component;
 
 	Image(const tinygltf::Image& image) {
 		width = image.width;
 		height = image.height;
 		component = image.component;
-		data = new float[width * height * component];
+		data = new unsigned char[width * height * component];
 		for (int i = 0; i < width * height * component; ++i)
-			data[i] = static_cast<float>(image.image.data()[i]) / 255.0f;
+			data[i] = image.image.data()[i];
 	}
 
 	double LookUpAlpha(vec2 uv) {
@@ -30,7 +30,7 @@ public:
 		i = std::max(0, std::min(i, width - 1));
 		j = std::max(0, std::min(j, height - 1));
 		int pixelIndex = (j * width + i) * component;
-		return static_cast<double>(data[pixelIndex + 3]);
+		return data[pixelIndex + 3] / 255.0;
 	}
 
 	vec3 LookUp(vec2 uv, bool gammaCorrection) {
@@ -39,9 +39,9 @@ public:
 		i = std::max(0, std::min(i, width - 1));
 		j = std::max(0, std::min(j, height - 1));
 		int pixelIndex = (j * width + i) * component;
-		double r = static_cast<double>(data[pixelIndex]);
-		double g = static_cast<double>(data[pixelIndex + 1]);
-		double b = static_cast<double>(data[pixelIndex + 2]);
+		double r = data[pixelIndex] / 255.0;
+		double g = data[pixelIndex + 1] / 255.0;
+		double b = data[pixelIndex + 2] / 255.0;
 		if (gammaCorrection) {
 			r = pow(r, 2.2);
 			g = pow(g, 2.2);

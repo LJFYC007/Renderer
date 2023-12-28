@@ -28,7 +28,7 @@ public:
 	vec3 vup = vec3(0.0, 1.0, 0.0);
 	double defocusAngle = 0.0;
 	double focusDist = 10.0;
-	int samplePixel = 256;
+	int samplePixel = 64;
 	int maxDepth = 10;
 	std::vector<shared_ptr<Light>> lights;
 	std::vector<shared_ptr<Light>> infiniteLights;

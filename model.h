@@ -86,9 +86,9 @@ public:
 			else {
 				const auto& baseColorFactor = pbrTexture.baseColorFactor;
 				vec3 color(baseColorFactor[0], baseColorFactor[1], baseColorFactor[2]);
-				color[0] = pow(color[0], 2.2);
-				color[1] = pow(color[1], 2.2);
-				color[2] = pow(color[2], 2.2);
+				// color[0] = pow(color[0], 2.2);
+				// color[1] = pow(color[1], 2.2);
+				// color[2] = pow(color[2], 2.2);
 				baseColor = make_shared<SpectrumConstantTexture>(color);
 				alpha = make_shared<DoubleConstantTexture>(baseColorFactor[3]);
 			}
