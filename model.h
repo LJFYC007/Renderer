@@ -4,6 +4,7 @@
 #include "material.h"
 #include "light.h"
 #include "textures.h"
+#include "image.h"
 
 #include <tiny_gltf.h>
 #include <vector>
@@ -46,7 +47,7 @@ public:
 			const auto& texture = model.textures[i];
 			int imageIndex = texture.source;
 			assert(imageIndex > -1);
-			images[i] = make_shared<tinygltf::Image>(model.images[imageIndex]);
+			images[i] = make_shared<Image>(model.images[imageIndex]);
 		}
 	}
 
@@ -79,12 +80,16 @@ public:
 			if (pbrTexture.baseColorTexture.index != -1) {
 				const auto& textureIndex = pbrTexture.baseColorTexture.index;
 				const auto& extension = pbrTexture.baseColorTexture.extensions;
-				baseColor = make_shared<ImageTexture>(pbrTexture.baseColorTexture.texCoord, GetUVMapping(extension), images[textureIndex]);
+				baseColor = make_shared<ImageTexture>(pbrTexture.baseColorTexture.texCoord, GetUVMapping(extension), images[textureIndex], true);
 				alpha = make_shared<AlphaImageTexture>(pbrTexture.baseColorTexture.texCoord, GetUVMapping(extension), images[textureIndex]);
 			}
 			else {
 				const auto& baseColorFactor = pbrTexture.baseColorFactor;
-				baseColor = make_shared<SpectrumConstantTexture>(vec3(baseColorFactor[0], baseColorFactor[1], baseColorFactor[2]));
+				vec3 color(baseColorFactor[0], baseColorFactor[1], baseColorFactor[2]);
+				color[0] = pow(color[0], 2.2);
+				color[1] = pow(color[1], 2.2);
+				color[2] = pow(color[2], 2.2);
+				baseColor = make_shared<SpectrumConstantTexture>(color);
 				alpha = make_shared<DoubleConstantTexture>(baseColorFactor[3]);
 			}
 			alphas[i] = alpha;
@@ -94,7 +99,7 @@ public:
 			if (pbrTexture.metallicRoughnessTexture.index != -1) {
 				const auto& textureIndex = pbrTexture.metallicRoughnessTexture.index;
 				const auto& extension = pbrTexture.metallicRoughnessTexture.extensions;
-				metallicRoughness = make_shared<ImageTexture>(pbrTexture.metallicRoughnessTexture.texCoord, GetUVMapping(extension), images[textureIndex]);
+				metallicRoughness = make_shared<ImageTexture>(pbrTexture.metallicRoughnessTexture.texCoord, GetUVMapping(extension), images[textureIndex], false);
 			}
 			else {
 				const auto& metallicFactor = pbrTexture.metallicFactor;
@@ -109,7 +114,7 @@ public:
 			if (material.normalTexture.index > -1) {
 				const auto& textureIndex = material.normalTexture.index;
 				const auto& extension = material.normalTexture.extensions;
-				materials[i]->SetNormalMap(make_shared<ImageTexture>(material.normalTexture.texCoord, GetUVMapping(extension), images[textureIndex]));
+				materials[i]->SetNormalMap(make_shared<ImageTexture>(material.normalTexture.texCoord, GetUVMapping(extension), images[textureIndex], false));
 			}
 		}
 	}
@@ -236,7 +241,7 @@ public:
 private:
 	tinygltf::Model model;
 	std::vector<shared_ptr<Primitive>>& world;
-	std::vector<shared_ptr<tinygltf::Image>> images;
+	std::vector<shared_ptr<Image>> images;
 	std::vector<shared_ptr<Material>> materials;
 	std::vector<shared_ptr<DoubleTexture>> alphas;
 };

@@ -47,7 +47,7 @@ void box(vec3 a, vec3 b, const shared_ptr<Material>& mat, const Transform& t = T
 int main()
 {
     Camera cam;
-    Model model(World, "resources/glb.glb");
+	Model model(World, "resources/glb.glb");
 
     /*
     auto red = make_shared<DiffuseMaterial>(make_shared<SpectrumConstantTexture>(vec3(.65, .05, .05)));

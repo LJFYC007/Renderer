@@ -2,7 +2,7 @@
 #include "texture.h"
 #include "color.h"
 #include "colorspace.h"
-#include "stb_image.h"
+#include "image.h"
 
 #include <cmath>
 #include <string>
@@ -60,51 +60,39 @@ private:
 class AlphaImageTexture : public DoubleTexture 
 {
 public:
-	AlphaImageTexture(int _texCoord, UVMapping _mapping, shared_ptr<tinygltf::Image> _image) :
+	AlphaImageTexture(int _texCoord, UVMapping _mapping, shared_ptr<Image> _image) :
 		texCoord(_texCoord), mapping(_mapping), image(_image) {}
 
 	double Evaluate(TextureEvalContext ctx) const override {
 		TexCoord2D c = mapping.Map(texCoord, ctx);
-		int i = static_cast<int>(c.st[0] * image->width);
-		int j = static_cast<int>(c.st[1] * image->height);
-		i = std::max(0, std::min(i, image->width - 1));
-		j = std::max(0, std::min(j, image->height - 1));
-		int pixelIndex = (j * image->width + i) * image->component;
-		return image->image.data()[pixelIndex + 3] / 255.0;
+		return image->LookUpAlpha(c.st);
 	}
 
 private:
 	int texCoord;
 	UVMapping mapping;
-	shared_ptr<tinygltf::Image> image;
+	shared_ptr<Image> image;
 };
 
 class ImageTexture : public SpectrumTexture
 {
 public:
-	ImageTexture(int _texCoord, UVMapping _mapping, shared_ptr<tinygltf::Image> _image) :
-		texCoord(_texCoord), mapping(_mapping), image(_image) {}
+	ImageTexture(int _texCoord, UVMapping _mapping, shared_ptr<Image> _image, bool _gammaCorrection) :
+		texCoord(_texCoord), mapping(_mapping), image(_image), gammaCorrection(_gammaCorrection) {}
 
 	vec3 Evaluate(TextureEvalContext ctx) const override {
 		TexCoord2D c = mapping.Map(texCoord, ctx);
-		int i = static_cast<int>(c.st[0] * image->width);
-		int j = static_cast<int>(c.st[1] * image->height);
-		i = std::max(0, std::min(i, image->width - 1));
-		j = std::max(0, std::min(j, image->height - 1));
-		int pixelIndex = (j * image->width + i) * image->component;
-		double r = image->image.data()[pixelIndex] / 255.0;
-		double g = image->image.data()[pixelIndex + 1] / 255.0;
-		double b = image->image.data()[pixelIndex + 2] / 255.0;
-		return vec3(r, g, b);
+		return image->LookUp(c.st, gammaCorrection);
 	}
 
 	SampledSpectrum Evaluate(TextureEvalContext ctx, SampledWaveLengths lambda) const override {
-		vec3 color = Evaluate(ctx);
-		return RGBAlbedoSpectrum(sRGB, RGBColor(color)).Sample(lambda);
+		TexCoord2D c = mapping.Map(texCoord, ctx);
+		return image->LookUp(c.st, lambda, gammaCorrection);
 	}
 
 private:
 	int texCoord;
 	UVMapping mapping;
-	shared_ptr<tinygltf::Image> image;
+	shared_ptr<Image> image;
+	bool gammaCorrection;
 };

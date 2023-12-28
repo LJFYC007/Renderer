@@ -170,6 +170,7 @@
     <ClInclude Include="camera.h" />
     <ClInclude Include="color.h" />
     <ClInclude Include="colorspace.h" />
+    <ClInclude Include="image.h" />
     <ClInclude Include="integrator.h" />
     <ClInclude Include="interaction.h" />
     <ClInclude Include="interval.h" />
