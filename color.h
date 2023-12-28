@@ -16,7 +16,7 @@ public:
 class RGBSigmoidPolynomial
 {
 public:
-    RGBSigmoidPolynomial() : c0(0), c1(0), c2(0) {}
+    RGBSigmoidPolynomial() = default;
     RGBSigmoidPolynomial(double _c0, double _c1, double _c2) : c0(_c0), c1(_c1), c2(_c2) {}
 
     static double s(double x) {
@@ -25,7 +25,7 @@ public:
     }
 
     double operator()(double lambda) const {
-        double x = c0 * lambda * lambda + c1 * lambda + c2;
+        double x = EvaluatePolynomial(lambda, c2, c1, c0);
         return s(x);
     }
 

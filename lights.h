@@ -127,7 +127,7 @@ class ImageInfiniteLight : public Light
 {
 public:
 	ImageInfiniteLight(const Transform& _renderFromLight, double _scale, std::string filename) :
-		Light(LightType::Infinite, _renderFromLight), scale(_scale), image(make_shared<Image>(filename)){}
+		Light(LightType::Infinite, _renderFromLight), scale(_scale), image(make_shared<HDRImage>(filename)){}
 
 	SampledSpectrum ImageLe(vec2 uv, const SampledWaveLengths& lambda) const {
 		return image->LookUp(uv, lambda, false) * scale;
@@ -140,7 +140,7 @@ public:
 	}
 
 	std::optional<LightLiSample> SampleLi(LightSampleContext sample, vec2 u, SampledWaveLengths lambda, bool allowIncompletePDF) const override {
-		double mapPDF = 1.0 / (image->width * image->height);
+		double mapPDF = 1.0;// / (image->width * image->height);
 		vec2 uv = u;
 		double theta = uv[1] * pi, phi = uv[0] * 2 * pi;
 		double cosTheta = std::cos(theta), sinTheta = std::sin(theta);
@@ -158,7 +158,7 @@ public:
 		double theta = SphericalTheta(wLight), phi = SphericalPhi(wLight);
 		double sinTheta = std::sin(theta);
 		if (sinTheta == 0) return 0;
-		double pdf = 1.0 / (image->width * image->height);
+		double pdf = 1.0;// / (image->width * image->height);
 		return pdf / (2 * pi * pi * sinTheta);
 	}
 
@@ -167,7 +167,7 @@ public:
 	}
 
 private:
-	shared_ptr<Image> image;
+	shared_ptr<HDRImage> image;
 	double scale;
 	vec3 sceneCenter, sceneRadius;
 };

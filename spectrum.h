@@ -589,10 +589,10 @@ public:
 	double MaxValue() const override { return rsp.MaxValue(); }
 
 	SampledSpectrum Sample(const SampledWaveLengths& lambda) const override {
-		double s[NSpectrumSamples];
+		SampledSpectrum s;
 		for (int i = 0; i < NSpectrumSamples; ++i)
-			s[i] = this->operator()(lambda[i]);
-		return SampledSpectrum(s);
+			s[i] = rsp(lambda[i]);
+		return s;
 	}
 
 private:
@@ -610,10 +610,10 @@ public:
 	double MaxValue() const override { return scale * rsp.MaxValue() * SpectrasRGB.MaxValue(); }
 
 	SampledSpectrum Sample(const SampledWaveLengths& lambda) const override {
-		double s[NSpectrumSamples];
+		SampledSpectrum s;
 		for (int i = 0; i < NSpectrumSamples; ++i)
-			s[i] = this->operator()(lambda[i]);
-		return SampledSpectrum(s) * SpectrasRGB.Sample(lambda);
+			s[i] = scale * rsp(lambda[i]);
+		return s * SpectrasRGB.Sample(lambda);
 	}
 
 private:

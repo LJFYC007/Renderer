@@ -20,8 +20,8 @@ static vec3 ans[3010][2210];
 class Camera
 {
 public:
-	int ImageWidth = 500;
-	int ImageHeight = 500;
+	int ImageWidth = 1500;
+	int ImageHeight = 1500;
 	double fov = 20.0;
 	vec3 lookfrom = vec3(-5.5, 1.2, 9.0);
 	vec3 lookat = vec3(0.5, 1.2, 0.0);
