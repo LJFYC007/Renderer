@@ -69,7 +69,7 @@ SampledSpectrum SurfaceInteraction::Le(vec3 w, const SampledWaveLengths& lambda)
 	return areaLight ? areaLight->L(p(), n, uv, w, lambda) : SampledSpectrum(0.0);
 }
 
-BSDF SurfaceInteraction::GetBSDF(const RayDifferential &ray, const SampledWaveLengths& lambda, Camera* camera) {
+BSDF SurfaceInteraction::GetBSDF(const RayDifferential &ray, SampledWaveLengths& lambda, Camera* camera) {
 	ComputeDifferentials(ray, camera);
 
 	shared_ptr<SpectrumTexture> normalMap = material->GetNormalMap();

@@ -67,6 +67,14 @@ public:
 		}
 		return UVMapping(su, sv, du, dv);
 	}
+	
+	double GetEta(tinygltf::ExtensionMap extensionMap) {
+		const auto& extension = extensionMap.find("KHR_materials_ior");
+		if (extension == extensionMap.end()) return 1.5;
+		const auto& specularFactor = extension->second.Get("ior");
+		double x = specularFactor.GetNumberAsDouble();
+		return specularFactor.GetNumberAsDouble();
+	}
 
 	void LoadMaterials() {
 		materials.resize(model.materials.size());
@@ -106,15 +114,18 @@ public:
 				const auto& roughnessFactor = pbrTexture.roughnessFactor;
 				metallicRoughness = make_shared<SpectrumConstantTexture>(vec3(0, roughnessFactor, metallicFactor));
 			}
-			auto layerMaterial = make_shared<DielectricMaterial>(metallicRoughness);
+			auto layerMaterial = make_shared<DielectricMaterial>(metallicRoughness, make_shared<ConstantSpectrum>(GetEta(material.extensions)));
 			auto fresnelMixMaterial = make_shared<MixMaterial>(baseMaterial, layerMaterial, nullptr);
 			auto metallicMaterial = make_shared<ConductorMaterial>(baseColor, metallicRoughness);
 			materials[i] = make_shared<MixMaterial>(metallicMaterial, fresnelMixMaterial, metallicRoughness);
 
+			if (material.name == "Material.005" || material.name == "Material.007" || material.name == "Material.004")
+				materials[i] = make_shared<DielectricMaterial>(metallicRoughness, make_shared<PiecewiseLinearSpectrum>(glassBAF10_eta));
+
 			if (material.normalTexture.index > -1) {
 				const auto& textureIndex = material.normalTexture.index;
 				const auto& extension = material.normalTexture.extensions;
-				materials[i]->SetNormalMap(make_shared<ImageTexture>(material.normalTexture.texCoord, GetUVMapping(extension), images[textureIndex], false));
+				materials[i]->SetNormalMap(make_shared<ImageTexture>(material.normalTexture.texCoord, GetUVMapping(extension), images[textureIndex], false, material.normalTexture.scale));
 			}
 		}
 	}

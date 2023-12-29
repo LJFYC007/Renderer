@@ -336,6 +336,17 @@ static const double CIE_Illum_D6500[107 * 2] = {
 55.705399,  810.000000, 51.959000,  815.000000, 54.699799,  820.000000, 57.440601,
 825.000000, 58.876499,  830.000000, 60.312500,
 };
+static const double GlassBAF10_eta[27 * 2] = {
+	350, 1.7126880848268, 371, 1.7044510025682, 393, 1.6978539633931,
+	414, 1.6924597573902, 436, 1.6879747521657, 457, 1.6841935148947,
+	479, 1.6809676313681, 500, 1.6781870617363, 522, 1.6757684467878,
+	543, 1.6736474831891, 565, 1.6717737892968, 586, 1.6701073530462,
+	608, 1.6686160168249, 629, 1.6672736605352, 651, 1.6660588657981,
+	672, 1.6649539185393, 694, 1.6639440538738, 715, 1.6630168772865,
+	737, 1.6621619159417, 758, 1.6613702672977, 780, 1.6606343213443,
+	801, 1.6599475391478, 823, 1.6593042748862, 844, 1.6586996317841,
+	866, 1.6581293446924, 887, 1.6575896837763, 909, 1.6570773750475,
+};
 
 class SampledSpectrum {
 public:
@@ -478,6 +489,7 @@ class Spectrum
 public:
 	virtual double operator ()(double lambda) const = 0;
 	virtual double MaxValue() const = 0;
+	virtual bool IsConstant() const { return false; }
 	virtual SampledSpectrum Sample(const SampledWaveLengths& lambda) const = 0;
 };
 
@@ -486,6 +498,7 @@ class ConstantSpectrum : public Spectrum
 public:
 	ConstantSpectrum(double _c) : c(_c) {}
 	double operator()(double lambda) const override { return c; }
+	bool IsConstant() const override { return true; }
 	double MaxValue() const override { return c; }
 	SampledSpectrum Sample(const SampledWaveLengths& lambda) const override { return SampledSpectrum(c); }
 private:
@@ -601,6 +614,7 @@ private:
 
 const DenselySampledSpectrum SpectraX(CIE_X), SpectraY(CIE_Y), SpectraZ(CIE_Z);
 const PiecewiseLinearSpectrum SpectrasRGB(CIE_Illum_D6500, 107, true);
+const PiecewiseLinearSpectrum glassBAF10_eta(GlassBAF10_eta, 27, false);
 
 class RGBIlluminantSpectrum : public Spectrum
 {

@@ -85,9 +85,9 @@ public:
     shared_ptr<SpectrumTexture> GetNormalMap() const { return normalMap; }
     shared_ptr<SpectrumTexture> GetBumpMap() const { return bumpMap; }
 
-    virtual shared_ptr<BxDF> GetBxDF(const MaterialEvalContext& ctx, const SampledWaveLengths& lambda) const = 0;
+    virtual shared_ptr<BxDF> GetBxDF(const MaterialEvalContext& ctx, SampledWaveLengths& lambda) const = 0;
 
-    virtual BSDF GetBSDF(MaterialEvalContext ctx, const SampledWaveLengths& lambda) const {
+    BSDF GetBSDF(MaterialEvalContext ctx, SampledWaveLengths& lambda) {
         shared_ptr<BxDF> bxdf = GetBxDF(ctx, lambda);
         return BSDF(ctx.ns, ctx.dpdus, bxdf);
     }
@@ -101,7 +101,7 @@ class DiffuseMaterial : public Material {
 public:
     DiffuseMaterial(shared_ptr<SpectrumTexture> _albedo) : albedo(_albedo) {}
 
-    shared_ptr<BxDF> GetBxDF(const MaterialEvalContext& ctx, const SampledWaveLengths& lambda) const override {
+    shared_ptr<BxDF> GetBxDF(const MaterialEvalContext& ctx, SampledWaveLengths& lambda) const override {
         SampledSpectrum reflectance = albedo->Evaluate(ctx, lambda);
         return make_shared<DiffuseBxDF>(reflectance);
     }
@@ -114,35 +114,47 @@ private:
 class ConductorMaterial : public Material {
 public:
     ConductorMaterial(shared_ptr<SpectrumTexture> _reflectance, shared_ptr<SpectrumTexture> _metallicRoughness) : reflectance(_reflectance), metallicRoughness(_metallicRoughness) {}
+    ConductorMaterial(shared_ptr<Spectrum> _eta, shared_ptr<Spectrum> _k, shared_ptr<SpectrumTexture> _metallicRoughness) : eta(_eta), k(_k), metallicRoughness(_metallicRoughness) {}
 
-    shared_ptr<BxDF> GetBxDF(const MaterialEvalContext& ctx, const SampledWaveLengths& lambda) const override {
+    shared_ptr<BxDF> GetBxDF(const MaterialEvalContext& ctx, SampledWaveLengths& lambda) const override {
         vec3 x = metallicRoughness->Evaluate(ctx);
         double alpha = RoughnessToAlpha(x[1]);
         SampledSpectrum r = reflectance->Evaluate(ctx, lambda);
-        SampledSpectrum eta(1.0);
-        SampledSpectrum ks = Sqrt(r) / Sqrt(ClampZero(SampledSpectrum(1.0) - r)) * 2;
-        return make_shared<ConductorBxDF>(TrowbridgeReitzDistribution(alpha, alpha), eta, ks);
+        SampledSpectrum etas, ks;
+        if (!eta) {
+            etas = SampledSpectrum(1.0);
+            ks = Sqrt(r) / Sqrt(ClampZero(SampledSpectrum(1.0) - r)) * 2;
+        }
+        else {
+            etas = eta->Sample(lambda);
+            ks = k->Sample(lambda);
+        }
+        return make_shared<ConductorBxDF>(TrowbridgeReitzDistribution(alpha, alpha), etas, ks);
     }
 
 private:
     shared_ptr<SpectrumTexture> reflectance;
     shared_ptr<SpectrumTexture> metallicRoughness;
+    shared_ptr<Spectrum> eta, k;
 };
 
 class DielectricMaterial : public Material {
 public:
-    DielectricMaterial(shared_ptr<SpectrumTexture> _metallicRoughness, double _eta = 1.5) 
+    DielectricMaterial(shared_ptr<SpectrumTexture> _metallicRoughness, shared_ptr<Spectrum> _eta) 
         : metallicRoughness(_metallicRoughness), eta(_eta) {}
 
-    shared_ptr<BxDF> GetBxDF(const MaterialEvalContext& ctx, const SampledWaveLengths& lambda) const override {
+    shared_ptr<BxDF> GetBxDF(const MaterialEvalContext& ctx, SampledWaveLengths& lambda) const override {
         vec3 x = metallicRoughness->Evaluate(ctx);
         double alpha = RoughnessToAlpha(x[1]);
-        return make_shared<DielectricBxDF>(TrowbridgeReitzDistribution(alpha, alpha), eta);
+        double sampledEta = eta->operator()(lambda[0]);
+        if (!eta->IsConstant()) lambda.Terminate();
+        if (sampledEta == 0) sampledEta = 1;
+        return make_shared<DielectricBxDF>(TrowbridgeReitzDistribution(alpha, alpha), sampledEta);
     }
 
 private:
     shared_ptr<SpectrumTexture> metallicRoughness;
-    double eta;
+    shared_ptr<Spectrum> eta;
 };
 
 class MixMaterial : public Material {
@@ -165,7 +177,7 @@ public:
 		else return materials[1];
     }
 
-    shared_ptr<BxDF> GetBxDF(const MaterialEvalContext& ctx, const SampledWaveLengths& lambda) const override {
+    shared_ptr<BxDF> GetBxDF(const MaterialEvalContext& ctx, SampledWaveLengths& lambda) const override {
         std::cerr << "Should not call GetBxDF on MixMaterial";
         return nullptr;
     }

@@ -56,7 +56,7 @@ public:
 
 	RayDifferential SpawnRay(const RayDifferential& rayi, const BSDF& bsdf, vec3 wi, int flags, double eta) const;
 	SampledSpectrum Le(vec3 w, const SampledWaveLengths& lambda) const;
-	BSDF GetBSDF(const RayDifferential& ray, const SampledWaveLengths& lambda, Camera* camera);
+	BSDF GetBSDF(const RayDifferential& ray, SampledWaveLengths& lambda, Camera* camera);
 	void ComputeDifferentials(const RayDifferential& ray, Camera* camera);
 
 	vec3 dpdu, dpdv, dpdU, dpdV, dndu, dndv;

@@ -77,17 +77,17 @@ private:
 class ImageTexture : public SpectrumTexture
 {
 public:
-	ImageTexture(int _texCoord, UVMapping _mapping, shared_ptr<Image> _image, bool _gammaCorrection) :
-		texCoord(_texCoord), mapping(_mapping), image(_image), gammaCorrection(_gammaCorrection) {}
+	ImageTexture(int _texCoord, UVMapping _mapping, shared_ptr<Image> _image, bool _gammaCorrection, double _scale = 1) :
+		texCoord(_texCoord), mapping(_mapping), image(_image), gammaCorrection(_gammaCorrection), scale(_scale) {}
 
 	vec3 Evaluate(TextureEvalContext ctx) const override {
 		TexCoord2D c = mapping.Map(texCoord, ctx);
-		return image->LookUp(c.st, gammaCorrection);
+		return image->LookUp(c.st, gammaCorrection) * scale;
 	}
 
 	SampledSpectrum Evaluate(TextureEvalContext ctx, SampledWaveLengths lambda) const override {
 		TexCoord2D c = mapping.Map(texCoord, ctx);
-		return image->LookUp(c.st, lambda, gammaCorrection);
+		return image->LookUp(c.st, lambda, gammaCorrection) * scale;
 	}
 
 private:
@@ -95,4 +95,5 @@ private:
 	UVMapping mapping;
 	shared_ptr<Image> image;
 	bool gammaCorrection;
+	double scale;
 };
