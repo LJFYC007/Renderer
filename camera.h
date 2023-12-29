@@ -29,7 +29,7 @@ public:
 	double defocusAngle = 0.0;
 	double focusDist = 10.0;
 	int samplePixel = 1024;
-	int maxDepth = 10;
+	int maxDepth = 20;
 	std::vector<shared_ptr<Light>> lights;
 	std::vector<shared_ptr<Light>> infiniteLights;
 	shared_ptr<LightSampler> lightSampler;
