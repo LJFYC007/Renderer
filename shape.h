@@ -156,6 +156,7 @@ public:
 		SurfaceInteraction intr(Vector3fi(p, pError), uv, UV, -r.rd, dpdu, dpdv, dpdU, dpdV, vec3(), vec3(), r.time, false);
 		intr.n = intr.shading.n = normalize(cross(dp02, dp12));
 
+		/*
 		if (mesh->normalExists) {
 			vec3 ns = ints->b0 * mesh->vertices[v[0]].n + ints->b1 * mesh->vertices[v[1]].n + ints->b2 * mesh->vertices[v[2]].n;
 			ns = ns.lengthSquared() > 0 ? normalize(ns) : intr.n;
@@ -177,6 +178,7 @@ public:
 			}
 			intr.SetShadingGeometry(ns, ss, ts, ss, ts, dndu, dndv);
 		}
+		*/
 
 		return ShapeIntersection{ intr, ints->t };
 	}

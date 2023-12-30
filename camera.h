@@ -22,14 +22,16 @@ class Camera
 public:
 	int ImageWidth = 1000;
 	int ImageHeight = 1000;
-	double fov = 20.0;
-	vec3 lookfrom = vec3(-1.5, 0.5, 4.0);
-	vec3 lookat = vec3(0.5, 0.5, 0.0);
+	double fov = 7.0;
+	//vec3 lookfrom = vec3(-1.5, 0.5, 4.0);
+	//vec3 lookat = vec3(0.5, 0.5, 0.0);
+	vec3 lookfrom = vec3(-1.7, 1.8, 4.0);
+	vec3 lookat = vec3(0.3, -0.5, 0.0);
 	vec3 vup = vec3(0.0, 1.0, 0.0);
 	double defocusAngle = 0.0;
 	double focusDist = 10.0;
 	int samplePixel = 1024;
-	int maxDepth = 20;
+	int maxDepth = 15;
 	std::vector<shared_ptr<Light>> lights;
 	std::vector<shared_ptr<Light>> infiniteLights;
 	shared_ptr<LightSampler> lightSampler;

@@ -83,7 +83,7 @@ public:
 		double t1 = std::sqrt(0.5 * (n + std::abs(re)));
 		double t2 = 0.5 * im / t1;
 		if (re >= 0) return { t1, t2 };
-		return { std::abs(t2), im > 0 ? t1 : -t1 };
+		return { std::abs(t2), std::copysign(t1, im)};
 	}
 };
 

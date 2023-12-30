@@ -119,7 +119,7 @@ public:
 			auto metallicMaterial = make_shared<ConductorMaterial>(baseColor, metallicRoughness);
 			materials[i] = make_shared<MixMaterial>(metallicMaterial, fresnelMixMaterial, metallicRoughness);
 
-			if (material.name == "Material.005" || material.name == "Material.007" || material.name == "Material.004") {
+			if (material.name == "Material.001" || material.name == "Material.002" || material.name == "Material.003" || material.name == "Material.004" || material.name == "Material.005") {
 				metallicRoughness = make_shared<SpectrumConstantTexture>(vec3(0, 0, 0));
 				materials[i] = make_shared<DielectricMaterial>(metallicRoughness, make_shared<PiecewiseLinearSpectrum>(glassBAF10_eta));
 			}

@@ -170,8 +170,7 @@ public:
 
 		vec3 wm = wi * etap + wo;
 		if (wm.lengthSquared() == 0.0 ) return SampledSpectrum(0.0);
-		wm = normalize(wm);
-		if (dot(wm, vec3(0, 0, 1)) < 0) wm = -wm;
+		wm = FaceForward(normalize(wm), vec3(0, 0, 1));
 		if (dot(wm, wi) * cosThetai < 0 || dot(wm, wo) * cosThetao < 0) return SampledSpectrum(0.0);
 
 		double F = FrDielectric(dot(wo, wm), eta);
@@ -241,8 +240,7 @@ public:
 
 		vec3 wm = wi * etap + wo;
 		if (wm.lengthSquared() == 0.0) return 0.0;
-		wm = normalize(wm);
-		if (dot(wm, vec3(0, 0, 1)) < 0) wm = -wm;
+		wm = FaceForward(normalize(wm), vec3(0, 0, 1));
 		if (dot(wm, wi) * cosThetai < 0 || dot(wm, wo) * cosThetao < 0) return 0.0;
 
 		double R = FrDielectric(dot(wo, wm), eta);
