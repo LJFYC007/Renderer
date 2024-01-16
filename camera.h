@@ -94,15 +94,7 @@ public:
 						vec3 rd = pixel - ro;
 						SampledWaveLengths sample(randomDouble());
 
-						RayDifferential ray(ro, rd, 0.0);
-						ray.hasDifferentials = true;
-						double scale = focusDist / rd.z();
-						vec3 dPdx = normalize((pixelCenter + pixelDeltaU) - ro) * scale;
-						vec3 dPdy = normalize((pixelCenter + pixelDeltaV) - ro) * scale;
-						ray.rxOrigin = ray.ryOrigin = ro;
-						ray.rxDirection = rd + (dPdx - rd);
-						ray.ryDirection = rd + (dPdy - rd);
-
+						Ray ray(ro, rd, 0.0);
 						RGBColor rgb = sRGB.ToRGB((::Li(ray, this, sample, bvh)).ToXYZ(sample));
 						col = col + vec3(rgb.r, rgb.g, rgb.b) / samplePixel;
 					}
@@ -127,17 +119,6 @@ public:
 			for (int i = 0; i < ImageWidth; ++i)
 				std::cout << ans[i][j].x() << ' ' << ans[i][j].y() << ' ' << ans[i][j].z() << '\n';
 		std::clog << "\rDone.                 \n";
-	}
-
-	void Approximate_dp_dxy(const vec3& p, const vec3& n, double time, vec3* dpdx, vec3* dpdy) {
-		vec3 pVector = normalize(p - cameraCenter);
-		vec3 p_dx = cameraCenter + (pVector + pixelDeltaU * (1.0 / sqrtSpp)) * focusDist;
-		vec3 p_dy = cameraCenter + (pVector + pixelDeltaV * (1.0 / sqrtSpp)) * focusDist;
-		*dpdx = p_dx - p;
-		*dpdy = p_dy - p;
-		vec3 normal = normalize(n);
-		*dpdx = *dpdx - normal * dot(*dpdx, normal);
-		*dpdy = *dpdy - normal * dot(*dpdy, normal);
 	}
 
 private:

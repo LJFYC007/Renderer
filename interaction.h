@@ -19,7 +19,7 @@ public:
 	Interaction(Vector3fi _pi, vec3 _n, vec2 _uv, vec2 _UV, vec3 _wo, double _time) : pi(_pi), n(_n), uv(_uv), UV(_UV), wo(_wo), time(_time) {}
 	vec3 p() const { return vec3(pi); }
 	vec3 OffsetRayOrigin(vec3 w) const { return ::OffsetRayOrigin(pi, n, w); }
-	RayDifferential SpawnRay(vec3 d) const { return RayDifferential(OffsetRayOrigin(d), d, time); }
+	Ray SpawnRay(vec3 d) const { return Ray(OffsetRayOrigin(d), d, time); }
 
 	Vector3fi pi;
 	vec3 wo, n;
@@ -54,10 +54,9 @@ public:
 		shading.dndv = dndvs;
 	}
 
-	RayDifferential SpawnRay(const RayDifferential& rayi, const BSDF& bsdf, vec3 wi, int flags, double eta) const;
+	Ray SpawnRay(const Ray& rayi, const BSDF& bsdf, vec3 wi, int flags, double eta) const;
 	SampledSpectrum Le(vec3 w, const SampledWaveLengths& lambda) const;
-	BSDF GetBSDF(const RayDifferential& ray, SampledWaveLengths& lambda, Camera* camera);
-	void ComputeDifferentials(const RayDifferential& ray, Camera* camera);
+	BSDF GetBSDF(const Ray& ray, SampledWaveLengths& lambda, Camera* camera);
 
 	vec3 dpdu, dpdv, dpdU, dpdV, dndu, dndv;
 	struct {

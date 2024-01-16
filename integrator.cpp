@@ -27,7 +27,7 @@ SampledSpectrum SampleLd(const SurfaceInteraction& intr, const BSDF& bsdf, Camer
 	return ls->L * w_l * f / p_l;
 }
 
-SampledSpectrum Li(RayDifferential r, Camera* camera, SampledWaveLengths& lambda, const BVHAggregate& bvh)
+SampledSpectrum Li(Ray r, Camera* camera, SampledWaveLengths& lambda, const BVHAggregate& bvh)
 {
 	SampledSpectrum L(0.0), beta(1.0);
 	int depth = 0;

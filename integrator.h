@@ -21,5 +21,5 @@ static bool Unoccluded(const BVHAggregate& bvh, const Interaction& p0, const Int
 
 SampledSpectrum SampleLd(const SurfaceInteraction& intr, const BSDF& bsdf, Camera* camera, const SampledWaveLengths& lambda, const BVHAggregate& bvh);
 
-SampledSpectrum Li(RayDifferential r, Camera* camera, SampledWaveLengths& lambda, const BVHAggregate& bvh);
+SampledSpectrum Li(Ray r, Camera* camera, SampledWaveLengths& lambda, const BVHAggregate& bvh);
 

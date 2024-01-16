@@ -36,10 +36,3 @@ inline Ray SpawnRayTo(Vector3fi pFrom, vec3 nFrom, Vector3fi pTo, vec3 nTo) {
 	vec3 pt = OffsetRayOrigin(pTo, nTo, pf - vec3(pTo));
 	return Ray(pf, pt - pf);
 }
-
-class RayDifferential : public Ray {
-public:
-	RayDifferential(vec3 ro, vec3 rd, double time = 0) : Ray(ro, rd, time) {}
-	bool hasDifferentials = false;
-	vec3 rxOrigin, ryOrigin, rxDirection, ryDirection;
-};
