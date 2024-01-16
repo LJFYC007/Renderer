@@ -22,15 +22,29 @@ class Camera
 public:
 	int ImageWidth = 1000;
 	int ImageHeight = 1000;
-	double fov = 7.0;
-	//vec3 lookfrom = vec3(-1.5, 0.5, 4.0);
-	//vec3 lookat = vec3(0.5, 0.5, 0.0);
-	vec3 lookfrom = vec3(-1.7, 1.8, 4.0);
-	vec3 lookat = vec3(0.3, -0.5, 0.0);
+	double fov = 20.0;
+	vec3 lookfrom1 = vec3(-1.45, 0.9, 4.0);
+	vec3 lookfrom2 = vec3(-1.45, 0.9, 4.0);
+	vec3 lookat = vec3(0.55, 0.2, 0.0);
+
+	//vec3 lookfrom1 = vec3(-1.45, 0.9, 4.0);
+	//vec3 lookfrom2 = vec3(-1.45, 0.95, 4.05);
+	
+	/*
+	double fov = 20.0;
+	vec3 lookfrom = vec3(-5.5, 1.2, 9.0);
+	vec3 lookat = vec3(0.5, 1.2, 0.0);
+
+
+	double fov = 3.0;
+	vec3 lookfrom = vec3(-1.62, 1.75, 4.0);
+	vec3 lookat = vec3(0.38, -0.3, 0.0);
+	*/
+
 	vec3 vup = vec3(0.0, 1.0, 0.0);
-	double defocusAngle = 0.0;
+	double defocusAngle = 0.2;
 	double focusDist = 10.0;
-	int samplePixel = 1024;
+	int samplePixel = 256;
 	int maxDepth = 15;
 	std::vector<shared_ptr<Light>> lights;
 	std::vector<shared_ptr<Light>> infiniteLights;
@@ -52,6 +66,28 @@ public:
 				for (int oi = 0; oi < sqrtSpp; ++oi)
 					for (int oj = 0; oj < sqrtSpp; ++oj)
 					{
+						vec3 lookfrom = Lerp(randomDouble(), lookfrom1, lookfrom2);
+						cameraCenter = lookfrom;
+						double h = tan(radians(fov) / 2.0);
+						double viewportHeight = 2.0 * h * focusDist;
+						double viewportWidth = viewportHeight * (ImageWidth * 1.0 / ImageHeight);
+
+						vec3 w = normalize(lookfrom - lookat);
+						vec3 u = normalize(cross(vup, w));
+						vec3 v = normalize(cross(w, u));
+
+						vec3 viewportU = viewportWidth * u;
+						vec3 viewportV = viewportHeight * v;
+						pixelDeltaU = viewportU / ImageWidth;
+						pixelDeltaV = viewportV / ImageHeight;
+
+						vec3 viewportLowerLeft = cameraCenter - focusDist * w - viewportU / 2.0 - viewportV / 2.0;
+						pixel00Location = viewportLowerLeft + (pixelDeltaU + pixelDeltaV) / 2.0;
+
+						double defocusRadius = focusDist * tan(radians(defocusAngle / 2.0));
+						defocusDiskU = u * defocusRadius;
+						defocusDiskV = v * defocusRadius;
+
 						vec3 pixelCenter = pixel00Location + i * pixelDeltaU + j * pixelDeltaV;
 						vec3 pixel = pixelCenter + (-0.5 + (1.0 / sqrtSpp) * (oi + randomDouble())) * pixelDeltaU + (-0.5 + (1.0 / sqrtSpp) * (oj + randomDouble())) * pixelDeltaV;
 						vec3 ro = (defocusAngle <= 0.0) ? cameraCenter : cameraCenter + DefocusDiskSample(defocusDiskU, defocusDiskV);
@@ -60,9 +96,9 @@ public:
 
 						RayDifferential ray(ro, rd, 0.0);
 						ray.hasDifferentials = true;
-						double scale = focusDist / rd.z(); 
+						double scale = focusDist / rd.z();
 						vec3 dPdx = normalize((pixelCenter + pixelDeltaU) - ro) * scale;
-						vec3 dPdy = normalize((pixelCenter + pixelDeltaV) - ro) * scale; 
+						vec3 dPdy = normalize((pixelCenter + pixelDeltaV) - ro) * scale;
 						ray.rxOrigin = ray.ryOrigin = ro;
 						ray.rxDirection = rd + (dPdx - rd);
 						ray.ryDirection = rd + (dPdy - rd);
@@ -121,27 +157,6 @@ private:
 		
 		sqrtSpp = static_cast<int>(sqrt(samplePixel));
 		assert(sqrtSpp * sqrtSpp == samplePixel);
-
-		cameraCenter = lookfrom;
-		double h = tan(radians(fov) / 2.0);
-		double viewportHeight = 2.0 * h * focusDist;
-		double viewportWidth = viewportHeight * (ImageWidth * 1.0 / ImageHeight);
-
-		vec3 w = normalize(lookfrom - lookat);
-		vec3 u = normalize(cross(vup, w));
-		vec3 v = normalize(cross(w, u));
-
-		vec3 viewportU = viewportWidth * u;
-		vec3 viewportV = viewportHeight * v;
-		pixelDeltaU = viewportU / ImageWidth;
-		pixelDeltaV = viewportV / ImageHeight;
-
-		vec3 viewportLowerLeft = cameraCenter - focusDist * w - viewportU / 2.0 - viewportV / 2.0;
-		pixel00Location = viewportLowerLeft + (pixelDeltaU + pixelDeltaV) / 2.0;
-
-		double defocusRadius = focusDist * tan(radians(defocusAngle / 2.0));
-		defocusDiskU = u * defocusRadius;
-		defocusDiskV = v * defocusRadius;
 	}
 
 	static vec3 DefocusDiskSample(const vec3& u, const vec3& v)

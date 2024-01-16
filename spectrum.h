@@ -347,6 +347,11 @@ static const double GlassBAF10_eta[27 * 2] = {
 	801, 1.6599475391478, 823, 1.6593042748862, 844, 1.6586996317841,
 	866, 1.6581293446924, 887, 1.6575896837763, 909, 1.6570773750475,
 };
+static const double GlassSF11_eta[3 * 2] = {
+	435, 1.60,
+	546, 1.52,
+	700, 1.45
+};
 
 class SampledSpectrum {
 public:
@@ -615,6 +620,7 @@ private:
 const DenselySampledSpectrum SpectraX(CIE_X), SpectraY(CIE_Y), SpectraZ(CIE_Z);
 const PiecewiseLinearSpectrum SpectrasRGB(CIE_Illum_D6500, 107, true);
 const PiecewiseLinearSpectrum glassBAF10_eta(GlassBAF10_eta, 27, false);
+const PiecewiseLinearSpectrum glassSF11_eta(GlassSF11_eta, 3, false);
 
 class RGBIlluminantSpectrum : public Spectrum
 {

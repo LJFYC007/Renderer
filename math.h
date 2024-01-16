@@ -282,6 +282,8 @@ inline vec3 SphericalDirection(double sinTheta, double cosTheta, double phi) {
 	return vec3(sinTheta * std::cos(phi), sinTheta * std::sin(phi), cosTheta);
 }
 
+inline vec3 Lerp(double t, vec3 x, vec3 y) { return (1 - t) * x + t * y; }
+
 // ======== interval ==========
 class Interval
 {
